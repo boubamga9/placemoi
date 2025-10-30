@@ -1,0 +1,113 @@
+# Nom du projet
+project_id = "seatly"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100
+
+[realtime]
+enabled = false
+
+[studio]
+enabled = true
+port = 54323
+api_url = "env(PUBLIC_SITE_URL)"
+openai_api_key = "env(OPENAI_API_KEY)"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[storage.image_transformation]
+enabled = true
+
+[auth]
+enabled = true
+# Utilisation de la variable d'environnement pour site_url
+site_url = "env(PUBLIC_SITE_URL)"
+additional_redirect_urls = [
+  "env(PUBLIC_SITE_URL)/onboarding",
+  "env(PUBLIC_SITE_URL)/settings/security"
+]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+enable_anonymous_sign_ins = false
+enable_manual_linking = false
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+max_frequency = "60s"
+
+# Décommenter et utiliser env vars pour SMTP
+# [auth.email.smtp]
+# host="env(PRIVATE_SMTP_HOST)"
+# port="env(PRIVATE_SMTP_PORT)"
+# user="env(PRIVATE_SMTP_USER)"
+# pass="env(PRIVATE_SMTP_PASSWORD)"
+# admin_email="env(PRIVATE_SMTP_ADMIN_EMAIL)"
+# sender_name="env(PRIVATE_SMTP_SENDER_NAME)"
+
+[auth.sms]
+enable_signup = true
+enable_confirmations = false
+template = "Your code is {{ .Code }} ."
+max_frequency = "5s"
+
+[auth.sms.twilio]
+enabled = false
+account_sid = ""
+message_service_sid = ""
+auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
+
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+redirect_uri = ""
+skip_nonce_check = false
+
+[auth.external.twitter]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_TWITTER_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_TWITTER_SECRET)"
+
+[auth.external.github]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)"
+
+[analytics]
+enabled = false
+port = 54327
+vector_port = 54328
+backend = "postgres"
+
+[experimental]
+orioledb_version = ""
+s3_host = "env(S3_HOST)"
+s3_region = "env(S3_REGION)"
+s3_access_key = "env(S3_ACCESS_KEY)"
+s3_secret_key = "env(S3_SECRET_KEY)"
