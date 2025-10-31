@@ -8,6 +8,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { Trash2 } from 'lucide-svelte';
+	import { formatEventTypeFr } from '$lib/i18n/event-type';
 
 	type Event = Database['public']['Tables']['events']['Row'];
 
@@ -122,7 +123,7 @@
 								class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium capitalize"
 								style="background-color: #F5E6D3; color: #2C3E50;"
 							>
-								{event.event_type}
+								{formatEventTypeFr(event.event_type)}
 							</span>
 							<button
 								type="button"

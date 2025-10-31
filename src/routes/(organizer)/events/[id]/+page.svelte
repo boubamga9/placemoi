@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import LoaderCircle from '~icons/lucide/loader-circle';
 	import QRCode from 'qrcode';
+	import { formatEventTypeFr } from '$lib/i18n/event-type';
 
 	type Event = Database['public']['Tables']['events']['Row'];
 
@@ -168,7 +169,7 @@
 				class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium capitalize"
 				style="background-color: #F5E6D3; color: #2C3E50;"
 			>
-				{data.event.event_type}
+				{formatEventTypeFr(data.event.event_type)}
 			</span>
 		</div>
 		{#if data.event.event_date}
