@@ -1,5 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { isEventAccessible } from '$lib/utils/event-utils';
 
 export const GET: RequestHandler = async ({ params, url, locals: { supabase } }) => {
     const { id } = params;
@@ -7,6 +8,21 @@ export const GET: RequestHandler = async ({ params, url, locals: { supabase } })
 
     if (!name) {
         throw error(400, 'Le nom est requis');
+    }
+
+    // Check if event exists and is accessible
+    const { data: event, error: eventError } = await supabase
+        .from('events')
+        .select('event_date')
+        .eq('id', id)
+        .single();
+
+    if (eventError || !event) {
+        throw error(404, 'Événement non trouvé');
+    }
+
+    if (!isEventAccessible(event.event_date)) {
+        throw error(410, 'Cet événement n\'est plus accessible');
     }
 
     // Search for matching guest names (limit to 10 suggestions)

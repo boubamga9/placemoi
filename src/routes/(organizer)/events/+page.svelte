@@ -127,8 +127,10 @@
 							</span>
 							<button
 								type="button"
-								class="rounded-lg p-2 transition-colors hover:bg-red-50"
-								style="color: #dc2626;"
+								class="rounded-lg p-2 transition-colors"
+								on:mouseover={(e) => (e.currentTarget.style.backgroundColor = '#FFF5F5')}
+								on:mouseout={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+								style="color: #9B4A4A;"
 								on:click|stopPropagation={() => confirmDelete(event.id)}
 								title="Supprimer l'événement"
 							>
@@ -244,7 +246,7 @@
 				<AlertDialog.Action
 					type="submit"
 					class="delete-button rounded-lg px-4 py-2 text-white transition-colors"
-					style="background-color: #dc2626;"
+					style="background-color: #9B4A4A;"
 				>
 					Supprimer
 				</AlertDialog.Action>
@@ -259,6 +261,6 @@
 	}
 
 	:global(.delete-button:hover) {
-		background-color: #b91c1c !important;
+		background-color: #8B3E3E !important;
 	}
 </style>

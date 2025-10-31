@@ -4,7 +4,10 @@
 
 	type Event = Database['public']['Tables']['events']['Row'];
 
-	export let data: { event: Event };
+	export let data: { 
+		event: Event;
+		isEventAccessible: boolean;
+	};
 
 	let fileInput: HTMLInputElement;
 	let selectedFile: File | null = null;
@@ -116,18 +119,30 @@
 			notre format (nom, table, place).
 		</p>
 
+		{#if !data.isEventAccessible}
+			<div
+				class="mb-6 rounded-lg border p-4"
+				style="background-color: #FFF5F5; border-color: #9B4A4A;"
+			>
+				<p class="text-sm" style="color: #9B4A4A;">
+					⚠️ Impossible d'importer des invités : cet événement n'est plus accessible (5 jours après la date de l'événement).
+				</p>
+			</div>
+		{/if}
+
 		<!-- File Uploader -->
 		<form on:submit={handleUploadWithRetry} class="space-y-4">
 			<label
-				class="relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 p-12 transition-colors hover:border-neutral-400"
+				class="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 p-12 transition-colors {data.isEventAccessible ? 'cursor-pointer hover:border-neutral-400' : 'cursor-not-allowed opacity-50'}"
 			>
 				<input
 					bind:this={fileInput}
 					type="file"
 					accept=".csv,.xlsx,.xls,.xlsm,.txt,.xlsb,.xltx,.xltm"
 					on:change={handleFileSelect}
-					class="absolute inset-0 cursor-pointer opacity-0"
-					required
+					class="absolute inset-0 opacity-0 {data.isEventAccessible ? 'cursor-pointer' : 'cursor-not-allowed'}"
+					required={data.isEventAccessible}
+					disabled={!data.isEventAccessible}
 				/>
 				<svg
 					class="mb-4 h-12 w-12"
@@ -213,7 +228,7 @@
 					type="submit"
 					class="flex-1 rounded-xl px-6 py-3 font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
 					style="background-color: #D4A574; border: none;"
-					disabled={!selectedFile || isUploading}
+					disabled={!selectedFile || isUploading || !data.isEventAccessible}
 				>
 					{#if isUploading}
 						<span class="flex items-center justify-center gap-2">

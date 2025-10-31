@@ -1,6 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
+import { isEventAccessible } from '$lib/utils/event-utils';
 import * as XLSX from 'xlsx';
 
 async function processFileWithAI(file: File) {
@@ -127,6 +128,21 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
     }
 
     console.log('📥 Upload API received');
+
+    // Check if event is still accessible (5 days after event_date)
+    const { data: event, error: eventError } = await supabase
+        .from('events')
+        .select('event_date')
+        .eq('id', params.id)
+        .single();
+
+    if (eventError || !event) {
+        throw error(404, 'Événement non trouvé');
+    }
+
+    if (!isEventAccessible(event.event_date)) {
+        throw error(410, 'Impossible d\'importer des invités : cet événement n\'est plus accessible (5 jours après la date de l\'événement)');
+    }
 
     const formData = await request.formData();
     const file = formData.get('file') as File;

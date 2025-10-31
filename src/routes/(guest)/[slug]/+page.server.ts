@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { Database } from '$lib/database/database.types';
+import { isEventAccessible } from '$lib/utils/event-utils';
 
 type Event = Database['public']['Tables']['events']['Row'];
 type EventCustomization = Database['public']['Tables']['event_customizations']['Row'];
@@ -20,6 +21,15 @@ export const load = async ({ params, locals: { supabase } }: any) => {
 
     if (fetchError || !event) {
         throw error(404, 'Événement non trouvé');
+    }
+
+    // Check if event is still accessible (5 days after event_date)
+    if (!isEventAccessible(event.event_date)) {
+        throw error(410, {
+            message: 'Cet événement n\'est plus accessible',
+            eventName: event.event_name,
+            eventDate: event.event_date
+        });
     }
 
     // Get customizations with defaults

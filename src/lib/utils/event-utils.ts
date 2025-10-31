@@ -50,3 +50,28 @@ export async function generateUniqueSlug(supabase: any): Promise<string> {
     // Fallback: use longer nanoid if collisions somehow occur
     return nanoid(12);
 }
+
+/**
+ * Check if an event is still accessible (within 5 days after event_date)
+ * @param eventDate - The date of the event (Date string or Date object)
+ * @returns true if the event is accessible, false if expired
+ */
+export function isEventAccessible(eventDate: string | Date | null | undefined): boolean {
+    if (!eventDate) {
+        return true; // If no date set, assume accessible
+    }
+
+    const event = typeof eventDate === 'string' ? new Date(eventDate) : eventDate;
+    const today = new Date();
+    
+    // Reset time to midnight for date comparison only
+    today.setHours(0, 0, 0, 0);
+    event.setHours(0, 0, 0, 0);
+
+    // Calculate 5 days after event date
+    const expiryDate = new Date(event);
+    expiryDate.setDate(expiryDate.getDate() + 5);
+
+    // Event is accessible if today is before or equal to expiry date
+    return today <= expiryDate;
+}

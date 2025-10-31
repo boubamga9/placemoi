@@ -2,6 +2,7 @@
 	import type { Database } from '$lib/database/database.types';
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 
 	type Event = Database['public']['Tables']['events']['Row'];
 	type Guest = Database['public']['Tables']['guests']['Row'];
@@ -10,9 +11,11 @@
 		event: Event;
 		guestsByTable: Record<string, Guest[]>;
 		totalGuests: number;
+		isEventAccessible: boolean;
 	};
 
 	let isRemoving = new Set<string>();
+	let showDeleteAllDialog = false;
 
 	async function removeGuest(guestId: string) {
 		if (isRemoving.has(guestId)) return;
@@ -37,6 +40,18 @@
 		} finally {
 			isRemoving.delete(guestId);
 		}
+	}
+
+	function confirmDeleteAll() {
+		showDeleteAllDialog = true;
+	}
+
+	function cancelDeleteAll() {
+		showDeleteAllDialog = false;
+	}
+
+	function handleDeleteAllSuccess() {
+		showDeleteAllDialog = false;
 	}
 </script>
 
@@ -78,14 +93,19 @@
 				</p>
 			</div>
 			<button
-				class="whitespace-nowrap rounded-xl px-4 py-2 font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md"
+				class="whitespace-nowrap rounded-xl px-4 py-2 font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
 				style="background-color: #D4A574; border: none;"
 				on:click={() => goto(`/events/${data.event.id}/upload`)}
 				on:mouseover={(e) =>
-					(e.currentTarget.style.backgroundColor = '#C49863')}
-				on:mouseout={(e) => (e.currentTarget.style.backgroundColor = '#D4A574')}
-				on:focus={(e) => (e.currentTarget.style.backgroundColor = '#C49863')}
-				on:blur={(e) => (e.currentTarget.style.backgroundColor = '#D4A574')}
+					(!data.isEventAccessible ? null : e.currentTarget.style.backgroundColor = '#C49863')}
+				on:mouseout={(e) =>
+					(!data.isEventAccessible ? null : e.currentTarget.style.backgroundColor = '#D4A574')}
+				on:focus={(e) =>
+					(!data.isEventAccessible ? null : e.currentTarget.style.backgroundColor = '#C49863')}
+				on:blur={(e) =>
+					(!data.isEventAccessible ? null : e.currentTarget.style.backgroundColor = '#D4A574')}
+				disabled={!data.isEventAccessible}
+				title={!data.isEventAccessible ? 'Impossible d\'ajouter des invités après 5 jours' : ''}
 			>
 				📄 Importer une liste
 			</button>
@@ -97,6 +117,16 @@
 		<h2 class="mb-4 text-xl font-medium" style="color: #2C3E50;">
 			Ajouter un invité manuellement
 		</h2>
+		{#if !data.isEventAccessible}
+			<div
+				class="mb-4 rounded-lg border p-4"
+				style="background-color: #FFF5F5; border-color: #9B4A4A;"
+			>
+				<p class="text-sm" style="color: #9B4A4A;">
+					⚠️ Impossible d'ajouter des invités : cet événement n'est plus accessible (5 jours après la date de l'événement).
+				</p>
+			</div>
+		{/if}
 		<form method="POST" action="?/addGuest" use:enhance class="space-y-4">
 			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 				<div>
@@ -158,8 +188,9 @@
 
 			<button
 				type="submit"
-				class="w-full rounded-xl px-4 py-2 font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md"
+				class="w-full rounded-xl px-4 py-2 font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
 				style="background-color: #D4A574; border: none;"
+				disabled={!data.isEventAccessible}
 			>
 				Ajouter l'invité
 			</button>
@@ -168,6 +199,18 @@
 
 	<!-- Tables -->
 	{#if Object.keys(data.guestsByTable).length > 0}
+		<div class="mb-6 flex justify-end">
+			<button
+				type="button"
+				class="rounded-xl px-4 py-2 text-sm font-medium transition-colors"
+				style="color: #9B4A4A; border: 1px solid #9B4A4A; background-color: white;"
+				on:click={confirmDeleteAll}
+				on:mouseover={(e) => (e.currentTarget.style.backgroundColor = '#FFF5F5')}
+				on:mouseout={(e) => (e.currentTarget.style.backgroundColor = 'white')}
+			>
+				🗑️ Tout supprimer
+			</button>
+		</div>
 		<div class="space-y-6">
 			{#each Object.entries(data.guestsByTable) as [tableNumber, guests]}
 				<div
@@ -243,12 +286,79 @@
 				Commencez par importer votre liste d'invités
 			</p>
 			<button
-				class="rounded-xl px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:scale-105"
+				class="rounded-xl px-6 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
 				style="background-color: #D4A574; border: none;"
 				on:click={() => goto(`/events/${data.event.id}/upload`)}
+				disabled={!data.isEventAccessible}
+				title={!data.isEventAccessible ? 'Impossible d\'ajouter des invités après 5 jours' : ''}
 			>
 				Importer un fichier
 			</button>
 		</div>
 	{/if}
 </div>
+
+<!-- Dialog de confirmation de suppression de tous les invités -->
+<AlertDialog.Root bind:open={showDeleteAllDialog}>
+	<AlertDialog.Content
+		class="rounded-xl border"
+		style="background-color: #FFF9F4; border-color: #E5E5E5;"
+	>
+		<AlertDialog.Header>
+			<AlertDialog.Title
+				style="color: #2C3E50; font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 600;"
+			>
+				Supprimer tous les invités
+			</AlertDialog.Title>
+			<AlertDialog.Description style="color: #2C3E50; opacity: 0.8;">
+				Êtes-vous sûr de vouloir supprimer tous les invités de cet événement ? Cette action est
+				irréversible.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<form
+				method="POST"
+				action="?/deleteAllGuests"
+				use:enhance={() => {
+					return async ({ result, update }) => {
+						if (result.type === 'success') {
+							handleDeleteAllSuccess();
+							await update();
+						} else if (result.type === 'failure') {
+							console.error(
+								'Erreur lors de la suppression:',
+								result.data?.error,
+							);
+							alert(result.data?.error || 'Erreur lors de la suppression');
+						}
+					};
+				}}
+			>
+				<AlertDialog.Cancel
+					on:click={cancelDeleteAll}
+					class="cancel-button rounded-lg border px-4 py-2 transition-colors"
+					style="border-color: #D4A574; color: #2C3E50; background-color: white;"
+				>
+					Annuler
+				</AlertDialog.Cancel>
+				<AlertDialog.Action
+					type="submit"
+					class="delete-button rounded-lg px-4 py-2 text-white transition-colors"
+					style="background-color: #9B4A4A;"
+				>
+					Tout supprimer
+				</AlertDialog.Action>
+			</form>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
+
+<style>
+	:global(.cancel-button:hover) {
+		background-color: #f5e6d3 !important;
+	}
+
+	:global(.delete-button:hover) {
+		background-color: #8B3E3E !important;
+	}
+</style>

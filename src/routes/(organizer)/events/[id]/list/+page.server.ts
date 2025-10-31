@@ -1,5 +1,6 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import type { Database } from '$lib/database/database.types';
+import { isEventAccessible } from '$lib/utils/event-utils';
 
 type Event = Database['public']['Tables']['events']['Row'];
 type Guest = Database['public']['Tables']['guests']['Row'];
@@ -52,7 +53,8 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
     return {
         event: event as Event,
         guestsByTable,
-        totalGuests: guests?.length || 0
+        totalGuests: guests?.length || 0,
+        isEventAccessible: isEventAccessible(event.event_date)
     };
 };
 
@@ -65,7 +67,7 @@ export const actions = {
         }
 
         const formData = await request.formData();
-        const guestName = formData.get('guest_name') as string;
+        let guestName = formData.get('guest_name') as string;
         const tableNumber = formData.get('table_number') as string;
         const seatNumber = formData.get('seat_number') as string;
 
@@ -73,7 +75,71 @@ export const actions = {
             return fail(400, { error: 'Le nom et la table sont requis' });
         }
 
-        // Insert guest
+        // Check if event is still accessible (5 days after event_date)
+        const { data: event, error: eventError } = await supabase
+            .from('events')
+            .select('event_date')
+            .eq('id', params.id)
+            .eq('owner_id', session.user.id)
+            .single();
+
+        if (eventError || !event) {
+            return fail(404, { error: 'Événement non trouvé' });
+        }
+
+        if (!isEventAccessible(event.event_date)) {
+            return fail(410, { error: 'Impossible d\'ajouter des invités : cet événement n\'est plus accessible (5 jours après la date de l\'événement)' });
+        }
+
+        // Check if a guest with the same name already exists and handle duplicates
+        const { data: existingGuests, error: checkError } = await supabase
+            .from('guests')
+            .select('guest_name')
+            .eq('event_id', params.id);
+
+        if (checkError) {
+            console.error('Error checking existing guests:', checkError);
+        }
+
+        if (existingGuests && existingGuests.length > 0) {
+            const baseName = guestName.trim();
+            
+            // Find all guests that match the base name (exact match or base name + number)
+            const matchingNames = existingGuests
+                .map(g => g.guest_name)
+                .filter(name => {
+                    // Exact match
+                    if (name === baseName) return true;
+                    // Match base name followed by space and number
+                    const match = name.match(/^(.+?)\s+(\d+)$/);
+                    if (match && match[1] === baseName) return true;
+                    return false;
+                });
+
+            if (matchingNames.length > 0) {
+                // Extract numbers from matching names
+                const numbers: number[] = [];
+                
+                matchingNames.forEach(name => {
+                    if (name === baseName) {
+                        numbers.push(0); // Base name counts as 0
+                    } else {
+                        const match = name.match(/^.+?\s+(\d+)$/);
+                        if (match && match[1]) {
+                            numbers.push(parseInt(match[1], 10));
+                        }
+                    }
+                });
+
+                // Find the next available number
+                const maxNumber = numbers.length > 0 ? Math.max(...numbers) : 0;
+                const nextNumber = maxNumber + 1;
+                
+                guestName = `${baseName} ${nextNumber}`;
+            }
+        }
+
+        // Insert guest with potentially modified name
         const { error: insertError } = await supabase
             .from('guests')
             .insert({
@@ -115,6 +181,39 @@ export const actions = {
         if (deleteError) {
             console.error('Error deleting guest:', deleteError);
             return fail(500, { error: 'Erreur lors de la suppression de l\'invité' });
+        }
+
+        return { success: true };
+    },
+
+    deleteAllGuests: async ({ params, locals: { supabase, safeGetSession } }: any) => {
+        const { session } = await safeGetSession();
+
+        if (!session) {
+            throw redirect(303, '/auth');
+        }
+
+        // Verify event ownership
+        const { data: event, error: eventError } = await supabase
+            .from('events')
+            .select('id')
+            .eq('id', params.id)
+            .eq('owner_id', session.user.id)
+            .single();
+
+        if (eventError || !event) {
+            return fail(404, { error: 'Événement non trouvé' });
+        }
+
+        // Delete all guests for this event
+        const { error: deleteError } = await supabase
+            .from('guests')
+            .delete()
+            .eq('event_id', params.id);
+
+        if (deleteError) {
+            console.error('Error deleting all guests:', deleteError);
+            return fail(500, { error: 'Erreur lors de la suppression des invités' });
         }
 
         return { success: true };

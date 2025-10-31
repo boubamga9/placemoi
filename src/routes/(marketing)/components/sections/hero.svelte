@@ -2,7 +2,7 @@
 </script>
 
 <div
-	class="flex min-h-screen w-full items-center justify-center px-6 py-20 sm:px-8 lg:px-12"
+	class="flex min-h-screen w-full items-center justify-center px-6 pt-32 pb-20 sm:px-8 sm:pt-20 lg:px-12"
 	style="background-color: #FFF9F4;"
 >
 	<div
@@ -15,8 +15,8 @@
 				style="color: #2C3E50; font-family: 'Playfair Display', serif;"
 			>
 				Organisez le placement <br class="hidden sm:block" />de vos invités<br
-					class="hidden sm:block"
-				/>en quelques minutes.
+					class="block sm:hidden"
+				/><br class="hidden sm:block" /> en quelques minutes.
 			</h2>
 
 			<p

@@ -1,6 +1,7 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import type { Database } from '$lib/database/database.types';
 import { env } from '$env/dynamic/private';
+import { isEventAccessible } from '$lib/utils/event-utils';
 
 type Event = Database['public']['Tables']['events']['Row'];
 
@@ -26,7 +27,8 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
     }
 
     return {
-        event: event as Event
+        event: event as Event,
+        isEventAccessible: isEventAccessible(event.event_date)
     };
 };
 
@@ -138,6 +140,22 @@ export const actions = {
         }
 
         console.log('📥 Upload action received');
+
+        // Check if event is still accessible (5 days after event_date)
+        const { data: event, error: eventError } = await supabase
+            .from('events')
+            .select('event_date')
+            .eq('id', params.id)
+            .eq('owner_id', session.user.id)
+            .single();
+
+        if (eventError || !event) {
+            return fail(404, { error: 'Événement non trouvé' });
+        }
+
+        if (!isEventAccessible(event.event_date)) {
+            return fail(410, { error: 'Impossible d\'importer des invités : cet événement n\'est plus accessible (5 jours après la date de l\'événement)' });
+        }
 
         const formData = await request.formData();
         const file = formData.get('file') as File;
