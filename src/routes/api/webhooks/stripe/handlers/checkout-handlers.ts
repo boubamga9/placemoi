@@ -1,6 +1,7 @@
 import type { Stripe } from 'stripe';
 import { error } from '@sveltejs/kit';
 import { generateUniqueSlug } from '$lib/utils/event-utils';
+import { EmailService } from '$lib/services/email-service';
 
 export async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, locals: any): Promise<void> {
 
@@ -82,6 +83,38 @@ export async function handleEventPayment(session: Stripe.Checkout.Session, local
 
         console.error('Payment record created successfully:', paymentData);
         console.error(`Event payment successful: eventId=${eventId}, slug=${slug}`);
+
+        // Fetch event and owner details for email
+        const { data: event, error: eventFetchError } = await locals.supabaseServiceRole
+            .from('events')
+            .select('event_name, event_date')
+            .eq('id', eventId)
+            .single();
+
+        const { data: owner, error: ownerFetchError } = await locals.supabaseServiceRole
+            .from('owners')
+            .select('email')
+            .eq('id', ownerId)
+            .single();
+
+        if (eventFetchError || !event) {
+            console.error('Error fetching event for email:', eventFetchError);
+        } else if (ownerFetchError || !owner) {
+            console.error('Error fetching owner for email:', ownerFetchError);
+        } else {
+            // Send payment confirmation email (non-blocking)
+            EmailService.sendPaymentConfirmation({
+                customerEmail: owner.email,
+                eventName: event.event_name,
+                eventDate: event.event_date,
+                amount: amount / 100,
+                currency: session.currency || 'eur',
+                slug: slug
+            }).catch((emailError) => {
+                // Log error but don't fail the webhook
+                console.error('Error sending payment confirmation email:', emailError);
+            });
+        }
 
     } catch (err) {
         console.error('handleEventPayment failed:', err);

@@ -5,6 +5,7 @@
 	import LoaderCircle from '~icons/lucide/loader-circle';
 	import QRCode from 'qrcode';
 	import { formatEventTypeFr } from '$lib/i18n/event-type';
+	import { QR_CODE_DEFAULTS } from '$lib/utils/qr-code-config';
 
 	type Event = Database['public']['Tables']['events']['Row'];
 
@@ -16,11 +17,11 @@
 	};
 
 	let qrCodeDataUrl: string | null = null;
-	let qrCodeColor = '#2C3E50'; // Default color
-	let qrCodeBackgroundColor = '#FFFFFF'; // Default background color
-	let qrCodeErrorLevel = 'M'; // Error correction level (L, M, Q, H)
-	let qrCodeMargin = 2; // Margin around QR code
-	let qrCodeSize = 512; // QR code size
+	let qrCodeColor = QR_CODE_DEFAULTS.color.dark; // Default color
+	let qrCodeBackgroundColor = QR_CODE_DEFAULTS.color.light; // Default background color
+	let qrCodeErrorLevel = QR_CODE_DEFAULTS.errorCorrectionLevel; // Error correction level (L, M, Q, H)
+	let qrCodeMargin = QR_CODE_DEFAULTS.margin; // Margin around QR code
+	let qrCodeSize = QR_CODE_DEFAULTS.width; // QR code size
 	let copied = false; // Copy feedback state
 
 	// Generate the public search URL
