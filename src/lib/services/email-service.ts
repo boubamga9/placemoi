@@ -6,7 +6,6 @@ import { ContactConfirmationEmail } from '$lib/emails/contact-confirmation';
 import { ContactNotificationEmail } from '$lib/emails/contact-notification';
 import { PaymentConfirmationEmail } from '$lib/emails/payment-confirmation';
 import {
-    generateQRCodePNG,
     generateQRCodePNGBuffer,
     generateQRCodeSVGString
 } from '$lib/utils/qr-code-generator';
@@ -114,16 +113,12 @@ export class EmailService {
         slug: string;
     }) {
         try {
-            // Generate QR codes in parallel (both for inline display and attachments)
-            // Note: We generate SVG once then convert it to both base64 and Buffer
-            const [qrCodePngBase64, qrCodeSvgString, qrCodePngBuffer] = await Promise.all([
-                generateQRCodePNG(slug),
+            // Generate QR codes in parallel for attachments only
+            const [qrCodeSvgString, qrCodePngBuffer] = await Promise.all([
                 generateQRCodeSVGString(slug),
                 generateQRCodePNGBuffer(slug)
             ]);
 
-            // Convert SVG string to base64 for inline display
-            const qrCodeSvgBase64 = Buffer.from(qrCodeSvgString).toString('base64');
             // Convert SVG string to Buffer for attachment
             const qrCodeSvgBuffer = Buffer.from(qrCodeSvgString);
 
@@ -137,9 +132,7 @@ export class EmailService {
                     eventDate,
                     amount,
                     currency,
-                    slug,
-                    qrCodePngBase64,
-                    qrCodeSvgBase64
+                    slug
                 }),
                 attachments: [
                     {
