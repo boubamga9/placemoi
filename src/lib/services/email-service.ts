@@ -7,7 +7,6 @@ import { ContactNotificationEmail } from '$lib/emails/contact-notification';
 import { PaymentConfirmationEmail } from '$lib/emails/payment-confirmation';
 import {
     generateQRCodePNG,
-    generateQRCodeSVG,
     generateQRCodePNGBuffer,
     generateQRCodeSVGString
 } from '$lib/utils/qr-code-generator';
@@ -115,17 +114,17 @@ export class EmailService {
         slug: string;
     }) {
         try {
-            // Generate QR codes (both for inline display and attachments)
-            const [qrCodePngBase64, qrCodeSvgBase64, qrCodePngBuffer, qrCodeSvgString] =
-                await Promise.all([
-                    generateQRCodePNG(slug),
-                    generateQRCodeSVG(slug),
-                    generateQRCodePNGBuffer(slug),
-                    generateQRCodeSVGString(slug)
-                ]);
+            // Generate QR codes in parallel (both for inline display and attachments)
+            // Note: We generate SVG once then convert it to both base64 and Buffer
+            const [qrCodePngBase64, qrCodeSvgString, qrCodePngBuffer] = await Promise.all([
+                generateQRCodePNG(slug),
+                generateQRCodeSVGString(slug),
+                generateQRCodePNGBuffer(slug)
+            ]);
 
-            // For attachments, Resend accepts Buffer or base64 string
-            // Convert SVG string to Buffer
+            // Convert SVG string to base64 for inline display
+            const qrCodeSvgBase64 = Buffer.from(qrCodeSvgString).toString('base64');
+            // Convert SVG string to Buffer for attachment
             const qrCodeSvgBuffer = Buffer.from(qrCodeSvgString);
 
             // Send email with attachments
