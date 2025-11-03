@@ -45,6 +45,15 @@ export const SERVER_VALIDATION_PRESETS = {
         maxSizeBytes: 2 * 1024 * 1024, // 2MB
         allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
         quality: 0.85
+    },
+
+    // Images de fond : 1920x1080, 5MB max, qualité 85%
+    BACKGROUND: {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        maxSizeBytes: 5 * 1024 * 1024, // 5MB
+        allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+        quality: 0.85
     }
 } as const;
 

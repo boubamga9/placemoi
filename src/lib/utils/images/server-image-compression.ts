@@ -44,6 +44,14 @@ export const SERVER_COMPRESSION_PRESETS = {
         maxHeight: 800,
         quality: 85,
         format: 'jpeg'
+    },
+
+    // Images de fond : 1920x1080, qualité 85%
+    BACKGROUND: {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 85,
+        format: 'jpeg'
     }
 } as const;
 

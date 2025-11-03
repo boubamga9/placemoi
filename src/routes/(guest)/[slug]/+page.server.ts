@@ -12,16 +12,26 @@ export const load = async ({ params, locals: { supabase } }: any) => {
         throw error(404, 'Événement non trouvé');
     }
 
-    // Get the event by slug (public access, no auth required)
-    const { data: event, error: fetchError } = await supabase
+    // OPTIMIZED: Get event and customization in a single query with relation
+    const { data: eventData, error: fetchError } = await supabase
         .from('events')
-        .select('*')
+        .select(`
+            *,
+            event_customizations (*)
+        `)
         .eq('slug', slug)
         .single();
 
-    if (fetchError || !event) {
+    if (fetchError || !eventData) {
         throw error(404, 'Événement non trouvé');
     }
+
+    // Extract event (without the nested relation)
+    const { event_customizations, ...event } = eventData as any;
+    // event_customizations is returned as an array by Supabase even for one-to-one relations
+    const customization = Array.isArray(event_customizations) 
+        ? event_customizations[0] 
+        : event_customizations || null;
 
     // Check if event is still accessible (5 days after event_date)
     if (!isEventAccessible(event.event_date)) {
@@ -31,13 +41,6 @@ export const load = async ({ params, locals: { supabase } }: any) => {
             eventDate: event.event_date
         });
     }
-
-    // Get customizations with defaults
-    const { data: customization } = await supabase
-        .from('event_customizations')
-        .select('*')
-        .eq('event_id', event.id)
-        .single();
 
     const customizationWithDefaults: EventCustomization = {
         id: customization?.id || '',

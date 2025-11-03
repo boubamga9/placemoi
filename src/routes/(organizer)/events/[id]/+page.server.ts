@@ -26,34 +26,39 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
         throw error(404, 'Événement non trouvé');
     }
 
-    // Get guests count
-    const { count, error: countError } = await supabase
-        .from('guests')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', id);
+    // OPTIMIZED: Execute 3 independent queries in parallel
+    const [
+        { count, error: countError },
+        { data: payment, error: paymentError },
+        { data: owner, error: ownerError }
+    ] = await Promise.all([
+        // 1. Get guests count
+        supabase
+            .from('guests')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', id),
+        // 2. Check if there's a successful payment for this event
+        supabase
+            .from('payments')
+            .select('id, status')
+            .eq('event_id', id)
+            .eq('status', 'succeeded')
+            .single(),
+        // 3. Check owners flag for free QR generation
+        supabase
+            .from('owners')
+            .select('can_generate_qr_free')
+            .eq('id', session.user.id)
+            .single()
+    ]);
 
     if (countError) {
         console.error('Error counting guests:', countError);
     }
 
-    // Check if there's a successful payment for this event
-    const { data: payment, error: paymentError } = await supabase
-        .from('payments')
-        .select('id, status')
-        .eq('event_id', id)
-        .eq('status', 'succeeded')
-        .single();
-
     if (paymentError && paymentError.code !== 'PGRST116') {
         console.error('Error checking payment:', paymentError);
     }
-
-    // Check owners flag for free QR generation
-    const { data: owner, error: ownerError } = await supabase
-        .from('owners')
-        .select('can_generate_qr_free')
-        .eq('id', session.user.id)
-        .single();
 
     if (ownerError && ownerError.code !== 'PGRST116') {
         console.error('Error fetching owner flag:', ownerError);

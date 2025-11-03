@@ -36,7 +36,7 @@
 				<img
 					src="/images/logo_text.svg"
 					alt="Logo Pattyly"
-					class="h-[70px] w-[120px] object-contain transition-transform duration-200 hover:scale-105"
+					class="h-[70px] w-[124px] object-contain transition-transform duration-200 hover:scale-105"
 				/>
 			</Button>
 		</div>
