@@ -18,6 +18,7 @@
 	let isRemoving = new Set<string>();
 	let showDeleteAllDialog = false;
 	let isAddingGuest = false;
+	let addGuestForm: HTMLFormElement;
 
 	async function removeGuest(guestId: string) {
 		if (isRemoving.has(guestId)) return;
@@ -130,6 +131,7 @@
 			</div>
 		{/if}
 		<form 
+			bind:this={addGuestForm}
 			method="POST" 
 			action="?/addGuest" 
 			use:enhance={() => {
@@ -138,11 +140,8 @@
 					await update();
 					isAddingGuest = false;
 					// Reset form on success
-					if (result.type === 'success') {
-						const form = document.querySelector('form[action="?/addGuest"]') as HTMLFormElement;
-						if (form) {
-							form.reset();
-						}
+					if (result.type === 'success' && addGuestForm) {
+						addGuestForm.reset();
 					}
 				};
 			}}
