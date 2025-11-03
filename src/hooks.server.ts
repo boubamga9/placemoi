@@ -11,50 +11,12 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import type { Handle } from '@sveltejs/kit';
 import Stripe from 'stripe';
-import { RateLimiterRedis, type RateLimitResult } from '$lib/rate-limiting';
-import { RATE_LIMITS } from '$lib/rate-limiting/config';
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-/**
- * Apply rate limiting headers to the request
- */
-function applyRateLimitHeaders(request: Request, result: RateLimitResult): void {
-	if (result.isLimited && result.retryAfter !== undefined) {
-		request.headers.set('x-rate-limit-exceeded', 'true');
-		request.headers.set('x-rate-limit-message', result.message || '');
-		request.headers.set('x-rate-limit-retry-after', result.retryAfter.toString());
-	}
-}
-
 // ============================================================================
 // MAIN HANDLER
 // ============================================================================
 
-// Initialize Redis rate limiter
-const rateLimiter = new RateLimiterRedis();
-
 export const handle: Handle = async ({ event, resolve }) => {
 	try {
-		// Rate limiting for public forms
-		if (event.request.method === 'POST') {
-			const pathname = event.url.pathname;
-			const clientIP = event.getClientAddress();
-
-			// Find rate limit config for this route
-			const config = Object.entries(RATE_LIMITS).find(([route]) =>
-				pathname === route || pathname.includes(route)
-			)?.[1];
-
-			if (config) {
-				const rateLimitResult = await rateLimiter.checkRateLimit(clientIP, pathname, config);
-
-				// Apply headers if rate limited
-				applyRateLimitHeaders(event.request, rateLimitResult);
-			}
-		}
 
 		// Initialize Supabase client
 		event.locals.supabase = createServerClient(

@@ -12,17 +12,6 @@ export const load: ServerLoad = async () => {
 
 export const actions: Actions = {
 	default: async (event) => {
-		// --- Vérif rate limiting ---
-		const rateLimitExceeded = event.request.headers.get("x-rate-limit-exceeded");
-		if (rateLimitExceeded === "true") {
-			const rateLimitMessage =
-				event.request.headers.get("x-rate-limit-message") ||
-				"Trop de tentatives. Veuillez patienter.";
-			const form = await superValidate(zod(formSchema));
-			setError(form, "", rateLimitMessage);
-			return { form };
-		}
-
 		const supabase = event.locals.supabaseServiceRole;
 		const form = await superValidate(event, zod(formSchema));
 		if (!form.valid) {

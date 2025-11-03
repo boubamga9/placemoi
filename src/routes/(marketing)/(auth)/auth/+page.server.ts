@@ -22,17 +22,6 @@ export const load: PageServerLoad = async ({ url }) => {
 
 export const actions: Actions = {
     default: async (event) => {
-        // Vérifier si c'est une erreur de rate limiting
-        const rateLimitExceeded = event.request.headers.get('x-rate-limit-exceeded');
-        if (rateLimitExceeded === 'true') {
-            const rateLimitMessage = event.request.headers.get('x-rate-limit-message') || 'Trop de tentatives. Veuillez patienter.';
-
-            // Utiliser setError au lieu de fail pour une meilleure gestion
-            const form = await superValidate(zod(formSchema));
-            setError(form, '', rateLimitMessage);
-            return { form };
-        }
-
         const supabase = event.locals.supabase;
         const form = await superValidate(event, zod(formSchema));
         if (!form.valid) {
