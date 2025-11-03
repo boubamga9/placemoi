@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import LoaderCircle from '~icons/lucide/loader-circle';
 
 	type Event = Database['public']['Tables']['events']['Row'];
 	type Guest = Database['public']['Tables']['guests']['Row'];
@@ -16,6 +17,7 @@
 
 	let isRemoving = new Set<string>();
 	let showDeleteAllDialog = false;
+	let isAddingGuest = false;
 
 	async function removeGuest(guestId: string) {
 		if (isRemoving.has(guestId)) return;
@@ -127,7 +129,25 @@
 				</p>
 			</div>
 		{/if}
-		<form method="POST" action="?/addGuest" use:enhance class="space-y-4">
+		<form 
+			method="POST" 
+			action="?/addGuest" 
+			use:enhance={() => {
+				isAddingGuest = true;
+				return async ({ update, result }) => {
+					await update();
+					isAddingGuest = false;
+					// Reset form on success
+					if (result.type === 'success') {
+						const form = document.querySelector('form[action="?/addGuest"]') as HTMLFormElement;
+						if (form) {
+							form.reset();
+						}
+					}
+				};
+			}}
+			class="space-y-4"
+		>
 			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 				<div>
 					<label
@@ -190,9 +210,22 @@
 				type="submit"
 				class="w-full rounded-xl px-4 py-2 font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
 				style="background-color: #D4A574; border: none;"
-				disabled={!data.isEventAccessible}
+				disabled={!data.isEventAccessible || isAddingGuest}
+				on:mouseover={(e) =>
+					(!data.isEventAccessible || isAddingGuest ? null : e.currentTarget.style.backgroundColor = '#C49863')}
+				on:mouseout={(e) =>
+					(!data.isEventAccessible || isAddingGuest ? null : e.currentTarget.style.backgroundColor = '#D4A574')}
+				on:focus={(e) =>
+					(!data.isEventAccessible || isAddingGuest ? null : e.currentTarget.style.backgroundColor = '#C49863')}
+				on:blur={(e) =>
+					(!data.isEventAccessible || isAddingGuest ? null : e.currentTarget.style.backgroundColor = '#D4A574')}
 			>
-				Ajouter l'invité
+				{#if isAddingGuest}
+					<LoaderCircle class="mr-2 inline h-4 w-4 animate-spin" />
+					Ajout en cours...
+				{:else}
+					Ajouter l'invité
+				{/if}
 			</button>
 		</form>
 	</div>

@@ -114,9 +114,7 @@
 			Importer votre liste d'invités
 		</h2>
 		<p class="mb-6 text-sm" style="color: #2C3E50; opacity: 0.7;">
-			Téléchargez votre fichier avec les informations de vos invités. Notre
-			intelligence artificielle s'occupera de faire correspondre les colonnes à
-			notre format (nom, table, place).
+			Téléchargez votre fichier avec les informations de vos invités. Les fichiers CSV simples sont traités instantanément, sinon notre intelligence artificielle s'occupera de faire correspondre les colonnes à notre format (nom, table, place).
 		</p>
 
 		{#if !data.isEventAccessible}
@@ -245,7 +243,7 @@
 									d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
 								/>
 							</svg>
-							Upload en cours...
+							Traitement en cours...
 						</span>
 					{:else}
 						Importer et traiter

@@ -2,9 +2,15 @@ import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
 import { isEventAccessible } from '$lib/utils/event-utils';
+import { handleDuplicateGuestNames } from '$lib/utils/guest-utils';
+import { tryParseCSV, isSimpleCSV } from '$lib/utils/csv-parser';
 import * as XLSX from 'xlsx';
 
-async function processFileWithAI(file: File) {
+/**
+ * Processes a file to extract guest information
+ * Tries local CSV parsing first, falls back to AI if needed
+ */
+async function processFile(file: File): Promise<any[]> {
     console.log('📖 Reading file content...');
 
     const arrayBuffer = await file.arrayBuffer();
@@ -35,6 +41,29 @@ async function processFileWithAI(file: File) {
         // Text file (CSV, TXT)
         fileContent = buffer.toString('utf-8');
     }
+
+    // OPTIMIZATION 1: Try local CSV parsing first (avoids OpenAI call)
+    if (isSimpleCSV(file.name, fileContent)) {
+        console.log('🔍 Attempting local CSV parsing...');
+        const localParsed = tryParseCSV(fileContent);
+        
+        if (localParsed && localParsed.length > 0) {
+            console.log('✅ Successfully parsed CSV locally!', localParsed.length, 'guests');
+            // Convert to format expected by rest of code
+            return localParsed.map(g => ({
+                guest_name: g.guest_name,
+                table_number: g.table_number,
+                seat_number: g.seat_number
+            }));
+        }
+        console.log('⚠️ Local parsing failed, falling back to AI...');
+    }
+
+    // Fallback to AI processing
+    return await processFileWithAI(fileContent);
+}
+
+async function processFileWithAI(fileContent: string) {
 
     console.log('📝 File content length:', fileContent.length, 'characters');
     console.log('📄 First 500 characters:', fileContent.substring(0, 500));
@@ -172,10 +201,18 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
     }
 
     try {
-        console.log('🤖 Processing file with AI...');
-        const guests = await processFileWithAI(file);
+        console.log('🤖 Processing file...');
+        
+        // OPTIMIZATION 3: Parallelize fetching existing guests with file processing
+        const [guests, existingGuestsResult] = await Promise.all([
+            processFile(file),
+            supabase
+                .from('guests')
+                .select('guest_name')
+                .eq('event_id', params.id)
+        ]);
 
-        console.log('✅ AI processing complete. Guests extracted:', guests.length);
+        console.log('✅ File processing complete. Guests extracted:', guests.length);
 
         if (!Array.isArray(guests) || guests.length === 0) {
             console.log('❌ No guests found in file');
@@ -183,6 +220,13 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
         }
 
         console.log('📋 Sample guest data:', guests[0]);
+
+        // Get existing guest names
+        if (existingGuestsResult.error) {
+            console.error('Error fetching existing guests:', existingGuestsResult.error);
+        }
+
+        const existingNames = existingGuestsResult.data?.map(g => g.guest_name) || [];
 
         // Helper function to extract numbers from strings
         const extractNumber = (value: any): string => {
@@ -193,27 +237,48 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
             return match ? match[0] : str;
         };
 
-        const guestsToInsert = guests.map((guest: any) => ({
-            event_id: params.id!,
+        // Prepare guests data
+        const guestsPrepared = guests.map((guest: any) => ({
             guest_name: guest.guest_name || guest.name || '',
             table_number: extractNumber(guest.table_number || guest.table || ''),
             seat_number: guest.seat_number || guest.seat ? extractNumber(guest.seat_number || guest.seat) : null
         }));
 
+        // Handle duplicate names (adds 1, 2, 3, etc. to duplicates)
+        const guestsWithDuplicatesHandled = handleDuplicateGuestNames(
+            guestsPrepared,
+            existingNames
+        );
+
+        // Insert guests into database
+        const guestsToInsert = guestsWithDuplicatesHandled.map((guest) => ({
+            event_id: params.id!,
+            ...guest
+        }));
+
         console.log('📊 Cleaned data sample:', guestsToInsert[0]);
         console.log('💾 Inserting guests into database...', guestsToInsert.length, 'guests');
 
-        const { error: insertError } = await supabase
-            .from('guests')
-            .insert(guestsToInsert);
+        // OPTIMIZATION 2: Insert by batches of 100 for better performance
+        const BATCH_SIZE = 100;
+        let insertedCount = 0;
 
-        if (insertError) {
-            console.error('❌ Error inserting guests:', insertError);
-            throw error(500, 'Erreur lors de l\'insertion des invités');
+        for (let i = 0; i < guestsToInsert.length; i += BATCH_SIZE) {
+            const batch = guestsToInsert.slice(i, i + BATCH_SIZE);
+            const { error: insertError } = await supabase
+                .from('guests')
+                .insert(batch);
+
+            if (insertError) {
+                console.error('❌ Error inserting guests batch:', insertError);
+                throw error(500, 'Erreur lors de l\'insertion des invités');
+            }
+
+            insertedCount += batch.length;
+            console.log(`✅ Inserted batch: ${insertedCount}/${guestsToInsert.length} guests`);
         }
 
-        console.log('✅ Guests inserted successfully!');
-        console.log('📤 Sending response with guestsCount:', guests.length);
+        console.log('✅ All guests inserted successfully!');
 
         return json({
             success: true,

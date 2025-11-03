@@ -1,6 +1,7 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import type { Database } from '$lib/database/database.types';
 import { isEventAccessible } from '$lib/utils/event-utils';
+import { handleDuplicateGuestName } from '$lib/utils/guest-utils';
 
 type Event = Database['public']['Tables']['events']['Row'];
 type Guest = Database['public']['Tables']['guests']['Row'];
@@ -101,43 +102,9 @@ export const actions = {
             console.error('Error checking existing guests:', checkError);
         }
 
-        if (existingGuests && existingGuests.length > 0) {
-            const baseName = guestName.trim();
-            
-            // Find all guests that match the base name (exact match or base name + number)
-            const matchingNames = existingGuests
-                .map(g => g.guest_name)
-                .filter(name => {
-                    // Exact match
-                    if (name === baseName) return true;
-                    // Match base name followed by space and number
-                    const match = name.match(/^(.+?)\s+(\d+)$/);
-                    if (match && match[1] === baseName) return true;
-                    return false;
-                });
-
-            if (matchingNames.length > 0) {
-                // Extract numbers from matching names
-                const numbers: number[] = [];
-                
-                matchingNames.forEach(name => {
-                    if (name === baseName) {
-                        numbers.push(0); // Base name counts as 0
-                    } else {
-                        const match = name.match(/^.+?\s+(\d+)$/);
-                        if (match && match[1]) {
-                            numbers.push(parseInt(match[1], 10));
-                        }
-                    }
-                });
-
-                // Find the next available number
-                const maxNumber = numbers.length > 0 ? Math.max(...numbers) : 0;
-                const nextNumber = maxNumber + 1;
-                
-                guestName = `${baseName} ${nextNumber}`;
-            }
-        }
+        // Handle duplicate names using utility function
+        const existingNames = existingGuests?.map(g => g.guest_name) || [];
+        guestName = handleDuplicateGuestName(guestName, existingNames);
 
         // Insert guest with potentially modified name
         const { error: insertError } = await supabase

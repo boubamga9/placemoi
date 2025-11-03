@@ -2,6 +2,9 @@ import { error, redirect, fail } from '@sveltejs/kit';
 import type { Database } from '$lib/database/database.types';
 import { env } from '$env/dynamic/private';
 import { isEventAccessible } from '$lib/utils/event-utils';
+import { handleDuplicateGuestNames } from '$lib/utils/guest-utils';
+import { tryParseCSV, isSimpleCSV } from '$lib/utils/csv-parser';
+import * as XLSX from 'xlsx';
 
 type Event = Database['public']['Tables']['events']['Row'];
 
@@ -32,16 +35,61 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
     };
 };
 
-async function processFileWithAI(file: File, eventId: string) {
+/**
+ * Processes a file to extract guest information
+ * Tries local CSV parsing first, falls back to AI if needed
+ */
+async function processFile(file: File): Promise<any[]> {
     console.log('📖 Reading file content...');
 
-    // Read file content
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Convert to base64 for OpenAI vision API (if it's an image/scanned document)
-    // For now, we'll assume it's a text-based file
-    const fileContent = buffer.toString('utf-8');
+    // Check if it's an Excel file
+    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls') ||
+        file.name.endsWith('.xlsm') || file.name.endsWith('.xlsb') ||
+        file.name.endsWith('.xltx') || file.name.endsWith('.xltm');
+
+    let fileContent = '';
+
+    if (isExcel) {
+        console.log('📊 Detected Excel file, parsing...');
+        try {
+            const workbook = XLSX.read(buffer, { type: 'buffer' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            fileContent = XLSX.utils.sheet_to_csv(worksheet);
+            console.log('✅ Excel parsed successfully');
+        } catch (e) {
+            console.error('❌ Error parsing Excel file:', e);
+            throw new Error('Impossible de lire le fichier Excel');
+        }
+    } else {
+        // Text file (CSV, TXT)
+        fileContent = buffer.toString('utf-8');
+    }
+
+    // OPTIMIZATION 1: Try local CSV parsing first (avoids OpenAI call)
+    if (isSimpleCSV(file.name, fileContent)) {
+        console.log('🔍 Attempting local CSV parsing...');
+        const localParsed = tryParseCSV(fileContent);
+        
+        if (localParsed && localParsed.length > 0) {
+            console.log('✅ Successfully parsed CSV locally!', localParsed.length, 'guests');
+            return localParsed.map(g => ({
+                guest_name: g.guest_name,
+                table_number: g.table_number,
+                seat_number: g.seat_number
+            }));
+        }
+        console.log('⚠️ Local parsing failed, falling back to AI...');
+    }
+
+    // Fallback to AI processing
+    return await processFileWithAI(fileContent);
+}
+
+async function processFileWithAI(fileContent: string) {
 
     console.log('📝 File content length:', fileContent.length, 'characters');
 
@@ -188,11 +236,18 @@ export const actions = {
         }
 
         try {
-            console.log('🤖 Processing file with AI...');
-            // Process file with AI
-            const guests = await processFileWithAI(file, params.id);
+            console.log('🤖 Processing file...');
+            
+            // OPTIMIZATION 3: Parallelize fetching existing guests with file processing
+            const [guests, existingGuestsResult] = await Promise.all([
+                processFile(file),
+                supabase
+                    .from('guests')
+                    .select('guest_name')
+                    .eq('event_id', params.id)
+            ]);
 
-            console.log('✅ AI processing complete. Guests extracted:', guests.length);
+            console.log('✅ File processing complete. Guests extracted:', guests.length);
 
             if (!Array.isArray(guests) || guests.length === 0) {
                 console.log('❌ No guests found in file');
@@ -201,26 +256,54 @@ export const actions = {
 
             console.log('📋 Sample guest data:', guests[0]);
 
-            // Insert guests into database
-            const guestsToInsert = guests.map((guest: any) => ({
-                event_id: params.id,
+            // Get existing guest names
+            if (existingGuestsResult.error) {
+                console.error('Error fetching existing guests:', existingGuestsResult.error);
+            }
+
+            const existingNames = existingGuestsResult.data?.map(g => g.guest_name) || [];
+
+            // Prepare guests data
+            const guestsPrepared = guests.map((guest: any) => ({
                 guest_name: guest.guest_name || guest.name || '',
                 table_number: guest.table_number?.toString() || guest.table?.toString() || '',
                 seat_number: guest.seat_number?.toString() || guest.seat?.toString() || null
             }));
 
+            // Handle duplicate names (adds 1, 2, 3, etc. to duplicates)
+            const guestsWithDuplicatesHandled = handleDuplicateGuestNames(
+                guestsPrepared,
+                existingNames
+            );
+
+            // Insert guests into database
+            const guestsToInsert = guestsWithDuplicatesHandled.map((guest) => ({
+                event_id: params.id,
+                ...guest
+            }));
+
             console.log('💾 Inserting guests into database...', guestsToInsert.length, 'guests');
 
-            const { error: insertError } = await supabase
-                .from('guests')
-                .insert(guestsToInsert);
+            // OPTIMIZATION 2: Insert by batches of 100 for better performance
+            const BATCH_SIZE = 100;
+            let insertedCount = 0;
 
-            if (insertError) {
-                console.error('❌ Error inserting guests:', insertError);
-                return fail(500, { error: 'Erreur lors de l\'insertion des invités' });
+            for (let i = 0; i < guestsToInsert.length; i += BATCH_SIZE) {
+                const batch = guestsToInsert.slice(i, i + BATCH_SIZE);
+                const { error: insertError } = await supabase
+                    .from('guests')
+                    .insert(batch);
+
+                if (insertError) {
+                    console.error('❌ Error inserting guests batch:', insertError);
+                    return fail(500, { error: 'Erreur lors de l\'insertion des invités' });
+                }
+
+                insertedCount += batch.length;
+                console.log(`✅ Inserted batch: ${insertedCount}/${guestsToInsert.length} guests`);
             }
 
-            console.log('✅ Guests inserted successfully!');
+            console.log('✅ All guests inserted successfully!');
 
             const response = {
                 success: true,
