@@ -2,10 +2,10 @@
 	import type { Database } from '$lib/database/database.types';
 	import { goto } from '$app/navigation';
 
-	type Event = Database['public']['Tables']['events']['Row'];
+	type EventType = Database['public']['Tables']['events']['Row'];
 
-	export let data: { 
-		event: Event;
+	export let data: {
+		event: EventType;
 		isEventAccessible: boolean;
 	};
 
@@ -15,14 +15,18 @@
 	let uploadSuccess = false;
 	let uploadMessage = '';
 
-	function handleFileSelect(event: Event) {
-		const target = event.target as HTMLInputElement;
-		if (target.files && target.files[0]) {
+	function handleFileSelect(
+		event: Event & { currentTarget: EventTarget & HTMLInputElement },
+	) {
+		const target = event.currentTarget;
+		if (target?.files && target.files[0]) {
 			selectedFile = target.files[0];
 		}
 	}
 
-	async function handleUploadWithRetry(event: Event) {
+	async function handleUploadWithRetry(
+		event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement },
+	) {
 		event.preventDefault();
 
 		if (!selectedFile) return;
@@ -113,9 +117,41 @@
 		<h2 class="mb-2 text-2xl font-medium" style="color: #2C3E50;">
 			Importer votre liste d'invités
 		</h2>
-		<p class="mb-6 text-sm" style="color: #2C3E50; opacity: 0.7;">
-			Téléchargez votre fichier avec les informations de vos invités. Les fichiers CSV simples sont traités instantanément, sinon notre intelligence artificielle s'occupera de faire correspondre les colonnes à notre format (nom, table, place).
+		<p class="mb-4 text-sm" style="color: #2C3E50; opacity: 0.7;">
+			Téléchargez votre fichier avec les informations de vos invités. Les
+			fichiers CSV simples sont traités instantanément, sinon notre intelligence
+			artificielle s'occupera de faire correspondre les colonnes à notre format
+			(nom, table, place).
 		</p>
+
+		<!-- Template Download Link -->
+		<div class="mb-6 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+			<p class="mb-2 text-xs" style="color: #2C3E50; opacity: 0.8;">
+				En cas de problème avec votre format, vous pouvez utiliser notre modèle
+				de fichier :
+			</p>
+			<a
+				href="/api/guests-template/download"
+				download="modele-invites.xlsx"
+				class="inline-flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
+				style="color: #D4A574;"
+			>
+				<svg
+					class="h-4 w-4"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+					/>
+				</svg>
+				<span>Télécharger le modèle Excel (nom, table, place)</span>
+			</a>
+		</div>
 
 		{#if !data.isEventAccessible}
 			<div
@@ -123,7 +159,8 @@
 				style="background-color: #FFF5F5; border-color: #9B4A4A;"
 			>
 				<p class="text-sm" style="color: #9B4A4A;">
-					⚠️ Impossible d'importer des invités : cet événement n'est plus accessible (5 jours après la date de l'événement).
+					⚠️ Impossible d'importer des invités : cet événement n'est plus
+					accessible (5 jours après la date de l'événement).
 				</p>
 			</div>
 		{/if}
@@ -131,14 +168,18 @@
 		<!-- File Uploader -->
 		<form on:submit={handleUploadWithRetry} class="space-y-4">
 			<label
-				class="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 p-12 transition-colors {data.isEventAccessible ? 'cursor-pointer hover:border-neutral-400' : 'cursor-not-allowed opacity-50'}"
+				class="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 p-12 transition-colors {data.isEventAccessible
+					? 'cursor-pointer hover:border-neutral-400'
+					: 'cursor-not-allowed opacity-50'}"
 			>
 				<input
 					bind:this={fileInput}
 					type="file"
 					accept=".csv,.xlsx,.xls,.xlsm,.txt,.xlsb,.xltx,.xltm"
 					on:change={handleFileSelect}
-					class="absolute inset-0 opacity-0 {data.isEventAccessible ? 'cursor-pointer' : 'cursor-not-allowed'}"
+					class="absolute inset-0 opacity-0 {data.isEventAccessible
+						? 'cursor-pointer'
+						: 'cursor-not-allowed'}"
 					required={data.isEventAccessible}
 					disabled={!data.isEventAccessible}
 				/>
@@ -219,6 +260,15 @@
 				>
 					{uploadMessage}
 				</div>
+			{/if}
+
+			{#if selectedFile && data.isEventAccessible}
+				<p
+					class="mb-2 text-center text-xs"
+					style="color: #2C3E50; opacity: 0.7;"
+				>
+					Le traitement peut prendre entre 1 et 3 minutes
+				</p>
 			{/if}
 
 			<div class="flex gap-3">
