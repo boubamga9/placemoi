@@ -5,18 +5,32 @@
 	type EventCustomization =
 		Database['public']['Tables']['event_customizations']['Row'];
 
+	type Guest = {
+		guest_name: string;
+		table_number: string;
+		seat_number: string | null;
+	};
+
 	export let data: {
 		event: Database['public']['Tables']['events']['Row'];
 		customization: EventCustomization;
+		guests: Guest[];
 	};
 
 	let searchTerm = '';
 	let result: { table_number: string; seat_number: string | null } | null =
 		null;
-	let isLoading = false;
 	let suggestions: Array<{ name: string }> = [];
 	let selectedIndex = -1;
 	let showSuggestions = false;
+	let _isLoading = false;
+
+	// 🚀 OPTIMIZATION: Preloaded guests data (loaded once, searched in-memory)
+	const guestsData = data.guests || [];
+
+	// Seuil pour basculer vers l'API si trop d'invités (évite de surcharger le navigateur)
+	const IN_MEMORY_SEARCH_THRESHOLD = 2000;
+	const useInMemorySearch = guestsData.length < IN_MEMORY_SEARCH_THRESHOLD;
 
 	// Compute background style
 	$: backgroundStyle = `background-color: ${data.customization.background_color};${
@@ -25,67 +39,105 @@
 			: ''
 	}`;
 
+	// 🚀 OPTIMIZATION: Search adaptatif (mémoire si < 2000, API sinon)
 	async function searchGuest() {
 		// Require at least 3 characters to start searching
-		if (!searchTerm.trim() || searchTerm.trim().length < 3) {
+		const trimmedTerm = searchTerm.trim();
+		if (!trimmedTerm || trimmedTerm.length < 3) {
 			result = null;
 			suggestions = [];
 			showSuggestions = false;
 			return;
 		}
 
-		isLoading = true;
-		try {
-			const response = await fetch(
-				`/api/events/${data.event.id}/search-autocomplete?name=${encodeURIComponent(searchTerm.trim())}`,
-			);
-			const searchData = await response.json();
+		// Si < 2000 invités : recherche en mémoire (instantané)
+		if (useInMemorySearch) {
+			const searchLower = trimmedTerm.toLowerCase();
+			const matchingGuests = guestsData
+				.filter((guest) => guest.guest_name.toLowerCase().includes(searchLower))
+				.slice(0, 10); // Limit to 10 suggestions
 
-			if (searchData.success && searchData.guests) {
-				suggestions = searchData.guests;
-				showSuggestions = suggestions.length > 0;
+			if (matchingGuests.length > 0) {
+				suggestions = matchingGuests.map((g) => ({ name: g.guest_name }));
+				showSuggestions = true;
 				result = null;
 			} else {
 				suggestions = [];
 				showSuggestions = false;
 				result = null;
 			}
-		} catch (error) {
-			console.error('Error searching for guest:', error);
-			suggestions = [];
-			showSuggestions = false;
-			result = null;
-		} finally {
-			isLoading = false;
+		} else {
+			// Si >= 2000 invités : recherche via API (évite de surcharger le navigateur)
+			_isLoading = true;
+			try {
+				const response = await fetch(
+					`/api/events/${data.event.id}/search-autocomplete?name=${encodeURIComponent(trimmedTerm)}`,
+				);
+				const searchData = await response.json();
+
+				if (searchData.success && searchData.guests) {
+					suggestions = searchData.guests;
+					showSuggestions = suggestions.length > 0;
+					result = null;
+				} else {
+					suggestions = [];
+					showSuggestions = false;
+					result = null;
+				}
+			} catch (error) {
+				console.error('Error searching for guest:', error);
+				suggestions = [];
+				showSuggestions = false;
+				result = null;
+			} finally {
+				_isLoading = false;
+			}
 		}
 	}
 
+	// 🚀 OPTIMIZATION: Find guest (mémoire si < 2000, API sinon)
 	async function selectGuest(guestName: string) {
 		searchTerm = guestName;
 		suggestions = [];
 		showSuggestions = false;
 
-		// Now search for the specific guest
-		isLoading = true;
-		try {
-			const response = await fetch(
-				`/api/events/${data.event.id}/search?name=${encodeURIComponent(guestName)}`,
+		// Si < 2000 invités : recherche en mémoire (instantané)
+		if (useInMemorySearch) {
+			const guest = guestsData.find(
+				(g) => g.guest_name.toLowerCase() === guestName.toLowerCase(),
 			);
-			const searchData = await response.json();
 
-			if (searchData.success && searchData.guest) {
+			if (guest) {
 				result = {
-					table_number: searchData.guest.table_number,
-					seat_number: searchData.guest.seat_number,
+					table_number: guest.table_number,
+					seat_number: guest.seat_number,
 				};
 			} else {
 				result = null;
 			}
-		} catch (error) {
-			console.error('Error searching for guest:', error);
-			result = null;
-		} finally {
-			isLoading = false;
+		} else {
+			// Si >= 2000 invités : recherche via API
+			_isLoading = true;
+			try {
+				const response = await fetch(
+					`/api/events/${data.event.id}/search?name=${encodeURIComponent(guestName)}`,
+				);
+				const searchData = await response.json();
+
+				if (searchData.success && searchData.guest) {
+					result = {
+						table_number: searchData.guest.table_number,
+						seat_number: searchData.guest.seat_number,
+					};
+				} else {
+					result = null;
+				}
+			} catch (error) {
+				console.error('Error searching for guest:', error);
+				result = null;
+			} finally {
+				_isLoading = false;
+			}
 		}
 	}
 

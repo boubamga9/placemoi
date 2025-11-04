@@ -46,8 +46,40 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
         updated_at: customization?.updated_at || new Date().toISOString()
     };
 
+    // 🚀 OPTIMIZATION: Preload all guests for this event (si < 2000 invités)
+    // Au-delà de 2000, on utilise l'API pour éviter de surcharger le navigateur
+    const IN_MEMORY_SEARCH_THRESHOLD = 2000;
+
+    // D'abord, on compte les invités pour décider si on précharge
+    const { count, error: countError } = await supabase
+        .from('guests')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', id);
+
+    if (countError) {
+        console.error('Error counting guests:', countError);
+    }
+
+    let guests: any[] = [];
+
+    // On précharge seulement si < 2000 invités
+    if (count !== null && count < IN_MEMORY_SEARCH_THRESHOLD) {
+        const { data: guestsData, error: guestsError } = await supabase
+            .from('guests')
+            .select('guest_name, table_number, seat_number')
+            .eq('event_id', id);
+
+        if (guestsError) {
+            console.error('Error fetching guests for preload:', guestsError);
+        } else {
+            guests = guestsData || [];
+        }
+    }
+
     return {
         event: event as Event,
-        customization: customizationWithDefaults
+        customization: customizationWithDefaults,
+        // Preloaded guests data (vide si >= 2000 invités, pour utiliser l'API)
+        guests: guests
     };
 };
