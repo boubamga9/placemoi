@@ -1,7 +1,6 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
 	import {
 		superForm,
 		type Infer,
@@ -104,7 +103,6 @@
 
 			// Use compressed image
 			backgroundImageFile = compressionResult.file;
-			$formData.background_image = compressionResult.file;
 			backgroundImageFileName = file.name;
 
 			// Sync the input element with the compressed file
@@ -141,7 +139,6 @@
 
 			// Use compressed logo
 			logoFile = compressionResult.file;
-			$formData.logo = compressionResult.file;
 			logoFileName = file.name;
 
 			// Sync the input element with the compressed file
@@ -170,10 +167,10 @@
 			backgroundImageFile = null;
 			backgroundImagePreview = null;
 			backgroundImageFileName = null;
-			$formData.background_image = undefined;
 
-			// Supprimer côté serveur si une image existe
-			if ($formData.background_image_url) {
+			// Supprimer côté serveur si une image Cloudinary existe (pas les data URIs temporaires)
+			const existingUrl = $formData.background_image_url;
+			if (existingUrl && !existingUrl.startsWith('data:')) {
 				const formData = new FormData();
 
 				const response = await fetch('?/removeBackgroundImage', {
@@ -181,25 +178,26 @@
 					body: formData,
 				});
 
-				if (response.ok) {
-					// Mettre à jour l'état après suppression
-					$formData.background_image_url = '';
-					console.log('Background image removed successfully');
-				} else {
-					console.error('Failed to remove background image');
+				if (!response.ok) {
 					// En cas d'erreur, remettre l'aperçu
-					backgroundImagePreview = $formData.background_image_url;
+					backgroundImagePreview = existingUrl;
+					return;
 				}
+
+				// Mettre à jour l'état après suppression réussie
+				$formData.background_image_url = undefined;
 			}
 
 			// Clear the input
 			if (backgroundInputElement) {
 				backgroundInputElement.value = '';
 			}
-		} catch (error) {
-			console.error('Error removing background image:', error);
-			// En cas d'erreur, remettre l'aperçu
-			backgroundImagePreview = $formData.background_image_url;
+		} catch {
+			// En cas d'erreur, remettre l'aperçu si c'était une URL Cloudinary
+			const existingUrl = $formData.background_image_url;
+			if (existingUrl && !existingUrl.startsWith('data:')) {
+				backgroundImagePreview = existingUrl;
+			}
 		}
 	}
 
@@ -209,10 +207,10 @@
 			logoFile = null;
 			logoPreview = null;
 			logoFileName = null;
-			$formData.logo = undefined;
 
-			// Supprimer côté serveur si un logo existe
-			if ($formData.logo_url) {
+			// Supprimer côté serveur si un logo Cloudinary existe (pas les data URIs temporaires)
+			const existingUrl = $formData.logo_url;
+			if (existingUrl && !existingUrl.startsWith('data:')) {
 				const formData = new FormData();
 
 				const response = await fetch('?/removeLogo', {
@@ -220,27 +218,92 @@
 					body: formData,
 				});
 
-				if (response.ok) {
-					// Mettre à jour l'état après suppression
-					$formData.logo_url = '';
-					console.log('Logo removed successfully');
-				} else {
-					console.error('Failed to remove logo');
+				if (!response.ok) {
 					// En cas d'erreur, remettre l'aperçu
-					logoPreview = $formData.logo_url;
+					logoPreview = existingUrl;
+					return;
 				}
+
+				// Mettre à jour l'état après suppression réussie
+				$formData.logo_url = undefined;
 			}
 
 			// Clear the input
 			if (logoInputElement) {
 				logoInputElement.value = '';
 			}
-		} catch (error) {
-			console.error('Error removing logo:', error);
-			// En cas d'erreur, remettre l'aperçu
-			logoPreview = $formData.logo_url;
+		} catch {
+			// En cas d'erreur, remettre l'aperçu si c'était une URL Cloudinary
+			const existingUrl = $formData.logo_url;
+			if (existingUrl && !existingUrl.startsWith('data:')) {
+				logoPreview = existingUrl;
+			}
 		}
 	}
+
+	// Utiliser enhance avec update pour modifier le FormData avant l'envoi
+	// Car superForm n'inclut pas les fichiers mis via DataTransfer dans l'input
+	const customEnhance = (node: HTMLFormElement) => {
+		return enhance(node, {
+			onSubmit: ({ formData: fd }) => {
+				// IMPORTANT: Utiliser les valeurs du FormData existantes si présentes,
+				// sinon utiliser $formData comme fallback
+				// Cela évite d'écraser les bonnes valeurs qui sont déjà dans le FormData
+				const background_color =
+					fd.get('background_color') || $formData.background_color || '';
+				const font_color = fd.get('font_color') || $formData.font_color || '';
+				const font_family =
+					fd.get('font_family') || $formData.font_family || '';
+				const welcome_text =
+					fd.get('welcome_text') || $formData.welcome_text || '';
+				const subtitle_text =
+					fd.get('subtitle_text') || $formData.subtitle_text || '';
+
+				// S'assurer que toutes les valeurs sont bien présentes dans le FormData
+				fd.set('background_color', String(background_color));
+				fd.set('font_color', String(font_color));
+				fd.set('font_family', String(font_family));
+				fd.set('welcome_text', String(welcome_text));
+				fd.set('subtitle_text', String(subtitle_text));
+
+				// Ajouter les fichiers compressés explicitement au FormData avant l'envoi
+				if (
+					backgroundImageFile instanceof File &&
+					backgroundImageFile.size > 0
+				) {
+					fd.set('background_image', backgroundImageFile);
+				} else {
+					// Si pas de nouveau fichier, supprimer le champ pour éviter les conflits
+					fd.delete('background_image');
+				}
+
+				if (logoFile instanceof File && logoFile.size > 0) {
+					fd.set('logo', logoFile);
+				} else {
+					// Si pas de nouveau fichier, supprimer le champ pour éviter les conflits
+					fd.delete('logo');
+				}
+
+				// Ne pas envoyer les champs cachés s'ils sont vides ou s'ils contiennent des data URIs temporaires
+				// Seulement envoyer les URLs Cloudinary existantes
+				const bgUrl = fd.get('background_image_url');
+				if (bgUrl) {
+					const bgUrlStr = String(bgUrl);
+					if (bgUrlStr.trim() === '' || bgUrlStr.startsWith('data:')) {
+						fd.delete('background_image_url');
+					}
+				}
+
+				const logoUrl = fd.get('logo_url');
+				if (logoUrl) {
+					const logoUrlStr = String(logoUrl);
+					if (logoUrlStr.trim() === '' || logoUrlStr.startsWith('data:')) {
+						fd.delete('logo_url');
+					}
+				}
+			},
+		});
+	};
 </script>
 
 <svelte:head>
@@ -308,7 +371,7 @@
 	<form
 		method="POST"
 		action="?/save"
-		use:enhance
+		use:customEnhance
 		enctype="multipart/form-data"
 		class="space-y-6"
 	>
@@ -455,11 +518,13 @@
 					/>
 				</label>
 			{/if}
-			<input
-				type="hidden"
-				name="background_image_url"
-				value={backgroundImagePreview || ''}
-			/>
+			{#if backgroundImagePreview && !backgroundImagePreview.startsWith('data:')}
+				<input
+					type="hidden"
+					name="background_image_url"
+					value={backgroundImagePreview}
+				/>
+			{/if}
 			{#if backgroundImageFileName}
 				<p class="text-sm" style="color: #2C3E50;">
 					Fichier sélectionné : {backgroundImageFileName}
@@ -511,7 +576,9 @@
 					/>
 				</label>
 			{/if}
-			<input type="hidden" name="logo_url" value={logoPreview || ''} />
+			{#if logoPreview && !logoPreview.startsWith('data:')}
+				<input type="hidden" name="logo_url" value={logoPreview} />
+			{/if}
 			{#if logoFileName}
 				<p class="text-sm" style="color: #2C3E50;">
 					Fichier sélectionné : {logoFileName}

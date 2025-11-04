@@ -3,8 +3,8 @@ import type { Database } from '$lib/database/database.types';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { eventCustomizationSchema } from '$lib/validations';
-import { sanitizeFileName } from '$lib/utils/filename-sanitizer';
 import { validateAndRecompressImage } from '$lib/utils/images/server-image-validation';
+import { uploadValidatedImage, deleteImage, extractPublicIdFromUrl, isCloudinaryConfigured, CloudinaryUploadError } from '$lib/utils/cloudinary';
 
 type Event = Database['public']['Tables']['events']['Row'];
 type EventCustomization = Database['public']['Tables']['event_customizations']['Row'];
@@ -68,143 +68,109 @@ export const actions = {
         }
 
         const { id } = params;
+        const formData = await request.formData();
 
-        // Validate form with superValidate
-        const validatedForm = await superValidate(request, zod(eventCustomizationSchema));
+        // 🧩 Valider directement le FormData (pas besoin de recréer un Request)
+        const validatedForm = await superValidate(formData, zod(eventCustomizationSchema));
 
-        if (!validatedForm.valid) {
+        // Récupérer les fichiers
+        const backgroundImageFile = formData.get('background_image') as File | null;
+        const logoFile = formData.get('logo') as File | null;
+
+        // Extraire les champs texte depuis validatedForm.data (garanti propre)
+        const {
+            background_color,
+            font_color,
+            font_family,
+            welcome_text,
+            subtitle_text,
+            background_image_url,
+            logo_url
+        } = validatedForm.data;
+
+        let finalBackgroundImageUrl = background_image_url || null;
+        let finalLogoUrl = logo_url || null;
+
+        // --- Uploads Cloudinary ---
+        const uploadPromises: Promise<void>[] = [];
+
+        if (backgroundImageFile && backgroundImageFile.size > 0) {
+            uploadPromises.push(
+                (async () => {
+                    if (!isCloudinaryConfigured())
+                        throw new Error("Cloudinary n'est pas configuré.");
+
+                    const validationResult = await validateAndRecompressImage(backgroundImageFile, 'BACKGROUND');
+                    if (!validationResult.isValid) throw new Error(validationResult.error || 'Image invalide');
+
+                    const uploadResult = await uploadValidatedImage(
+                        validationResult.compressedFile || backgroundImageFile,
+                        'BACKGROUND',
+                        session.user.id
+                    );
+
+                    finalBackgroundImageUrl = uploadResult.secure_url;
+                })()
+            );
+        }
+
+        if (logoFile && logoFile.size > 0) {
+            uploadPromises.push(
+                (async () => {
+                    if (!isCloudinaryConfigured())
+                        throw new Error("Cloudinary n'est pas configuré.");
+
+                    const validationResult = await validateAndRecompressImage(logoFile, 'LOGO');
+                    if (!validationResult.isValid) throw new Error(validationResult.error || 'Logo invalide');
+
+                    const uploadResult = await uploadValidatedImage(
+                        validationResult.compressedFile || logoFile,
+                        'LOGO',
+                        session.user.id
+                    );
+
+                    finalLogoUrl = uploadResult.secure_url;
+                })()
+            );
+        }
+
+        try {
+            await Promise.all(uploadPromises);
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Erreur lors de l’upload des images';
+            validatedForm.message = msg;
+            return { form: validatedForm };
+        }
+
+        if (!validatedForm.valid && uploadPromises.length === 0) {
             return fail(400, { form: validatedForm });
         }
 
-        // Handle file uploads from form.data - OPTIMIZED: parallel uploads
-        const { background_image, logo, background_image_url, logo_url } = validatedForm.data;
-        let finalBackgroundImageUrl = background_image_url;
-        let finalLogoUrl = logo_url;
+        // --- Sauvegarde en DB ---
+        const upsertData = {
+            event_id: id,
+            background_color,
+            font_color,
+            font_family,
+            welcome_text,
+            subtitle_text,
+            background_image_url: finalBackgroundImageUrl,
+            logo_url: finalLogoUrl,
+            updated_at: new Date().toISOString()
+        };
 
-        // Prepare upload promises (will run in parallel)
-        const uploadPromises: Promise<void>[] = [];
+        console.log('💾 Upsert data:', upsertData);
 
-        // Background image upload promise
-        if (background_image && background_image.size > 0) {
-            uploadPromises.push(
-                (async () => {
-                    try {
-                        // 🔒 SECURITY: Validate and recompress server-side (cannot be bypassed)
-                        const validationResult = await validateAndRecompressImage(background_image, 'BACKGROUND');
-
-                        if (!validationResult.isValid) {
-                            throw new Error(validationResult.error || 'Image invalide');
-                        }
-
-                        // Use server-compressed image if available, otherwise use original (already validated)
-                        const fileToUpload = validationResult.compressedFile || background_image;
-
-                        const sanitizedFileName = sanitizeFileName(fileToUpload.name);
-                        const fileName = `${session.user.id}/${Date.now()}-${sanitizedFileName}`;
-
-                        const { error: uploadError } = await supabase.storage
-                            .from('event-customizations')
-                            .upload(fileName, fileToUpload, {
-                                cacheControl: '3600',
-                                upsert: false
-                            });
-
-                        if (uploadError) {
-                            throw new Error(`Upload error: ${uploadError.message}`);
-                        }
-
-                        // Get public URL
-                        const { data: urlData } = supabase.storage
-                            .from('event-customizations')
-                            .getPublicUrl(fileName);
-
-                        finalBackgroundImageUrl = urlData.publicUrl;
-                    } catch (err) {
-                        console.error('Background image upload error:', err);
-                        throw new Error(err instanceof Error ? err.message : 'Erreur lors de l\'upload de l\'image de fond');
-                    }
-                })()
-            );
-        }
-
-        // Logo upload promise
-        if (logo && logo.size > 0) {
-            uploadPromises.push(
-                (async () => {
-                    try {
-                        // 🔒 SECURITY: Validate and recompress server-side (cannot be bypassed)
-                        const validationResult = await validateAndRecompressImage(logo, 'LOGO');
-
-                        if (!validationResult.isValid) {
-                            throw new Error(validationResult.error || 'Logo invalide');
-                        }
-
-                        // Use server-compressed image if available, otherwise use original (already validated)
-                        const fileToUpload = validationResult.compressedFile || logo;
-
-                        const sanitizedFileName = sanitizeFileName(fileToUpload.name);
-                        const fileName = `${session.user.id}/logo-${Date.now()}-${sanitizedFileName}`;
-
-                        const { error: uploadError } = await supabase.storage
-                            .from('event-customizations')
-                            .upload(fileName, fileToUpload, {
-                                cacheControl: '3600',
-                                upsert: false
-                            });
-
-                        if (uploadError) {
-                            throw new Error(`Upload error: ${uploadError.message}`);
-                        }
-
-                        // Get public URL
-                        const { data: urlData } = supabase.storage
-                            .from('event-customizations')
-                            .getPublicUrl(fileName);
-
-                        finalLogoUrl = urlData.publicUrl;
-                    } catch (err) {
-                        console.error('Logo upload error:', err);
-                        throw new Error(err instanceof Error ? err.message : 'Erreur lors de l\'upload du logo');
-                    }
-                })()
-            );
-        }
-
-        // Execute all uploads in parallel
-        if (uploadPromises.length > 0) {
-            try {
-                await Promise.all(uploadPromises);
-            } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Erreur lors de l\'upload des images';
-                validatedForm.message = errorMessage;
-                return { form: validatedForm };
-            }
-        }
-
-        // OPTIMIZED: Use upsert instead of SELECT + UPDATE/INSERT (saves one database query)
         const { error: upsertError } = await supabase
             .from('event_customizations')
-            .upsert({
-                event_id: id,
-                background_color: validatedForm.data.background_color,
-                font_color: validatedForm.data.font_color,
-                font_family: validatedForm.data.font_family,
-                background_image_url: finalBackgroundImageUrl,
-                logo_url: finalLogoUrl,
-                welcome_text: validatedForm.data.welcome_text,
-                subtitle_text: validatedForm.data.subtitle_text
-            }, {
-                onConflict: 'event_id'
-            });
+            .upsert(upsertData, { onConflict: 'event_id' });
 
         if (upsertError) {
-            console.error('Error upserting customization:', upsertError);
+            console.error('❌ Upsert error:', upsertError);
             validatedForm.message = 'Erreur lors de la sauvegarde de la personnalisation';
             return { form: validatedForm };
         }
 
-        // Redirect to event page after successful save
-        // No need to return form since we're redirecting
         throw redirect(303, `/events/${id}`);
     },
     removeBackgroundImage: async ({ params, locals: { supabase, safeGetSession } }: any) => {
@@ -224,21 +190,34 @@ export const actions = {
 
         if (customization?.background_image_url) {
             try {
-                // Supprimer le fichier du storage
-                const fileName = customization.background_image_url.split('/').pop();
-                if (fileName) {
-                    const { error: deleteError } = await supabase.storage
-                        .from('event-customizations')
-                        .remove([`${session.user.id}/${fileName}`]);
+                // Vérifier si c'est une URL Cloudinary ou Supabase (pour compatibilité)
+                const isCloudinaryUrl = customization.background_image_url.includes('cloudinary.com');
 
-                    if (deleteError) {
-                        console.error('Error deleting background image:', deleteError);
-                    } else {
-                        console.log('Background image deleted from storage');
+                if (isCloudinaryUrl && isCloudinaryConfigured()) {
+                    // Supprimer depuis Cloudinary
+                    const publicId = extractPublicIdFromUrl(customization.background_image_url);
+                    if (publicId) {
+                        try {
+                            await deleteImage(publicId);
+                        } catch (error) {
+                            // On continue quand même pour supprimer l'URL de la DB
+                        }
+                    }
+                } else if (!isCloudinaryUrl) {
+                    // Ancien système Supabase Storage - suppression pour compatibilité
+                    const fileName = customization.background_image_url.split('/').pop();
+                    if (fileName) {
+                        const { error: deleteError } = await supabase.storage
+                            .from('event-customizations')
+                            .remove([`${session.user.id}/${fileName}`]);
+
+                        if (deleteError) {
+                            // Ignorer l'erreur de suppression
+                        }
                     }
                 }
             } catch (error) {
-                console.error('Error processing background image deletion:', error);
+                // On continue quand même pour supprimer l'URL de la DB
             }
         }
 
@@ -275,21 +254,34 @@ export const actions = {
 
         if (customization?.logo_url) {
             try {
-                // Supprimer le fichier du storage
-                const fileName = customization.logo_url.split('/').pop();
-                if (fileName) {
-                    const { error: deleteError } = await supabase.storage
-                        .from('event-customizations')
-                        .remove([`${session.user.id}/${fileName}`]);
+                // Vérifier si c'est une URL Cloudinary ou Supabase (pour compatibilité)
+                const isCloudinaryUrl = customization.logo_url.includes('cloudinary.com');
 
-                    if (deleteError) {
-                        console.error('Error deleting logo:', deleteError);
-                    } else {
-                        console.log('Logo deleted from storage');
+                if (isCloudinaryUrl && isCloudinaryConfigured()) {
+                    // Supprimer depuis Cloudinary
+                    const publicId = extractPublicIdFromUrl(customization.logo_url);
+                    if (publicId) {
+                        try {
+                            await deleteImage(publicId);
+                        } catch (error) {
+                            // On continue quand même pour supprimer l'URL de la DB
+                        }
+                    }
+                } else if (!isCloudinaryUrl) {
+                    // Ancien système Supabase Storage - suppression pour compatibilité
+                    const fileName = customization.logo_url.split('/').pop();
+                    if (fileName) {
+                        const { error: deleteError } = await supabase.storage
+                            .from('event-customizations')
+                            .remove([`${session.user.id}/${fileName}`]);
+
+                        if (deleteError) {
+                            // Ignorer l'erreur de suppression
+                        }
                     }
                 }
             } catch (error) {
-                console.error('Error processing logo deletion:', error);
+                // On continue quand même pour supprimer l'URL de la DB
             }
         }
 

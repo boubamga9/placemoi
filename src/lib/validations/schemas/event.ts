@@ -78,13 +78,19 @@ export const eventCustomizationSchema = z.object({
     background_image: z.instanceof(File).optional(),
     background_image_url: z.string().optional(),
     background_color: z
-        .string()
-        .regex(/^#[0-9A-Fa-f]{6}$/, 'Couleur hexadécimale invalide (format: #RRGGBB)')
-        .optional(),
+        .union([
+            z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Couleur hexadécimale invalide (format: #RRGGBB)'),
+            z.literal('')
+        ])
+        .optional()
+        .transform((val) => val === '' ? undefined : val),
     font_color: z
-        .string()
-        .regex(/^#[0-9A-Fa-f]{6}$/, 'Couleur hexadécimale invalide (format: #RRGGBB)')
-        .optional(),
+        .union([
+            z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Couleur hexadécimale invalide (format: #RRGGBB)'),
+            z.literal('')
+        ])
+        .optional()
+        .transform((val) => val === '' ? undefined : val),
     font_family: z.string().max(100).optional(),
     logo: z.instanceof(File).optional(),
     logo_url: z.string().optional(),
