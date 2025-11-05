@@ -46,7 +46,7 @@
 			</div>
 
 			<p class="text-sm font-light" style="color: #2C3E50; opacity: 0.8;">
-				✔️ QR code + lien partageable • <strong>24,99€</strong> par événement
+				✔️ QR code + lien partageable • <strong>29,99€</strong> par événement
 			</p>
 		</div>
 

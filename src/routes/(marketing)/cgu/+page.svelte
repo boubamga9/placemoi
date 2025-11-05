@@ -307,13 +307,13 @@
 					</h3>
 					<p>
 						La création d'un événement avec plan de table sur la Plateforme est
-						facturée au prix unique de <strong>24,99€ TTC par événement</strong
+						facturée au prix unique de <strong>29,99€ TTC par événement</strong
 						>.
 					</p>
 					<p>
 						Le compte sur la Plateforme est gratuit et permet de gérer plusieurs
 						événements, chaque événement nécessitant un paiement unique de
-						24,99€.
+						29,99€.
 					</p>
 
 					<h3 class="mb-2 mt-6 text-lg font-semibold text-gray-900">
@@ -361,7 +361,7 @@
 							L'organisateur crée un nouvel événement et configure son plan de
 							table
 						</li>
-						<li>Paiement unique de 24,99€ via Stripe (3D Secure)</li>
+						<li>Paiement unique de 29,99€ via Stripe (3D Secure)</li>
 						<li>Confirmation par email et accès à l'événement créé</li>
 					</ul>
 

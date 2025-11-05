@@ -379,7 +379,7 @@
 							{:else if data.hasPayment}
 								En attente...
 							{:else}
-								Payer 24,99€ pour générer le QR code et le lien que vos invités
+								Payer 29,99€ pour générer le QR code et le lien que vos invités
 								utiliseront
 							{/if}
 						</p>
@@ -512,7 +512,7 @@
 						class="w-full rounded-xl px-6 py-2 text-center font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md sm:w-auto"
 						style="background-color: #D4A574; border: none;"
 					>
-						Générer le QR code (24,99€)
+						Générer le QR code (29,99€)
 					</a>
 				{/if}
 			</div>

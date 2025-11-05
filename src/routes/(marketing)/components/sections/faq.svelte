@@ -31,7 +31,7 @@
 		{
 			question: 'Combien ça coûte ?',
 			answer:
-				"24,99€ par événement, paiement unique. Aucun abonnement, aucune limite de durée. Vous gardez l'accès à votre événement tant que vous en avez besoin.",
+				"29,99€ par événement, paiement unique. Aucun abonnement, aucune limite de durée. Vous gardez l'accès à votre événement tant que vous en avez besoin.",
 		},
 		{
 			question: "Puis-je modifier ma liste d'invités après paiement ?",
