@@ -5,12 +5,16 @@
 	import { onMount } from 'svelte';
 	import { expoOut } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
+	import { injectAnalytics } from '@vercel/analytics/sveltekit';
 	import '../app.css';
 
 	export let data;
 
 	let { supabase } = data;
 	$: ({ supabase } = data);
+
+	// Initialize Vercel Analytics
+	injectAnalytics();
 
 	onMount(() => {
 		const { data } = supabase.auth.onAuthStateChange(
