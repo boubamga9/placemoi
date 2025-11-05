@@ -46,7 +46,7 @@ async function processFile(file: File): Promise<any[]> {
     if (isSimpleCSV(file.name, fileContent)) {
         console.log('🔍 Attempting local CSV parsing...');
         const localParsed = tryParseCSV(fileContent);
-        
+
         if (localParsed && localParsed.length > 0) {
             console.log('✅ Successfully parsed CSV locally!', localParsed.length, 'guests');
             // Convert to format expected by rest of code
@@ -202,7 +202,7 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 
     try {
         console.log('🤖 Processing file...');
-        
+
         // OPTIMIZATION 3: Parallelize fetching existing guests with file processing
         const [guests, existingGuestsResult] = await Promise.all([
             processFile(file),
@@ -259,8 +259,9 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
         console.log('📊 Cleaned data sample:', guestsToInsert[0]);
         console.log('💾 Inserting guests into database...', guestsToInsert.length, 'guests');
 
-        // OPTIMIZATION 2: Insert by batches of 100 for better performance
-        const BATCH_SIZE = 100;
+        // OPTIMIZATION 2: Insert by adaptive batches (max 500) for optimal performance
+        // If <= 500 guests: single batch (fastest), if > 500: batches of 500
+        const BATCH_SIZE = Math.min(500, guestsToInsert.length);
         let insertedCount = 0;
 
         for (let i = 0; i < guestsToInsert.length; i += BATCH_SIZE) {
