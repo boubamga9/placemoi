@@ -41,7 +41,7 @@
 	];
 </script>
 
-<section class="py-16 sm:py-20 md:py-24" style="background-color: #FFF9F4;">
+<section id="faq" class="py-16 sm:py-20 md:py-24" style="background-color: #FFF9F4;">
 	<div class="mx-auto max-w-4xl px-6">
 		<!-- Header -->
 		<div class="mb-16 text-center">

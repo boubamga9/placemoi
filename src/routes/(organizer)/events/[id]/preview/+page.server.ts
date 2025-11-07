@@ -1,5 +1,7 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { Database } from '$lib/database/database.types';
+import { STRIPE_PRICES } from '$lib/config/server';
+import { generateUniqueSlug } from '$lib/utils/event-utils';
 
 type Event = Database['public']['Tables']['events']['Row'];
 type EventCustomization = Database['public']['Tables']['event_customizations']['Row'];
@@ -46,6 +48,52 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
         updated_at: customization?.updated_at || new Date().toISOString()
     };
 
+    // Check payment status and owner flag (for free QR generation)
+    const [{ data: payment, error: paymentError }, { data: owner, error: ownerError }] =
+        await Promise.all([
+            supabase
+                .from('payments')
+                .select('id, status')
+                .eq('event_id', id)
+                .eq('status', 'succeeded')
+                .single(),
+            supabase
+                .from('owners')
+                .select('can_generate_qr_free')
+                .eq('id', session.user.id)
+                .single()
+        ]);
+
+    if (paymentError && paymentError.code !== 'PGRST116') {
+        console.error('Error checking payment:', paymentError);
+    }
+
+    if (ownerError && ownerError.code !== 'PGRST116') {
+        console.error('Error fetching owner flag:', ownerError);
+    }
+
+    const isFree = owner?.can_generate_qr_free === true;
+
+    // If free and no slug yet, generate one so the page can be public
+    if (isFree && !event.slug) {
+        try {
+            const slug = await generateUniqueSlug(supabase);
+            const { error: updateError } = await supabase
+                .from('events')
+                .update({ slug })
+                .eq('id', id);
+            if (updateError) {
+                console.error('Failed to set slug for free owner (preview):', updateError);
+            } else {
+                (event as Event).slug = slug;
+            }
+        } catch (e) {
+            console.error('Slug generation failed for free owner (preview):', e);
+        }
+    }
+
+    const hasPayment = isFree || !!payment;
+
     // 🚀 OPTIMIZATION: Preload all guests for this event (si < 2000 invités)
     // Au-delà de 2000, on utilise l'API pour éviter de surcharger le navigateur
     const IN_MEMORY_SEARCH_THRESHOLD = 2000;
@@ -79,6 +127,8 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
     return {
         event: event as Event,
         customization: customizationWithDefaults,
+        hasPayment,
+        stripePriceId: STRIPE_PRICES.EVENT,
         // Preloaded guests data (vide si >= 2000 invités, pour utiliser l'API)
         guests: guests
     };

@@ -15,6 +15,8 @@
 		event: Database['public']['Tables']['events']['Row'];
 		customization: EventCustomization;
 		guests: Guest[];
+		hasPayment: boolean;
+		stripePriceId: string;
 	};
 
 	let searchTerm = '';
@@ -31,6 +33,9 @@
 	// Seuil pour basculer vers l'API si trop d'invités (évite de surcharger le navigateur)
 	const IN_MEMORY_SEARCH_THRESHOLD = 2000;
 	const useInMemorySearch = guestsData.length < IN_MEMORY_SEARCH_THRESHOLD;
+
+	// Generate checkout URL
+	$: checkoutUrl = `/checkout/${data.stripePriceId}?eventId=${data.event.id}&returnTo=preview`;
 
 	// Compute background style
 	$: backgroundStyle = `background-color: ${data.customization.background_color};${
@@ -286,5 +291,28 @@
 				</div>
 			{/if}
 		</div>
+
+		{#if !data.hasPayment}
+			<div class="mt-12 flex justify-center">
+				<div
+					class="w-full max-w-xl rounded-xl border-2 p-6 text-center shadow-sm"
+					style="border-color: {data.customization.font_color};"
+				>
+					<p
+						class="mb-4 text-base"
+						style="color: {data.customization.font_color}; opacity: 0.85;"
+					>
+						Prêt à rendre cette page accessible à vos invités ?
+					</p>
+					<a
+						href={checkoutUrl}
+						class="inline-flex rounded-xl px-6 py-3 text-base font-medium text-white shadow-lg transition-all duration-200 hover:scale-105"
+						style="background-color: #D4A574; border: none;"
+					>
+						Générer le QR code (29,99€)
+					</a>
+				</div>
+			</div>
+		{/if}
 	</div>
 </div>

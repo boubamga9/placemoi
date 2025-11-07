@@ -601,7 +601,7 @@
 					<LoaderCircle class="mr-2 inline h-4 w-4 animate-spin" />
 					Enregistrement...
 				{:else}
-					Enregistrer les modifications
+					Enregistrer les modifications et prévisualiser
 				{/if}
 			</button>
 		</div>

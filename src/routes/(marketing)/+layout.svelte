@@ -7,7 +7,13 @@
 	import XIcon from 'virtual:icons/lucide/x';
 	import '../../app.css';
 
-	const menuItems = {};
+	const menuItems: Record<string, string> = {
+		'/': 'Accueil',
+		'/#faq': 'FAQ',
+		'/contact': 'Contact',
+	};
+
+	const mobileMenuItems = Object.entries(menuItems).filter(([href]) => href !== '/#faq');
 
 	let menuOpen = false;
 
@@ -18,6 +24,14 @@
 	});
 
 	export let data;
+
+	let isAuthenticated: boolean;
+	let primaryCtaHref: string;
+	let primaryCtaLabel: string;
+
+	$: isAuthenticated = Boolean(data?.session);
+	$: primaryCtaHref = isAuthenticated ? '/events' : '/auth';
+	$: primaryCtaLabel = isAuthenticated ? 'Mon espace' : 'Commencer';
 </script>
 
 <!-- Navbar integrated in Hero section with transparent background -->
@@ -64,11 +78,11 @@
 			<!-- Boutons desktop -->
 			<div class="hidden lg:flex lg:gap-4">
 				<Button
-					href="/auth"
+					href={primaryCtaHref}
 					class="rounded-xl text-base font-medium text-white shadow-lg transition-all duration-200 hover:scale-105"
 					style="width: 140px; height: 48px; background-color: #D4A574;"
 				>
-					Commencer
+					{primaryCtaLabel}
 				</Button>
 			</div>
 
@@ -92,12 +106,13 @@
 						</Drawer.Header>
 						<nav class="[&_ul]:flex [&_ul]:flex-col [&_ul]:p-2">
 							<ul>
-								{#each Object.entries(menuItems) as [href, text]}
+								{#each mobileMenuItems as [href, text]}
 									<li>
 										<Button
 											{href}
 											variant="ghost"
 											class="w-full py-6 text-base"
+											on:click={() => (menuOpen = false)}
 										>
 											{text}
 										</Button>
@@ -108,11 +123,12 @@
 							<ul class="">
 								<li>
 									<Button
-										href="/auth"
+										href={primaryCtaHref}
 										variant="ghost"
 										class="w-full py-6 text-base"
+										on:click={() => (menuOpen = false)}
 									>
-										Créer mon événement
+										{isAuthenticated ? 'Mon espace' : 'Créer mon événement'}
 									</Button>
 								</li>
 							</ul>

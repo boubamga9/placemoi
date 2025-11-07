@@ -171,7 +171,7 @@ export const actions = {
             return { form: validatedForm };
         }
 
-        throw redirect(303, `/events/${id}`);
+        throw redirect(303, `/events/${id}/preview`);
     },
     removeBackgroundImage: async ({ params, locals: { supabase, safeGetSession } }: any) => {
         const { session } = await safeGetSession();

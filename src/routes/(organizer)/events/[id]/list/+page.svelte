@@ -328,6 +328,20 @@
 			</button>
 		</div>
 	{/if}
+
+    <div class="mt-12 flex justify-center">
+        <button
+            class="rounded-xl px-6 py-3 text-base font-medium text-white shadow-lg transition-all duration-200 hover:scale-105"
+            style="background-color: #2C3E50; border: none;"
+            on:click={() => goto(`/events/${data.event.id}/customize`)}
+            on:mouseover={(e) => (e.currentTarget.style.backgroundColor = '#1F2B3A')}
+            on:mouseout={(e) => (e.currentTarget.style.backgroundColor = '#2C3E50')}
+            on:focus={(e) => (e.currentTarget.style.backgroundColor = '#1F2B3A')}
+            on:blur={(e) => (e.currentTarget.style.backgroundColor = '#2C3E50')}
+        >
+            🎨 Personnaliser ma page
+        </button>
+    </div>
 </div>
 
 <!-- Dialog de confirmation de suppression de tous les invités -->

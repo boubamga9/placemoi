@@ -71,6 +71,7 @@ export const load: PageServerLoad = async ({
 	try {
 		// Check if this is an event payment
 		const eventId = url.searchParams.get('eventId');
+		const returnTo = url.searchParams.get('returnTo');
 		const isEventPayment = eventId !== null;
 
 		const metadata: Record<string, string> = isEventPayment
@@ -86,7 +87,7 @@ export const load: PageServerLoad = async ({
 			: `${url.origin}/dashboard`;
 
 		const cancelUrl = isEventPayment
-			? `${url.origin}/events/${eventId}`
+			? `${url.origin}/events/${eventId}${returnTo === 'preview' ? '/preview' : ''}`
 			: `${url.origin}/subscription`;
 
 		const checkoutSession = await stripe.checkout.sessions.create({
