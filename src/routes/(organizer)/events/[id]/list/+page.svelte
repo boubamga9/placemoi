@@ -100,15 +100,25 @@
 				style="background-color: #D4A574; border: none;"
 				on:click={() => goto(`/events/${data.event.id}/upload`)}
 				on:mouseover={(e) =>
-					(!data.isEventAccessible ? null : e.currentTarget.style.backgroundColor = '#C49863')}
+					!data.isEventAccessible
+						? null
+						: (e.currentTarget.style.backgroundColor = '#C49863')}
 				on:mouseout={(e) =>
-					(!data.isEventAccessible ? null : e.currentTarget.style.backgroundColor = '#D4A574')}
+					!data.isEventAccessible
+						? null
+						: (e.currentTarget.style.backgroundColor = '#D4A574')}
 				on:focus={(e) =>
-					(!data.isEventAccessible ? null : e.currentTarget.style.backgroundColor = '#C49863')}
+					!data.isEventAccessible
+						? null
+						: (e.currentTarget.style.backgroundColor = '#C49863')}
 				on:blur={(e) =>
-					(!data.isEventAccessible ? null : e.currentTarget.style.backgroundColor = '#D4A574')}
+					!data.isEventAccessible
+						? null
+						: (e.currentTarget.style.backgroundColor = '#D4A574')}
 				disabled={!data.isEventAccessible}
-				title={!data.isEventAccessible ? 'Impossible d\'ajouter des invités après 5 jours' : ''}
+				title={!data.isEventAccessible
+					? "Impossible d'ajouter des invités après 5 jours"
+					: ''}
 			>
 				📄 Importer une liste
 			</button>
@@ -126,14 +136,15 @@
 				style="background-color: #FFF5F5; border-color: #9B4A4A;"
 			>
 				<p class="text-sm" style="color: #9B4A4A;">
-					⚠️ Impossible d'ajouter des invités : cet événement n'est plus accessible (5 jours après la date de l'événement).
+					⚠️ Impossible d'ajouter des invités : cet événement n'est plus
+					accessible (5 jours après la date de l'événement).
 				</p>
 			</div>
 		{/if}
-		<form 
+		<form
 			bind:this={addGuestForm}
-			method="POST" 
-			action="?/addGuest" 
+			method="POST"
+			action="?/addGuest"
 			use:enhance={() => {
 				isAddingGuest = true;
 				return async ({ update, result }) => {
@@ -207,17 +218,25 @@
 
 			<button
 				type="submit"
-				class="w-full rounded-xl px-4 py-2 font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+				class="w-full rounded-xl px-4 py-2 font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
 				style="background-color: #D4A574; border: none;"
 				disabled={!data.isEventAccessible || isAddingGuest}
 				on:mouseover={(e) =>
-					(!data.isEventAccessible || isAddingGuest ? null : e.currentTarget.style.backgroundColor = '#C49863')}
+					!data.isEventAccessible || isAddingGuest
+						? null
+						: (e.currentTarget.style.backgroundColor = '#C49863')}
 				on:mouseout={(e) =>
-					(!data.isEventAccessible || isAddingGuest ? null : e.currentTarget.style.backgroundColor = '#D4A574')}
+					!data.isEventAccessible || isAddingGuest
+						? null
+						: (e.currentTarget.style.backgroundColor = '#D4A574')}
 				on:focus={(e) =>
-					(!data.isEventAccessible || isAddingGuest ? null : e.currentTarget.style.backgroundColor = '#C49863')}
+					!data.isEventAccessible || isAddingGuest
+						? null
+						: (e.currentTarget.style.backgroundColor = '#C49863')}
 				on:blur={(e) =>
-					(!data.isEventAccessible || isAddingGuest ? null : e.currentTarget.style.backgroundColor = '#D4A574')}
+					!data.isEventAccessible || isAddingGuest
+						? null
+						: (e.currentTarget.style.backgroundColor = '#D4A574')}
 			>
 				{#if isAddingGuest}
 					<LoaderCircle class="mr-2 inline h-4 w-4 animate-spin" />
@@ -237,7 +256,8 @@
 				class="rounded-xl px-4 py-2 text-sm font-medium transition-colors"
 				style="color: #9B4A4A; border: 1px solid #9B4A4A; background-color: white;"
 				on:click={confirmDeleteAll}
-				on:mouseover={(e) => (e.currentTarget.style.backgroundColor = '#FFF5F5')}
+				on:mouseover={(e) =>
+					(e.currentTarget.style.backgroundColor = '#FFF5F5')}
 				on:mouseout={(e) => (e.currentTarget.style.backgroundColor = 'white')}
 			>
 				🗑️ Tout supprimer
@@ -322,26 +342,31 @@
 				style="background-color: #D4A574; border: none;"
 				on:click={() => goto(`/events/${data.event.id}/upload`)}
 				disabled={!data.isEventAccessible}
-				title={!data.isEventAccessible ? 'Impossible d\'ajouter des invités après 5 jours' : ''}
+				title={!data.isEventAccessible
+					? "Impossible d'ajouter des invités après 5 jours"
+					: ''}
 			>
 				Importer un fichier
 			</button>
 		</div>
 	{/if}
 
-    <div class="mt-12 flex justify-center">
-        <button
-            class="rounded-xl px-6 py-3 text-base font-medium text-white shadow-lg transition-all duration-200 hover:scale-105"
-            style="background-color: #2C3E50; border: none;"
-            on:click={() => goto(`/events/${data.event.id}/customize`)}
-            on:mouseover={(e) => (e.currentTarget.style.backgroundColor = '#1F2B3A')}
-            on:mouseout={(e) => (e.currentTarget.style.backgroundColor = '#2C3E50')}
-            on:focus={(e) => (e.currentTarget.style.backgroundColor = '#1F2B3A')}
-            on:blur={(e) => (e.currentTarget.style.backgroundColor = '#2C3E50')}
-        >
-            🎨 Personnaliser ma page
-        </button>
-    </div>
+	{#if data.totalGuests > 0}
+		<div class="mt-12 flex justify-center">
+			<button
+				class="rounded-xl px-6 py-3 text-base font-medium text-white shadow-lg transition-all duration-200 hover:scale-105"
+				style="background-color: #2C3E50; border: none;"
+				on:click={() => goto(`/events/${data.event.id}/customize`)}
+				on:mouseover={(e) =>
+					(e.currentTarget.style.backgroundColor = '#1F2B3A')}
+				on:mouseout={(e) => (e.currentTarget.style.backgroundColor = '#2C3E50')}
+				on:focus={(e) => (e.currentTarget.style.backgroundColor = '#1F2B3A')}
+				on:blur={(e) => (e.currentTarget.style.backgroundColor = '#2C3E50')}
+			>
+				Continuer vers la personnalisation →
+			</button>
+		</div>
+	{/if}
 </div>
 
 <!-- Dialog de confirmation de suppression de tous les invités -->
@@ -357,8 +382,8 @@
 				Supprimer tous les invités
 			</AlertDialog.Title>
 			<AlertDialog.Description style="color: #2C3E50; opacity: 0.8;">
-				Êtes-vous sûr de vouloir supprimer tous les invités de cet événement ? Cette action est
-				irréversible.
+				Êtes-vous sûr de vouloir supprimer tous les invités de cet événement ?
+				Cette action est irréversible.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
@@ -405,6 +430,6 @@
 	}
 
 	:global(.delete-button:hover) {
-		background-color: #8B3E3E !important;
+		background-color: #8b3e3e !important;
 	}
 </style>
