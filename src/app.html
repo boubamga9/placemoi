@@ -9,23 +9,57 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
-		rel="stylesheet">
-	<!-- Polices supplémentaires pour la personnalisation -->
-	<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+		rel="stylesheet" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+		rel="stylesheet"
+	/>
+	<!-- Polices supplémentaires pour la personnalisation (chargées après le rendu critique) -->
+	<script>
+		window.addEventListener('load', () => {
+			const existing = document.querySelector('link[data-extra-fonts]');
+			if (existing) return;
+
+			const families = [
+				'Crimson+Pro:wght@400;600',
+				'Cormorant+Garamond:wght@400;600',
+				'Lora:wght@400;500;600',
+				'Montserrat:wght@400;500;600',
+				'Poppins:wght@400;500;600',
+				'Raleway:wght@400;500;600',
+				'Nunito+Sans:wght@400;600',
+				'Roboto:wght@400;500',
+				'Open+Sans:wght@400;500',
+				'Oswald:wght@400;500',
+				'Bebas+Neue',
+				'Dancing+Script:wght@400;600',
+				'Great+Vibes'
+			];
+
+			const href =
+				'https://fonts.googleapis.com/css2?family=' +
+				families.join('&family=') +
+				'&display=swap';
+
+			const link = document.createElement('link');
+			link.rel = 'stylesheet';
+			link.href = href;
+			link.media = 'print';
+			link.onload = function () {
+				this.media = 'all';
+			};
+			link.setAttribute('data-extra-fonts', 'true');
+
+			const insertFonts = () => document.head.appendChild(link);
+
+			if ('requestIdleCallback' in window) {
+				requestIdleCallback(insertFonts);
+			} else {
+				setTimeout(insertFonts, 200);
+			}
+		});
+	</script>
 	%sveltekit.head%
 </head>
 
