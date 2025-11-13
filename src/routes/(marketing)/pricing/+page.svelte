@@ -31,7 +31,9 @@
 		},
 	];
 
-	const offerStructuredData = {
+	let _offerStructuredDataJson = '';
+
+	$: _offerStructuredDataJson = JSON.stringify({
 		'@context': 'https://schema.org',
 		'@type': 'Product',
 		name: 'Placemoi',
@@ -45,7 +47,7 @@
 			availability: 'https://schema.org/InStock',
 			url: `https://placemoi.com/pricing#${plan.id}`,
 		})),
-	};
+	});
 </script>
 
 <svelte:head>
@@ -59,7 +61,7 @@
 		content="placemoi tarifs, plan de table mariage prix, QR code invités, collecte photo mariage"
 	/>
 	<script type="application/ld+json">
-		{JSON.stringify(offerStructuredData)}
+		{_offerStructuredDataJson}
 	</script>
 </svelte:head>
 
@@ -118,21 +120,21 @@
 				<ul class="mt-6 space-y-4 text-sm leading-relaxed md:text-base">
 					<li class="flex gap-3" style="color: #2c3e50;">
 						<span
-							class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs"
+							class="mt-1 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold"
 							style="background-color: #d4a574; color: white;">✓</span
 						>
 						Interface mobile-first pensée pour vos invités
 					</li>
 					<li class="flex gap-3" style="color: #2c3e50;">
 						<span
-							class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs"
+							class="mt-1 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold"
 							style="background-color: #d4a574; color: white;">✓</span
 						>
 						Personnalisation complète (logo, couleurs, polices)
 					</li>
 					<li class="flex gap-3" style="color: #2c3e50;">
 						<span
-							class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs"
+							class="mt-1 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold"
 							style="background-color: #d4a574; color: white;">✓</span
 						>
 						Assistance par e-mail avant et après le grand jour
@@ -151,7 +153,7 @@
 			<div class="grid gap-8 lg:grid-cols-2">
 				{#each plans as plan}
 					<div
-						class="flex h-full flex-col rounded-3xl border bg-white p-10 shadow-sm"
+						class={`flex h-full flex-col rounded-3xl border bg-white ${plan.id === 'placement-photos' ? 'relative px-10 pb-10 pt-16 shadow-lg' : 'p-10 shadow-sm'}`}
 						style={`border-color: ${plan.id === 'placement-photos' ? '#D4A574' : '#E8DCCF'};`}
 					>
 						<div class="space-y-6">
@@ -199,7 +201,7 @@
 								{#each plan.features as feature}
 									<li class="flex items-start gap-3" style="color: #2c3e50;">
 										<span
-											class="mt-1 flex h-5 w-5 items-center justify-center rounded-full text-xs"
+											class="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold"
 											style={`background-color: ${plan.id === 'placement-photos' ? '#2C3E50' : '#D4A574'}; color: white;`}
 										>
 											✓

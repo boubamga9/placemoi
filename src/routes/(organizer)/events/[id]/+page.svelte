@@ -359,7 +359,7 @@
 			</div>
 		</div>
 
-		<div class="mb-12 space-y-6">
+		<div id="plans" class="mb-12 scroll-mt-24 space-y-6">
 			<p class="text-center text-base" style="color: #2C3E50; opacity: 0.8;">
 				Choisissez votre formule ou passez au plan supérieur pour débloquer la
 				collecte de photos.

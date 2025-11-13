@@ -7,15 +7,15 @@
 	import XIcon from 'virtual:icons/lucide/x';
 	import '../../app.css';
 
-const menuItems: Record<string, string> = {
-	'/': 'Accueil',
-	'/about': 'À propos',
-	'/pricing': 'Tarifs',
-	'/faq': 'FAQ',
-	'/contact': 'Contact',
-};
+	const menuItems: Record<string, string> = {
+		'/': 'Accueil',
+		'/about': 'À propos',
+		'/pricing': 'Tarifs',
+		'/faq': 'FAQ',
+		'/contact': 'Contact',
+	};
 
-const mobileMenuItems = Object.entries(menuItems);
+	const mobileMenuItems = Object.entries(menuItems);
 
 	let menuOpen = false;
 

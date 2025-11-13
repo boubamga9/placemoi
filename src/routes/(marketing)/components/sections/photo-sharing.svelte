@@ -13,7 +13,7 @@
 				class="mt-4 text-2xl font-normal leading-[120%] tracking-tight md:text-3xl xl:text-4xl"
 				style="color: #2C3E50; font-family: 'Playfair Display', serif;"
 			>
-				Vos invités partagent leurs souvenirs<br
+				Vos invités partagent leurs souvenirs{' '}<br
 					class="hidden sm:block"
 				/>depuis le même QR code
 			</h2>
