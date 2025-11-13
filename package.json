@@ -45,6 +45,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@fontsource/inter": "^5.2.8",
+		"@fontsource/playfair-display": "^5.2.8",
 		"@supabase/ssr": "^0.3.0",
 		"@supabase/supabase-js": "^2.43.1",
 		"@types/qrcode": "^1.5.6",
