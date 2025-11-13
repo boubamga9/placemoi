@@ -1,4 +1,6 @@
 <script lang="ts">
+	const heroImageUrl =
+		'https://res.cloudinary.com/dv7gvfcof/image/upload/v1763033544/qr_code_placemoi_exemple1_wyzizr.png';
 </script>
 
 <div
@@ -53,7 +55,7 @@
 		<!-- Image on mobile (below text) -->
 		<div class="block lg:hidden">
 			<img
-				src="/qr_code_placemoi_exemple1.png"
+				src={heroImageUrl}
 				alt="Interface de gestion des événements"
 				class="mx-auto w-3/4 max-w-md rounded-2xl border-2 border-[#D4A574]"
 				loading="eager"
@@ -63,7 +65,7 @@
 		<!-- Image on desktop -->
 		<div class="hidden lg:block">
 			<img
-				src="/qr_code_placemoi_exemple1.png"
+				src={heroImageUrl}
 				alt="Interface de gestion des événements"
 				class="mx-auto w-3/4 max-w-lg rounded-2xl border-2 border-[#D4A574]"
 				loading="eager"
