@@ -1,6 +1,8 @@
 <script lang="ts">
-	const heroImageUrl =
-		'https://res.cloudinary.com/dv7gvfcof/image/upload/v1763033544/qr_code_placemoi_exemple1_wyzizr.png';
+	const heroImageBase =
+		'https://res.cloudinary.com/dv7gvfcof/image/upload';
+	const heroImagePath = 'v1763033544/qr_code_placemoi_exemple1_wyzizr.png';
+	const heroImageUrl = `${heroImageBase}/f_auto,q_auto,w_600/${heroImagePath}`;
 </script>
 
 <div
