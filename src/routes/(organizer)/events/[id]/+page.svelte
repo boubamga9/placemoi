@@ -7,6 +7,18 @@
 	import { formatEventTypeFr } from '$lib/i18n/event-type';
 	import { QR_CODE_DEFAULTS } from '$lib/utils/qr-code-config';
 
+	const placementFeatures = [
+		'Page invitée personnalisée',
+		'QR code et lien partageable',
+		'Mises à jour illimitées jusqu’au jour J',
+	];
+
+	const placementPhotosFeatures = [
+		'Toutes les fonctionnalités du plan Placement',
+		'Collecte de photos via la page invitée et le QR code',
+		'Album collaboratif avec exports groupés',
+	];
+
 	type Event = Database['public']['Tables']['events']['Row'];
 
 	export let data: {
@@ -27,6 +39,8 @@
 	let qrCodeMargin = QR_CODE_DEFAULTS.margin; // Margin around QR code
 	let qrCodeSize = QR_CODE_DEFAULTS.width; // QR code size
 	let copied = false; // Copy feedback state
+	let photosLinkCopied = false;
+	let guestPhotosUrl = '';
 
 	// Generate the public search URL
 	$: publicUrl = browser
@@ -34,6 +48,11 @@
 			? `${window.location.origin}/${data.event.slug}`
 			: `${window.location.origin}/${data.event.id}`
 		: '';
+
+	$: guestPhotosUrl =
+		browser && data.event.slug
+			? `${window.location.origin}/${data.event.slug}/photos`
+			: '';
 
 	// Generate QR code when slug is available
 	$: if (browser && data.event.slug && data.hasPayment) {
@@ -137,6 +156,20 @@
 		}
 	}
 
+	async function copyPhotosUrl() {
+		if (!guestPhotosUrl) return;
+
+		try {
+			await navigator.clipboard.writeText(guestPhotosUrl);
+			photosLinkCopied = true;
+			setTimeout(() => {
+				photosLinkCopied = false;
+			}, 2000);
+		} catch (err) {
+			console.error('Failed to copy photos url:', err);
+		}
+	}
+
 	// Generate checkout URLs (only before any plan is activated)
 	$: canStartPlan = !data.hasPayment;
 	$: placementCheckoutUrl =
@@ -158,6 +191,25 @@
 	$: placementPhotosCardStyle = `border-color: #D4A574;${
 		isPlacementPhotosActive ? ' background-color: #FFF9F4;' : ''
 	}`;
+	$: activePlanInfo = isPlacementPhotosActive
+		? {
+				name: 'Placement + Photos',
+				price: '99,99€',
+				description:
+					'Collectez les souvenirs de vos invités depuis la même page que le plan de table.',
+				color: '#D4A574',
+				features: placementPhotosFeatures,
+			}
+		: isPlacementActive
+			? {
+					name: 'Placement',
+					price: '49,99€',
+					description:
+						'Page invitée élégante avec QR code et lien partageable pour guider vos convives.',
+					color: '#2C3E50',
+					features: placementFeatures,
+				}
+			: null;
 </script>
 
 <svelte:head>
@@ -358,7 +410,61 @@
 				</button>
 			</div>
 		</div>
+	</div>
 
+	{#if data.hasPayment && activePlanInfo}
+		<div id="plans" class="mb-12 scroll-mt-24">
+			<h2
+				class="mb-6 text-2xl font-medium"
+				style="color: #2C3E50; font-family: 'Playfair Display', serif;"
+			>
+				Votre plan
+			</h2>
+			<div class="rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
+				<div
+					class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between"
+				>
+					<div class="space-y-3">
+						<p
+							class="inline-flex items-center gap-2 rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em]"
+							style={`background-color: ${activePlanInfo.color}1A; color: ${activePlanInfo.color};`}
+						>
+							Plan activé
+						</p>
+						<h3 class="text-lg font-medium" style="color: #2C3E50;">
+							{activePlanInfo.name}
+						</h3>
+						<p class="text-sm" style="color: #2C3E50; opacity: 0.8;">
+							{activePlanInfo.description}
+						</p>
+					</div>
+					<div class="text-right md:text-left">
+						<p class="text-sm" style="color: #2C3E50; opacity: 0.6;">
+							Prix réglé
+						</p>
+						<p class="text-2xl font-medium" style="color: #2C3E50;">
+							{activePlanInfo.price}
+						</p>
+					</div>
+				</div>
+				<ul class="mt-6 grid gap-3 text-sm md:grid-cols-2">
+					{#each activePlanInfo.features as feature}
+						<li class="flex items-start gap-3" style="color: #2C3E50;">
+							<span
+								class="mt-1 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+								style={`background-color: ${activePlanInfo.color}; color: white;`}
+							>
+								✓
+							</span>
+							<span>{feature}</span>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		</div>
+	{/if}
+
+	{#if !data.hasPayment || !activePlanInfo}
 		<div id="plans" class="mb-12 scroll-mt-24 space-y-6">
 			<p class="text-center text-base" style="color: #2C3E50; opacity: 0.8;">
 				Choisissez votre formule ou passez au plan supérieur pour débloquer la
@@ -366,7 +472,7 @@
 			</p>
 			<div class="grid gap-6 md:grid-cols-2">
 				<div
-					class="rounded-2xl border p-6 text-center shadow-sm"
+					class="rounded-xl border p-6 text-center shadow-sm"
 					style={placementCardStyle}
 				>
 					<h3 class="text-lg font-semibold" style="color: #2C3E50;">
@@ -376,31 +482,7 @@
 						Page invitée personnalisée, QR code et lien partageable.
 					</p>
 					<p class="mt-4 text-2xl font-bold" style="color: #2C3E50;">49,99€</p>
-					{#if data.hasPayment}
-						{#if isPlacementPhotosActive}
-							<p
-								class="mt-4 text-sm font-semibold"
-								style="color: #2C3E50; opacity: 0.85;"
-							>
-								Inclus dans votre plan actuel.
-							</p>
-						{:else if isPlacementActive}
-							<p
-								class="mt-4 inline-flex w-full justify-center rounded-xl border border-[#2C3E50] px-6 py-3 text-sm font-semibold"
-								style="color: #2C3E50; background-color: white;"
-							>
-								Plan activé
-							</p>
-						{:else}
-							<p
-								class="mt-4 text-sm font-medium"
-								style="color: #2C3E50; opacity: 0.75;"
-							>
-								Un plan a déjà été réglé pour cet événement. Contactez-nous si
-								vous avez besoin d'aide.
-							</p>
-						{/if}
-					{:else if placementCheckoutUrl}
+					{#if placementCheckoutUrl}
 						<a
 							href={placementCheckoutUrl}
 							class="mt-4 inline-flex w-full justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:scale-[1.03]"
@@ -417,9 +499,8 @@
 						</p>
 					{/if}
 				</div>
-
 				<div
-					class="rounded-2xl border-2 p-6 text-center shadow-lg"
+					class="rounded-xl border-2 p-6 text-center shadow-lg"
 					style={placementPhotosCardStyle}
 				>
 					<h3 class="text-lg font-semibold" style="color: #2C3E50;">
@@ -429,24 +510,7 @@
 						Ajoutez la collecte de photos invités (QR code + album).
 					</p>
 					<p class="mt-4 text-2xl font-bold" style="color: #2C3E50;">99,99€</p>
-					{#if data.hasPayment}
-						{#if isPlacementPhotosActive}
-							<p
-								class="mt-4 inline-flex w-full justify-center rounded-xl border border-[#D4A574] px-6 py-3 text-sm font-semibold"
-								style="color: #D4A574; background-color: white;"
-							>
-								Plan activé
-							</p>
-						{:else}
-							<p
-								class="mt-4 text-sm font-medium"
-								style="color: #2C3E50; opacity: 0.75;"
-							>
-								Un plan a déjà été réglé (mise à niveau impossible après
-								paiement).
-							</p>
-						{/if}
-					{:else if placementPhotosCheckoutUrl}
+					{#if placementPhotosCheckoutUrl}
 						<a
 							href={placementPhotosCheckoutUrl}
 							class="mt-4 inline-flex w-full justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:scale-[1.03]"
@@ -465,7 +529,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	{/if}
 
 	<!-- QR Code section -->
 	{#if data.hasPayment}
@@ -568,6 +632,7 @@
 												type="button"
 												on:click={downloadQrCodeSvg}
 												class="w-full rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md"
+												style="background-color: #2C3E50;"
 												title="Format vectoriel - Idéal pour l'impression en grande taille"
 											>
 												Télécharger en SVG
@@ -575,7 +640,8 @@
 											<button
 												type="button"
 												on:click={downloadQrCodePng}
-												class="w-full rounded-lg px-4 py-2 text-sm font-medium shadow-sm transition-all duration-200 hover:shadow-md"
+												class="w-full rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md"
+												style="background-color: #D4A574;"
 												title="Format image haute résolution (2048px)"
 											>
 												Télécharger en PNG
@@ -598,7 +664,8 @@
 										</div>
 										<button
 											on:click={copyPublicUrl}
-											style="background-color: #D4A574; border: none;"
+											class="rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md"
+											style="background-color: #2C3E50; border: none;"
 										>
 											{copied ? '✓ Copié !' : 'Copier'}
 										</button>
@@ -628,6 +695,40 @@
 							</span>
 						</div>
 					{/if}
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	{#if data.hasPayment && isPlacementPhotosActive}
+		<div class="mb-12">
+			<h2
+				class="mb-4 text-2xl font-medium"
+				style="color: #2C3E50; font-family: 'Playfair Display', serif;"
+			>
+				Collecte de photos
+			</h2>
+			<p class="mb-4 text-sm" style="color: #2C3E50; opacity: 0.75;">
+				Consultez toutes les photos envoyées par vos invités depuis votre espace
+				organisateur. Vous pourrez bientôt y modérer et télécharger en masse.
+			</p>
+			<div
+				class="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+			>
+				<div class="space-y-1">
+					<p class="text-lg font-medium" style="color: #2C3E50;">Album</p>
+					<p class="text-xs" style="color: #2C3E50; opacity: 0.65;">
+						L’album invité reste accessible depuis le lien public ci-dessous.
+					</p>
+				</div>
+				<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+					<button
+						on:click={() => goto(`/events/${data.event.id}/albums`)}
+						class="rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md"
+						style="background-color: #D4A574; border: none;"
+					>
+						Ouvrir l’album
+					</button>
 				</div>
 			</div>
 		</div>
