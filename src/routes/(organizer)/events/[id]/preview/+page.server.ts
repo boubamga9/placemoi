@@ -53,7 +53,7 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
         await Promise.all([
             supabase
                 .from('payments')
-                .select('id, status')
+                .select('id, status, stripe_price_id')
                 .eq('event_id', id)
                 .eq('status', 'succeeded')
                 .single(),
@@ -93,6 +93,13 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
     }
 
     const hasPayment = isFree || !!payment;
+    const activePlan = payment?.stripe_price_id === STRIPE_PRICES.EVENT_WITH_PHOTOS
+        ? 'placement_photos'
+        : payment
+            ? 'placement'
+            : isFree
+                ? 'placement_photos'
+                : null;
 
     // 🚀 OPTIMIZATION: Preload all guests for this event (si < 2000 invités)
     // Au-delà de 2000, on utilise l'API pour éviter de surcharger le navigateur
@@ -128,7 +135,11 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
         event: event as Event,
         customization: customizationWithDefaults,
         hasPayment,
-        stripePriceId: STRIPE_PRICES.EVENT,
+        activePlan,
+        stripePrices: {
+            placement: STRIPE_PRICES.EVENT,
+            placementPhotos: STRIPE_PRICES.EVENT_WITH_PHOTOS || null
+        },
         // Preloaded guests data (vide si >= 2000 invités, pour utiliser l'API)
         guests: guests
     };

@@ -22,7 +22,7 @@
 <section class="w-full" style="background-color: #FEFEFE;">
 	<div class="grid grid-cols-1 gap-2 lg:grid-cols-2">
 		<!-- Left side - Sticky title -->
-		<div
+		<header
 			class="sticky top-0 flex h-screen items-center justify-center p-4 text-center lg:justify-start lg:p-8 lg:pl-16 lg:text-left"
 		>
 			<h2
@@ -32,7 +32,7 @@
 				Organiser le placement de vos invités<br />c&#39;est
 				<span class="font-bold" style="color: #D4A574;">facile</span> maintenant.
 			</h2>
-		</div>
+		</header>
 
 		<!-- Right side - Scrolling cards -->
 		<div class="grid gap-4 p-2 sm:gap-6 sm:p-4 lg:gap-8 lg:p-6 lg:pl-2">

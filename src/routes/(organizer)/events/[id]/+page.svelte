@@ -13,7 +13,11 @@
 		event: Event;
 		guestsCount: number;
 		hasPayment: boolean;
-		stripePriceId: string;
+		stripePrices: {
+			placement: string;
+			placementPhotos: string | null;
+		};
+		activePlan: 'placement' | 'placement_photos' | null;
 	};
 
 	let qrCodeDataUrl: string | null = null;
@@ -133,8 +137,27 @@
 		}
 	}
 
-	// Generate checkout URL
-	$: checkoutUrl = `/checkout/${data.stripePriceId}?eventId=${data.event.id}`;
+	// Generate checkout URLs (only before any plan is activated)
+	$: canStartPlan = !data.hasPayment;
+	$: placementCheckoutUrl =
+		canStartPlan && data.stripePrices.placement
+			? `/checkout/${data.stripePrices.placement}?eventId=${data.event.id}`
+			: null;
+	$: placementPhotosCheckoutUrl =
+		canStartPlan && data.stripePrices.placementPhotos
+			? `/checkout/${data.stripePrices.placementPhotos}?eventId=${data.event.id}`
+			: null;
+
+	$: isPlacementActive = data.activePlan === 'placement';
+	$: isPlacementPhotosActive = data.activePlan === 'placement_photos';
+	$: placementCardStyle = `border-color: #D4A57433;${
+		isPlacementActive || isPlacementPhotosActive
+			? ' background-color: #FFF9F4;'
+			: ''
+	}`;
+	$: placementPhotosCardStyle = `border-color: #D4A574;${
+		isPlacementPhotosActive ? ' background-color: #FFF9F4;' : ''
+	}`;
 </script>
 
 <svelte:head>
@@ -335,187 +358,278 @@
 				</button>
 			</div>
 		</div>
-	</div>
 
-	<!-- QR Code section -->
-	<div class="mb-12">
-		<h2
-			class="mb-6 text-2xl font-medium"
-			style="color: #2C3E50; font-family: 'Playfair Display', serif;"
-		>
-			QR Code
-		</h2>
-		<div
-			class="mb-6 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm"
-		>
-			<div class="flex flex-col gap-6">
-				<!-- Title section -->
-				<div class="flex items-center gap-4">
-					<div
-						class="flex h-12 w-12 items-center justify-center rounded-full"
-						style="background-color: #F5E6D3;"
-					>
-						<svg
-							class="h-6 w-6"
-							style="color: #D4A574;"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-							/>
-						</svg>
-					</div>
-					<div>
-						<h3 class="text-lg font-medium" style="color: #2C3E50;">Code QR</h3>
-						<p class="text-sm" style="color: #2C3E50; opacity: 0.7;">
-							{#if data.hasPayment && data.event.slug}
-								QR code en SVG - Utilisable à n'importe quelle taille d'affiche
-								sans pixellisation
-							{:else if data.hasPayment}
-								En attente...
-							{:else}
-								Payer 29,99€ pour générer le QR code et le lien que vos invités
-								utiliseront
-							{/if}
-						</p>
-					</div>
-				</div>
-				{#if data.hasPayment && data.event.slug}
-					<!-- QR Code and public URL available -->
-					<div class="flex flex-col gap-4">
-						{#if qrCodeDataUrl}
-							<div class="flex flex-col gap-4 sm:flex-row sm:items-start">
-								<!-- QR Code image -->
-								<div class="flex-shrink-0">
-									<img
-										src={qrCodeDataUrl}
-										alt="QR Code"
-										class="h-48 w-48 rounded-lg border-2 border-neutral-200"
-									/>
-								</div>
-
-								<!-- Customization controls -->
-								<div class="flex flex-col gap-3">
-									<div
-										class="flex flex-col gap-3 rounded-lg border border-neutral-200 bg-gray-50 p-3"
-									>
-										<!-- Color picker -->
-										<div class="flex items-center gap-2">
-											<label class="text-sm" style="color: #2C3E50;"
-												>Couleur QR:</label
-											>
-											<input
-												type="color"
-												value={qrCodeColor}
-												on:input={(e) => changeQrColor(e.currentTarget.value)}
-												class="h-8 w-16 cursor-pointer rounded border border-neutral-300"
-											/>
-										</div>
-
-										<!-- Background color -->
-										<div class="flex items-center gap-2">
-											<label class="text-sm" style="color: #2C3E50;"
-												>Fond:</label
-											>
-											<input
-												type="color"
-												value={qrCodeBackgroundColor}
-												on:input={(e) => {
-													qrCodeBackgroundColor = e.currentTarget.value;
-													if (browser && publicUrl) {
-														generateQRCode();
-													}
-												}}
-												class="h-8 w-16 cursor-pointer rounded border border-neutral-300"
-											/>
-										</div>
-									</div>
-
-									<!-- Download buttons -->
-									<div class="flex flex-col gap-2">
-										<button
-											type="button"
-											on:click={downloadQrCodeSvg}
-											class="w-full rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md"
-											style="background-color: #D4A574; border: none;"
-											title="Format vectoriel - Idéal pour l'impression en grande taille"
-										>
-											Télécharger en SVG
-										</button>
-										<button
-											type="button"
-											on:click={downloadQrCodePng}
-											class="w-full rounded-lg px-4 py-2 text-sm font-medium shadow-sm transition-all duration-200 hover:shadow-md"
-											style="background-color: white; border: 1px solid #D4A574; color: #D4A574;"
-											title="Format image haute résolution (2048px)"
-										>
-											Télécharger en PNG
-										</button>
-									</div>
-								</div>
-							</div>
-
-							<!-- Public URL - Full width below -->
-							<div class="flex flex-col gap-2">
-								<p class="text-sm" style="color: #2C3E50; opacity: 0.7;">
-									Lien public
-								</p>
-								<div class="flex flex-col gap-2 sm:flex-row">
-									<div
-										class="flex-1 break-all rounded-lg border border-neutral-300 bg-gray-50 px-3 py-2 text-sm"
-										style="color: #2C3E50;"
-									>
-										{publicUrl}
-									</div>
-									<button
-										type="button"
-										on:click={copyPublicUrl}
-										class="w-full rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md sm:w-auto"
-										style="background-color: #D4A574; border: none;"
-									>
-										{copied ? '✓ Copié !' : 'Copier'}
-									</button>
-								</div>
-							</div>
+		<div class="mb-12 space-y-6">
+			<p class="text-center text-base" style="color: #2C3E50; opacity: 0.8;">
+				Choisissez votre formule ou passez au plan supérieur pour débloquer la
+				collecte de photos.
+			</p>
+			<div class="grid gap-6 md:grid-cols-2">
+				<div
+					class="rounded-2xl border p-6 text-center shadow-sm"
+					style={placementCardStyle}
+				>
+					<h3 class="text-lg font-semibold" style="color: #2C3E50;">
+						Placement
+					</h3>
+					<p class="mt-2 text-sm" style="color: #2C3E50; opacity: 0.7;">
+						Page invitée personnalisée, QR code et lien partageable.
+					</p>
+					<p class="mt-4 text-2xl font-bold" style="color: #2C3E50;">49,99€</p>
+					{#if data.hasPayment}
+						{#if isPlacementPhotosActive}
+							<p
+								class="mt-4 text-sm font-semibold"
+								style="color: #2C3E50; opacity: 0.85;"
+							>
+								Inclus dans votre plan actuel.
+							</p>
+						{:else if isPlacementActive}
+							<p
+								class="mt-4 inline-flex w-full justify-center rounded-xl border border-[#2C3E50] px-6 py-3 text-sm font-semibold"
+								style="color: #2C3E50; background-color: white;"
+							>
+								Plan activé
+							</p>
 						{:else}
-							<div class="flex items-center gap-2">
-								<LoaderCircle
-									class="h-5 w-5 animate-spin"
-									style="color: #D4A574;"
-								/>
-								<span class="text-sm" style="color: #2C3E50; opacity: 0.7;">
-									Génération en cours...
-								</span>
-							</div>
+							<p
+								class="mt-4 text-sm font-medium"
+								style="color: #2C3E50; opacity: 0.75;"
+							>
+								Un plan a déjà été réglé pour cet événement. Contactez-nous si
+								vous avez besoin d'aide.
+							</p>
 						{/if}
-					</div>
-				{:else if data.hasPayment}
-					<!-- Payment done but QR code not yet generated -->
-					<div class="flex items-center gap-2">
-						<LoaderCircle
-							class="h-5 w-5 animate-spin"
-							style="color: #D4A574;"
-						/>
-						<span class="text-sm" style="color: #2C3E50; opacity: 0.7;">
-							Génération en cours...
-						</span>
-					</div>
-				{:else}
-					<!-- No payment yet -->
-					<a
-						href={checkoutUrl}
-						class="w-full rounded-xl px-6 py-2 text-center font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md sm:w-auto"
-						style="background-color: #D4A574; border: none;"
-					>
-						Générer le QR code (29,99€)
-					</a>
-				{/if}
+					{:else if placementCheckoutUrl}
+						<a
+							href={placementCheckoutUrl}
+							class="mt-4 inline-flex w-full justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:scale-[1.03]"
+							style="background-color: #2C3E50; border: none;"
+						>
+							Activer le QR code
+						</a>
+					{:else}
+						<p
+							class="mt-4 text-sm font-medium"
+							style="color: #2C3E50; opacity: 0.7;"
+						>
+							Configuration Stripe manquante.
+						</p>
+					{/if}
+				</div>
+
+				<div
+					class="rounded-2xl border-2 p-6 text-center shadow-lg"
+					style={placementPhotosCardStyle}
+				>
+					<h3 class="text-lg font-semibold" style="color: #2C3E50;">
+						Placement + Photos
+					</h3>
+					<p class="mt-2 text-sm" style="color: #2C3E50; opacity: 0.7;">
+						Ajoutez la collecte de photos invités (QR code + album).
+					</p>
+					<p class="mt-4 text-2xl font-bold" style="color: #2C3E50;">99,99€</p>
+					{#if data.hasPayment}
+						{#if isPlacementPhotosActive}
+							<p
+								class="mt-4 inline-flex w-full justify-center rounded-xl border border-[#D4A574] px-6 py-3 text-sm font-semibold"
+								style="color: #D4A574; background-color: white;"
+							>
+								Plan activé
+							</p>
+						{:else}
+							<p
+								class="mt-4 text-sm font-medium"
+								style="color: #2C3E50; opacity: 0.75;"
+							>
+								Un plan a déjà été réglé (mise à niveau impossible après
+								paiement).
+							</p>
+						{/if}
+					{:else if placementPhotosCheckoutUrl}
+						<a
+							href={placementPhotosCheckoutUrl}
+							class="mt-4 inline-flex w-full justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:scale-[1.03]"
+							style="background-color: #D4A574; border: none;"
+						>
+							Activer le QR + photos
+						</a>
+					{:else}
+						<p
+							class="mt-4 text-sm font-medium"
+							style="color: #2C3E50; opacity: 0.7;"
+						>
+							Configurez l'ID Stripe du plan photos pour proposer cette offre.
+						</p>
+					{/if}
+				</div>
 			</div>
 		</div>
 	</div>
+
+	<!-- QR Code section -->
+	{#if data.hasPayment}
+		<div class="mb-12">
+			<h2
+				class="mb-6 text-2xl font-medium"
+				style="color: #2C3E50; font-family: 'Playfair Display', serif;"
+			>
+				QR Code
+			</h2>
+			<div
+				class="mb-6 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm"
+			>
+				<div class="flex flex-col gap-6">
+					<!-- Title section -->
+					<div class="flex items-center gap-4">
+						<div
+							class="flex h-12 w-12 items-center justify-center rounded-full"
+							style="background-color: #F5E6D3;"
+						>
+							<svg
+								class="h-6 w-6"
+								style="color: #D4A574;"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+								/>
+							</svg>
+						</div>
+						<div>
+							<h3 class="text-lg font-medium" style="color: #2C3E50;">
+								Code QR
+							</h3>
+							<p class="text-sm" style="color: #2C3E50; opacity: 0.7;">
+								QR code en SVG - Utilisable à n'importe quelle taille d'affiche
+								sans pixellisation
+							</p>
+						</div>
+					</div>
+					{#if data.event.slug}
+						<!-- QR Code and public URL available -->
+						<div class="flex flex-col gap-4">
+							{#if qrCodeDataUrl}
+								<div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+									<!-- QR Code image -->
+									<div class="flex-shrink-0">
+										<img
+											src={qrCodeDataUrl}
+											alt="QR Code"
+											class="h-48 w-48 rounded-lg border-2 border-neutral-200"
+										/>
+									</div>
+
+									<!-- Customization controls -->
+									<div class="flex flex-col gap-3">
+										<div
+											class="flex flex-col gap-3 rounded-lg border border-neutral-200 bg-gray-50 p-3"
+										>
+											<!-- Color picker -->
+											<div class="flex items-center gap-2">
+												<span class="text-sm" style="color: #2C3E50;"
+													>Couleur QR:</span
+												>
+												<input
+													type="color"
+													value={qrCodeColor}
+													on:input={(e) => changeQrColor(e.currentTarget.value)}
+													class="h-8 w-16 cursor-pointer rounded border border-neutral-300"
+												/>
+											</div>
+
+											<!-- Background color -->
+											<div class="flex items-center gap-2">
+												<span class="text-sm" style="color: #2C3E50;"
+													>Fond:</span
+												>
+												<input
+													type="color"
+													value={qrCodeBackgroundColor}
+													on:input={(e) => {
+														qrCodeBackgroundColor = e.currentTarget.value;
+														if (browser && publicUrl) {
+															generateQRCode();
+														}
+													}}
+													class="h-8 w-16 cursor-pointer rounded border border-neutral-300"
+												/>
+											</div>
+										</div>
+
+										<!-- Download buttons -->
+										<div class="flex flex-col gap-2">
+											<button
+												type="button"
+												on:click={downloadQrCodeSvg}
+												class="w-full rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md"
+												title="Format vectoriel - Idéal pour l'impression en grande taille"
+											>
+												Télécharger en SVG
+											</button>
+											<button
+												type="button"
+												on:click={downloadQrCodePng}
+												class="w-full rounded-lg px-4 py-2 text-sm font-medium shadow-sm transition-all duration-200 hover:shadow-md"
+												title="Format image haute résolution (2048px)"
+											>
+												Télécharger en PNG
+											</button>
+										</div>
+									</div>
+								</div>
+
+								<!-- Public URL - Full width below -->
+								<div class="flex flex-col gap-2">
+									<p class="text-sm" style="color: #2C3E50; opacity: 0.7;">
+										Lien public
+									</p>
+									<div class="flex flex-col gap-2 sm:flex-row">
+										<div
+											class="flex-1 break-all rounded-lg border border-neutral-300 bg-gray-50 px-3 py-2 text-sm"
+											style="color: #2C3E50;"
+										>
+											{publicUrl}
+										</div>
+										<button
+											on:click={copyPublicUrl}
+											style="background-color: #D4A574; border: none;"
+										>
+											{copied ? '✓ Copié !' : 'Copier'}
+										</button>
+									</div>
+								</div>
+							{:else}
+								<div class="flex items-center gap-2">
+									<LoaderCircle
+										class="h-5 w-5 animate-spin"
+										style="color: #D4A574;"
+									/>
+									<span class="text-sm" style="color: #2C3E50; opacity: 0.7;">
+										Génération en cours...
+									</span>
+								</div>
+							{/if}
+						</div>
+					{:else}
+						<!-- Payment done but QR code not yet generated -->
+						<div class="flex items-center gap-2">
+							<LoaderCircle
+								class="h-5 w-5 animate-spin"
+								style="color: #D4A574;"
+							/>
+							<span class="text-sm" style="color: #2C3E50; opacity: 0.7;">
+								Génération en cours...
+							</span>
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>

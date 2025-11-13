@@ -1,4 +1,5 @@
 <script lang="ts">
+	import GuestFooter from '../components/guest-footer.svelte';
 	import type { Database } from '$lib/database/database.types';
 
 	type EventCustomization =
@@ -183,114 +184,127 @@
 </svelte:head>
 
 <div
-	class="flex min-h-screen items-center justify-center"
+	class="flex min-h-screen flex-col items-center justify-between"
 	style={backgroundStyle}
 >
-	<div class="container mx-auto max-w-2xl px-4 py-12">
-		<!-- Logo (if exists) -->
-		{#if data.customization.logo_url}
-			<div class="flex justify-center">
-				<img
-					src={data.customization.logo_url}
-					alt="Logo"
-					class="h-32 w-auto object-contain"
-				/>
+	<div class="flex w-full flex-1 items-center justify-center">
+		<div class="container mx-auto max-w-2xl px-4 py-12">
+			<!-- Logo (if exists) -->
+			{#if data.customization.logo_url}
+				<div class="flex justify-center">
+					<img
+						src={data.customization.logo_url}
+						alt="Logo"
+						class="h-32 w-auto object-contain"
+					/>
+				</div>
+			{/if}
+
+			<!-- Welcome Section -->
+			<div class="mb-8 text-center">
+				<h1
+					class="mb-4 text-5xl font-medium"
+					style="
+						color: {data.customization.font_color};
+						font-family: '{data.customization.font_family ||
+						'Playfair Display'}', {getFontFallback(
+						data.customization.font_family || 'Playfair Display',
+					)};
+					"
+				>
+					{data.customization.welcome_text || 'Bienvenue'}
+				</h1>
+				<p
+					class="text-xl"
+					style="color: {data.customization
+						.font_color}; opacity: 0.9; font-family: '{data.customization
+						.font_family || 'Playfair Display'}', {getFontFallback(
+						data.customization.font_family || 'Playfair Display',
+					)};"
+				>
+					{data.customization.subtitle_text || 'Trouvez votre place'}
+				</p>
 			</div>
-		{/if}
 
-		<!-- Welcome Section -->
-		<div class="mb-8 text-center">
-			<h1
-				class="mb-4 text-5xl font-medium"
-				style="
-					color: {data.customization.font_color};
-					font-family: '{data.customization.font_family ||
-					'Playfair Display'}', {getFontFallback(
-					data.customization.font_family || 'Playfair Display',
-				)};
-				"
-			>
-				{data.customization.welcome_text || 'Bienvenue'}
-			</h1>
-			<p
-				class="text-xl"
-				style="color: {data.customization
-					.font_color}; opacity: 0.9; font-family: '{data.customization
-					.font_family || 'Playfair Display'}', {getFontFallback(
-					data.customization.font_family || 'Playfair Display',
-				)};"
-			>
-				{data.customization.subtitle_text || 'Trouvez votre place'}
-			</p>
-		</div>
+			<!-- Search Section -->
+			<div id="guest-search-section" class="mb-6">
+				<div class="relative">
+					<input
+						id="guest-search"
+						type="text"
+						bind:value={searchTerm}
+						on:input={searchGuest}
+						on:keydown={handleKeyDown}
+						placeholder="Tapez votre nom..."
+						class="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+					/>
+					{#if showSuggestions && suggestions.length > 0}
+						<div
+							class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-neutral-200 bg-white shadow-lg"
+						>
+							{#each suggestions as suggestion, index}
+								<button
+									type="button"
+									on:click={() => selectGuest(suggestion.name)}
+									class="w-full px-4 py-2 text-left text-base transition-colors hover:bg-neutral-50 {selectedIndex ===
+									index
+										? 'bg-neutral-50'
+										: ''}"
+									on:mouseenter={() => (selectedIndex = index)}
+								>
+									{suggestion.name}
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			</div>
 
-		<!-- Search Section -->
-		<div class="mb-6">
-			<div class="relative">
-				<input
-					id="guest-search"
-					type="text"
-					bind:value={searchTerm}
-					on:input={searchGuest}
-					on:keydown={handleKeyDown}
-					placeholder="Tapez votre nom..."
-					class="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-				/>
-				{#if showSuggestions && suggestions.length > 0}
+			<!-- Result Section (always reserve space) -->
+			<div class="min-h-[220px]">
+				{#if result}
 					<div
-						class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-neutral-200 bg-white shadow-lg"
+						class="rounded-xl p-6 shadow-lg"
+						style="background-color: {data.customization.font_color};"
 					>
-						{#each suggestions as suggestion, index}
-							<button
-								type="button"
-								on:click={() => selectGuest(suggestion.name)}
-								class="w-full px-4 py-2 text-left text-base transition-colors hover:bg-neutral-50 {selectedIndex ===
-								index
-									? 'bg-neutral-50'
-									: ''}"
-								on:mouseenter={() => (selectedIndex = index)}
+						<div class="text-center">
+							<div
+								class="mb-2 text-sm font-medium uppercase"
+								style="color: {data.customization
+									.background_color}; opacity: 0.8;"
 							>
-								{suggestion.name}
-							</button>
-						{/each}
+								Table
+							</div>
+							<div
+								class="mb-4 text-5xl font-bold"
+								style="color: {data.customization.background_color};"
+							>
+								{result.table_number}
+							</div>
+							{#if result.seat_number}
+								<div
+									class="text-base"
+									style="color: {data.customization
+										.background_color}; opacity: 0.8;"
+								>
+									Place {result.seat_number}
+								</div>
+							{/if}
+						</div>
 					</div>
 				{/if}
 			</div>
 		</div>
-
-		<!-- Result Section (always reserve space) -->
-		<div class="min-h-[220px]">
-			{#if result}
-				<div
-					class="rounded-xl p-6 shadow-lg"
-					style="background-color: {data.customization.font_color};"
-				>
-					<div class="text-center">
-						<div
-							class="mb-2 text-sm font-medium uppercase"
-							style="color: {data.customization
-								.background_color}; opacity: 0.8;"
-						>
-							Table
-						</div>
-						<div
-							class="mb-4 text-5xl font-bold"
-							style="color: {data.customization.background_color};"
-						>
-							{result.table_number}
-						</div>
-						{#if result.seat_number}
-							<div
-								class="text-base"
-								style="color: {data.customization
-									.background_color}; opacity: 0.8;"
-							>
-								Place {result.seat_number}
-							</div>
-						{/if}
-					</div>
-				</div>
-			{/if}
-		</div>
 	</div>
+	<GuestFooter
+		customization={data.customization}
+		fontFallback={getFontFallback}
+		buttons={[
+			{
+				label: 'Envoyer des photos',
+				href: `/${data.event.slug}/photos`,
+				variant: 'solid',
+			},
+		]}
+	/>
 </div>

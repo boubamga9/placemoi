@@ -7,13 +7,15 @@
 	import XIcon from 'virtual:icons/lucide/x';
 	import '../../app.css';
 
-	const menuItems: Record<string, string> = {
-		'/': 'Accueil',
-		'/#faq': 'FAQ',
-		'/contact': 'Contact',
-	};
+const menuItems: Record<string, string> = {
+	'/': 'Accueil',
+	'/about': 'À propos',
+	'/pricing': 'Tarifs',
+	'/faq': 'FAQ',
+	'/contact': 'Contact',
+};
 
-	const mobileMenuItems = Object.entries(menuItems).filter(([href]) => href !== '/#faq');
+const mobileMenuItems = Object.entries(menuItems);
 
 	let menuOpen = false;
 
@@ -164,6 +166,47 @@
 
 			<!-- Links Grid -->
 			<div class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:flex lg:gap-12">
+				<!-- Découvrir -->
+				<div class="flex flex-col gap-3">
+					<h3
+						class="text-sm font-semibold uppercase tracking-wider text-white/90"
+					>
+						Découvrir
+					</h3>
+					<nav class="flex flex-col gap-2">
+						<a
+							href="/"
+							class="text-sm text-white/70 transition-colors hover:text-white/90"
+						>
+							Accueil
+						</a>
+						<a
+							href="/about"
+							class="text-sm text-white/70 transition-colors hover:text-white/90"
+						>
+							À propos
+						</a>
+						<a
+							href="/pricing"
+							class="text-sm text-white/70 transition-colors hover:text-white/90"
+						>
+							Tarifs
+						</a>
+						<a
+							href="/faq"
+							class="text-sm text-white/70 transition-colors hover:text-white/90"
+						>
+							FAQ
+						</a>
+						<a
+							href="/contact"
+							class="text-sm text-white/70 transition-colors hover:text-white/90"
+						>
+							Contact
+						</a>
+					</nav>
+				</div>
+
 				<!-- Légal -->
 				<div class="flex flex-col gap-3">
 					<h3
@@ -189,23 +232,6 @@
 							class="text-sm text-white/70 transition-colors hover:text-white/90"
 						>
 							Confidentialité
-						</a>
-					</nav>
-				</div>
-
-				<!-- Contact -->
-				<div class="flex flex-col gap-3">
-					<h3
-						class="text-sm font-semibold uppercase tracking-wider text-white/90"
-					>
-						Contact
-					</h3>
-					<nav class="flex flex-col gap-2">
-						<a
-							href="/contact"
-							class="text-sm text-white/70 transition-colors hover:text-white/90"
-						>
-							Nous contacter
 						</a>
 					</nav>
 				</div>

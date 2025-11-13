@@ -36,6 +36,8 @@ export async function handleEventPayment(session: Stripe.Checkout.Session, local
         const eventId = session.metadata?.eventId;
         const ownerId = session.metadata?.ownerId;
         const amount = session.amount_total ?? 0;
+        const stripePriceId = session.metadata?.priceId ?? null;
+        const planType = session.metadata?.planType ?? (stripePriceId ? 'placement' : null);
 
         console.error('Extracted data:', { eventId, ownerId, amount });
 
@@ -72,7 +74,8 @@ export async function handleEventPayment(session: Stripe.Checkout.Session, local
                 stripe_session_id: session.id,
                 amount: amount / 100,
                 currency: session.currency || 'eur',
-                status: 'succeeded'
+                status: 'succeeded',
+                stripe_price_id: stripePriceId,
             })
             .select();
 
@@ -82,7 +85,7 @@ export async function handleEventPayment(session: Stripe.Checkout.Session, local
         }
 
         console.error('Payment record created successfully:', paymentData);
-        console.error(`Event payment successful: eventId=${eventId}, slug=${slug}`);
+        console.error(`Event payment successful: eventId=${eventId}, slug=${slug}, priceId=${stripePriceId}, planType=${planType}`);
 
         // Fetch event and owner details for email
         const { data: event, error: eventFetchError } = await locals.supabaseServiceRole

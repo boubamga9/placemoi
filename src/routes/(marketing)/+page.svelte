@@ -3,6 +3,8 @@
 	import HeroSection from './components/sections/hero.svelte';
 	import PainPoints from './components/sections/pain-points.svelte';
 	import Solutions from './components/sections/benefits.svelte';
+	import PhotoSharing from './components/sections/photo-sharing.svelte';
+	import Pricing from './components/sections/pricing.svelte';
 	import LastCta from './components/sections/last-cta.svelte';
 	import Faq from './components/sections/faq.svelte';
 </script>
@@ -38,6 +40,8 @@
 	<HeroSection />
 	<PainPoints />
 	<Solutions />
+	<PhotoSharing />
+	<Pricing />
 	<LastCta />
 	<Faq />
 </div>

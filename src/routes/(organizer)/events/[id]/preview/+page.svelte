@@ -16,7 +16,11 @@
 		customization: EventCustomization;
 		guests: Guest[];
 		hasPayment: boolean;
-		stripePriceId: string;
+		stripePrices: {
+			placement: string;
+			placementPhotos: string | null;
+		};
+		activePlan: 'placement' | 'placement_photos' | null;
 	};
 
 	let searchTerm = '';
@@ -34,8 +38,11 @@
 	const IN_MEMORY_SEARCH_THRESHOLD = 2000;
 	const useInMemorySearch = guestsData.length < IN_MEMORY_SEARCH_THRESHOLD;
 
-	// Generate checkout URL
-	$: checkoutUrl = `/checkout/${data.stripePriceId}?eventId=${data.event.id}&returnTo=preview`;
+	// Generate checkout URLs
+	$: placementCheckoutUrl = `/checkout/${data.stripePrices.placement}?eventId=${data.event.id}&returnTo=preview`;
+	$: placementPhotosCheckoutUrl = data.stripePrices.placementPhotos
+		? `/checkout/${data.stripePrices.placementPhotos}?eventId=${data.event.id}&returnTo=preview`
+		: null;
 
 	// Compute background style
 	$: backgroundStyle = `background-color: ${data.customization.background_color};${
@@ -293,24 +300,87 @@
 		</div>
 
 		{#if !data.hasPayment}
-			<div class="mt-12 flex justify-center">
-				<div
-					class="w-full max-w-xl rounded-xl border-2 p-6 text-center shadow-sm"
-					style="border-color: {data.customization.font_color};"
+			<div class="mt-12 space-y-6">
+				<p
+					class="text-center text-base font-medium"
+					style="color: {data.customization.font_color}; opacity: 0.85;"
 				>
-					<p
-						class="mb-4 text-base"
-						style="color: {data.customization.font_color}; opacity: 0.85;"
+					Choisissez le plan qui correspond à votre événement pour activer le QR
+					code.
+				</p>
+				<div class="grid gap-6 md:grid-cols-2">
+					<div
+						class="rounded-2xl border p-6 text-center shadow-sm"
+						style="border-color: {data.customization.font_color}33;"
 					>
-						Prêt à rendre cette page accessible à vos invités ?
-					</p>
-					<a
-						href={checkoutUrl}
-						class="inline-flex rounded-xl px-6 py-3 text-base font-medium text-white shadow-lg transition-all duration-200 hover:scale-105"
-						style="background-color: #D4A574; border: none;"
+						<h3
+							class="text-lg font-semibold"
+							style="color: {data.customization.font_color};"
+						>
+							Plan Placement
+						</h3>
+						<p
+							class="mt-2 text-sm"
+							style="color: {data.customization.font_color}; opacity: 0.75;"
+						>
+							Placement instantané, page invitée personnalisée, QR code
+							imprimable.
+						</p>
+						<p
+							class="mt-4 text-2xl font-bold"
+							style="color: {data.customization.font_color};"
+						>
+							49,99€
+						</p>
+						<a
+							href={placementCheckoutUrl}
+							class="mt-4 inline-flex w-full justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:scale-[1.03]"
+							style="background-color: #2C3E50;"
+						>
+							Activer le QR code
+						</a>
+					</div>
+
+					<div
+						class="rounded-2xl border-2 p-6 text-center shadow-lg"
+						style="border-color: #D4A574;"
 					>
-						Générer le QR code (29,99€)
-					</a>
+						<h3
+							class="text-lg font-semibold"
+							style="color: {data.customization.font_color};"
+						>
+							Placement + Photos
+						</h3>
+						<p
+							class="mt-2 text-sm"
+							style="color: {data.customization.font_color}; opacity: 0.75;"
+						>
+							Tout le placement + collecte de photos des invités via la même
+							page.
+						</p>
+						<p
+							class="mt-4 text-2xl font-bold"
+							style="color: {data.customization.font_color};"
+						>
+							99,99€
+						</p>
+						{#if placementPhotosCheckoutUrl}
+							<a
+								href={placementPhotosCheckoutUrl}
+								class="mt-4 inline-flex w-full justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:scale-[1.03]"
+								style="background-color: #D4A574;"
+							>
+								Activer le QR code + photos
+							</a>
+						{:else}
+							<p
+								class="mt-4 text-sm font-medium"
+								style="color: {data.customization.font_color}; opacity: 0.75;"
+							>
+								Configurez l'ID Stripe du plan photos pour activer cette offre.
+							</p>
+						{/if}
+					</div>
 				</div>
 			</div>
 		{/if}

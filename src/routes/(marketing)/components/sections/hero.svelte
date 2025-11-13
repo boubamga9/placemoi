@@ -10,14 +10,14 @@
 	>
 		<!-- Text content -->
 		<div class="text-center lg:text-left">
-			<h2
+			<h1
 				class="text-3xl font-bold leading-[120%] md:text-4xl lg:text-5xl"
 				style="color: #2C3E50; font-family: 'Playfair Display', serif;"
 			>
 				Organisez le placement <br class="hidden sm:block" />de vos invités<br
 					class="block sm:hidden"
 				/><br class="hidden sm:block" /> en quelques minutes.
-			</h2>
+			</h1>
 
 			<p
 				class="my-6 text-base leading-[160%] md:text-lg"
@@ -46,7 +46,7 @@
 			</div>
 
 			<p class="text-sm font-light" style="color: #2C3E50; opacity: 0.8;">
-				✔️ QR code + lien partageable • <strong>29,99€</strong> par événement
+				✔️ QR code + lien partageable • <strong>à partir de 49,99€</strong> par événement
 			</p>
 		</div>
 

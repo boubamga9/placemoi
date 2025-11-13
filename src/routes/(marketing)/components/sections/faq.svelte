@@ -31,7 +31,7 @@
 		{
 			question: 'Combien ça coûte ?',
 			answer:
-				"29,99€ par événement, paiement unique. Aucun abonnement, aucune limite de durée. Vous gardez l'accès à votre événement tant que vous en avez besoin.",
+				"À partir de 49,99€ par événement, paiement unique. Aucun abonnement, aucune limite de durée. Vous gardez l'accès à votre événement tant que vous en avez besoin.",
 		},
 		{
 			question: "Puis-je modifier ma liste d'invités après paiement ?",
@@ -90,10 +90,25 @@
 		</div>
 
 		<!-- CTA sous la FAQ -->
-		<div class="mt-16 text-center">
-			<p class="mb-6 text-lg font-medium lg:text-xl" style="color: #2C3E50;">
+		<div class="mt-16 text-center space-y-4">
+			<p class="text-lg font-medium lg:text-xl" style="color: #2C3E50;">
 				Vous avez d'autres questions ?
 			</p>
+			<a
+				href="/faq"
+				class="inline-flex items-center justify-center rounded-xl border-2 bg-transparent px-8 py-3 text-base font-medium transition-all duration-200"
+				style="border-color: #2C3E50; color: #2C3E50;"
+				on:mouseover={(e) => {
+					e.currentTarget.style.backgroundColor = '#2C3E50';
+					e.currentTarget.style.color = 'white';
+				}}
+				on:mouseout={(e) => {
+					e.currentTarget.style.backgroundColor = 'transparent';
+					e.currentTarget.style.color = '#2C3E50';
+				}}
+			>
+				Consulter la FAQ complète
+			</a>
 			<a
 				href="/contact"
 				class="inline-flex items-center justify-center rounded-xl border-2 bg-transparent px-8 py-4 text-base font-medium transition-all duration-200"

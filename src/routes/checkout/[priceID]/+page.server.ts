@@ -1,5 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import Stripe from 'stripe';
+import { STRIPE_PRICES } from '$lib/config/server';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({
@@ -79,6 +80,11 @@ export const load: PageServerLoad = async ({
 				type: 'event_payment',
 				eventId: eventId!,
 				ownerId: user.id,
+				priceId: params.priceID,
+				planType:
+					params.priceID === STRIPE_PRICES.EVENT_WITH_PHOTOS
+						? 'placement_photos'
+						: 'placement',
 			}
 			: {};
 

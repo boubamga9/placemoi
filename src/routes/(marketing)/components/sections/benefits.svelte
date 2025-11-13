@@ -25,7 +25,7 @@
 <section class="py-16 sm:py-20 md:py-24" style="background-color: #FAFAFA;">
 	<div class="mx-auto max-w-7xl px-6">
 		<!-- Header -->
-		<div class="mb-16 text-center">
+		<header class="mb-16 text-center">
 			<h2
 				class="mb-4 text-2xl font-normal leading-[120%] tracking-tight lg:text-3xl xl:text-4xl"
 				style="color: #2C3E50; font-family: 'Playfair Display', serif;"
@@ -35,10 +35,10 @@
 					style="color: #D4A574;">un seul geste</span
 				>
 			</h2>
-		</div>
+		</header>
 
 		<!-- Solutions Cards -->
-		<div class="grid gap-8 md:grid-cols-3 lg:gap-12">
+		<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-12">
 			{#each solutions as solution}
 				<div
 					class="group rounded-lg border border-neutral-200 bg-white p-8 text-center shadow-sm transition-all duration-300 hover:shadow-lg"
@@ -65,6 +65,34 @@
 					</p>
 				</div>
 			{/each}
+			<div
+				class="group relative rounded-lg border border-dashed border-[#D4A574] bg-white p-8 text-center shadow-sm transition-all duration-300 hover:shadow-lg"
+			>
+				<span
+					class="absolute right-4 top-4 rounded-full border border-[#D4A574] bg-[#FFF9F4] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]"
+					style="color: #D4A574;"
+				>
+					Bonus
+				</span>
+				<div class="mb-6 flex justify-center">
+					<div
+						class="flex h-16 w-16 items-center justify-center rounded-full text-2xl transition-all duration-300 group-hover:scale-110"
+						style="background-color: #D4A574; color: white;"
+					>
+						📷
+					</div>
+				</div>
+				<h4 class="mb-4 text-lg font-medium lg:text-xl" style="color: #2C3E50;">
+					4. Partage photo
+				</h4>
+				<p
+					class="text-sm leading-relaxed lg:text-base"
+					style="color: #2C3E50; opacity: 0.8;"
+				>
+					Ils partagent leurs photos souvenirs via le même QR code. Vous les
+					récupérez en un clin d’œil.
+				</p>
+			</div>
 		</div>
 
 		<!-- Description sous les solutions -->

@@ -1,48 +1,58 @@
-import { Stripe } from 'stripe';
 import type { PageServerLoad } from './$types';
 
-type Plan = {
-    id: string;
-    name: string;
-    price: number;
-    currency: string;
-    stripePriceId: string;
-    features: string[];
+type PricingPlan = {
+	id: string;
+	name: string;
+	price: number;
+	description: string;
+	badge?: string;
+	highlight?: string;
+	features: string[];
+	extras: string[];
+	ctaLabel: string;
+	ctaHref: string;
 };
 
-export const load: PageServerLoad = async ({ locals: { stripe }, url }) => {
-    try {
-        // Un seul prix pour un paiement one-off (par événement)
-        // On privilégie un paramètre ?priceId= pour la flexibilité; sinon fallback à la liste active
-        const priceId = url.searchParams.get('priceId');
+export const load: PageServerLoad = async () => {
+	const plans: PricingPlan[] = [
+		{
+			id: 'placement',
+			name: 'Plan Placement',
+			price: 49.99,
+			description:
+				'Les essentiels pour que vos invités trouvent leur table en moins de 3 secondes.',
+			badge: 'Essentiel',
+			features: [
+				'Import CSV de vos invités et gestion des tables',
+				'Page invités personnalisable (logo, couleurs, messages)',
+				'QR code & lien unique pour l’événement',
+				'Mises à jour illimitées jusqu’au jour J',
+			],
+			extras: [],
+			ctaLabel: 'Commencer avec le placement',
+			ctaHref: '/auth',
+		},
+		{
+			id: 'placement-photos',
+			name: 'Placement + Photos',
+			price: 99.99,
+			description:
+				'Tout le placement + la collecte des souvenirs de vos invités depuis la même page.',
+			badge: 'Nouveau',
+			highlight: 'Album collaboratif',
+			features: [
+				'Toutes les fonctionnalités du plan Placement',
+				'Collecte photo via la page invitée et le QR code',
+				'Espace organisateur pour visualiser et télécharger vos photos',
+				'Exports groupés des souvenirs',
+			],
+			extras: [],
+			ctaLabel: 'Activer les photos invitées',
+			ctaHref: '/auth',
+		},
+	];
 
-        let price: Stripe.Price | null = null;
-        if (priceId) {
-            price = await stripe.prices.retrieve(priceId);
-        } else {
-            const { data: prices } = await stripe.prices.list({ active: true, limit: 1 });
-            price = prices[0] ?? null;
-        }
-
-        if (!price) {
-            return { plans: [] as Plan[] };
-        }
-
-        const plan: Plan = {
-            id: 'event',
-            name: 'Pack Événement',
-            price: (price.unit_amount || 0) / 100,
-            currency: (price.currency || 'eur').toUpperCase(),
-            stripePriceId: price.id,
-            features: [
-                'Page de recherche des invités',
-                'Personnalisation (couleurs, polices, logo)',
-                'QR code et lien partageable',
-            ],
-        };
-
-        return { plans: [plan] };
-    } catch {
-        return { plans: [] as Plan[] };
-    }
+	return {
+		plans,
+	};
 };

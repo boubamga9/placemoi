@@ -30,6 +30,6 @@
 		</a>
 	</div>
 	<p class="mt-4 text-sm font-light" style="color: #2C3E50; opacity: 0.8;">
-		✔️ <strong>29,99€</strong> par événement • Paiement unique • QR code + lien inclus
+		✔️ <strong>À partir de 49,99€</strong> par événement • Paiement unique • QR code + lien inclus
 	</p>
 </div>
