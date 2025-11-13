@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    {
+      "source": "/robots.txt",
+      "destination": "/staging-robots.txt",
+      "has": [
+        {
+          "type": "host",
+          "value": "test.placemoi.com"
+        }
+      ]
+    }
+  ]
+}

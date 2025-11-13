@@ -6,33 +6,42 @@
 	import { expoOut } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
-	import '../app.css';
+import '../app.css';
 
-	export let data;
+const isStaging = import.meta.env.VITE_IS_STAGING === 'true';
 
-	let { supabase } = data;
-	$: ({ supabase } = data);
+export let data;
 
-	// Initialize Vercel Analytics
-	injectAnalytics();
+let { supabase } = data;
+$: ({ supabase } = data);
 
-	onMount(() => {
-		const { data } = supabase.auth.onAuthStateChange(
-			async (event, _session) => {
-				// Invalider pour forcer une nouvelle vérification côté serveur
-				if (
-					event === 'SIGNED_IN' ||
-					event === 'SIGNED_OUT' ||
-					event === 'TOKEN_REFRESHED'
-				) {
-					invalidate('supabase:auth');
-				}
-			},
-		);
+// Initialize Vercel Analytics
+injectAnalytics();
 
-		return () => data.subscription.unsubscribe();
-	});
+onMount(() => {
+	const { data } = supabase.auth.onAuthStateChange(
+		async (event, _session) => {
+			// Invalider pour forcer une nouvelle vérification côté serveur
+			if (
+				event === 'SIGNED_IN' ||
+				event === 'SIGNED_OUT' ||
+				event === 'TOKEN_REFRESHED'
+			) {
+				invalidate('supabase:auth');
+			}
+		},
+	);
+
+	return () => data.subscription.unsubscribe();
+});
 </script>
+
+<svelte:head>
+	{#if isStaging}
+		<meta name="robots" content="noindex, nofollow" />
+		<meta name="googlebot" content="noindex, nofollow" />
+	{/if}
+</svelte:head>
 
 {#if $navigating}
 	<!-- 
