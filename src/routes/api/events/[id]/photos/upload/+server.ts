@@ -8,7 +8,7 @@ import { STRIPE_PRICES } from '$lib/config/server';
  * API endpoint pour uploader des photos/vidéos par les invités
  * POST /api/events/[id]/photos/upload
  */
-export const POST: RequestHandler = async ({ request, params, locals: { supabase } }) => {
+export const POST: RequestHandler = async ({ request, params, locals: { supabase, supabaseServiceRole } }) => {
 	const { id: eventId } = params;
 
 	if (!eventId) {
@@ -107,7 +107,9 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 			);
 
 			// Enregistrer dans la base de données
-			const { data: photoRecord, error: dbError } = await supabase
+			// Utiliser supabaseServiceRole pour contourner les politiques RLS
+			// car les invités (non authentifiés) ne peuvent pas insérer via le client normal
+			const { data: photoRecord, error: dbError } = await supabaseServiceRole
 				.from('event_photos')
 				.insert({
 					event_id: eventId,
