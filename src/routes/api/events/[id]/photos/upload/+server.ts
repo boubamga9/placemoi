@@ -18,7 +18,7 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 	// Vérifier que l'événement existe et est accessible
 	const { data: event, error: eventError } = await supabase
 		.from('events')
-		.select('id, event_date, slug')
+		.select('id, event_date, slug, owner_id')
 		.eq('id', eventId)
 		.single();
 
@@ -42,15 +42,34 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 		.single();
 
 	// Si pas de paiement, vérifier si c'est un événement gratuit (can_generate_qr_free)
-	const { data: owner } = await supabase
-		.from('events')
-		.select('owner_id, owners!inner(can_generate_qr_free)')
-		.eq('id', eventId)
-		.single();
+	// Utiliser supabaseServiceRole pour bypasser les RLS et utiliser la fonction owner_has_free()
+	const { data: ownerHasFree, error: ownerHasFreeError } = await supabaseServiceRole
+		.rpc('owner_has_free', { p_owner_id: event.owner_id });
 
-	const hasPhotosPlan =
-		payment?.stripe_price_id === STRIPE_PRICES.EVENT_WITH_PHOTOS ||
-		owner?.owners?.can_generate_qr_free === true;
+	let hasPhotosPlan: boolean;
+
+	if (ownerHasFreeError) {
+		console.error('Error checking owner_has_free:', ownerHasFreeError);
+		// Fallback: récupérer directement le flag avec service role
+		const { data: owner, error: ownerError } = await supabaseServiceRole
+			.from('owners')
+			.select('can_generate_qr_free')
+			.eq('id', event.owner_id)
+			.single();
+
+		if (ownerError) {
+			console.error('Error fetching owner:', ownerError);
+			throw error(500, 'Erreur lors de la vérification du plan');
+		}
+
+		hasPhotosPlan =
+			payment?.stripe_price_id === STRIPE_PRICES.EVENT_WITH_PHOTOS ||
+			owner?.can_generate_qr_free === true;
+	} else {
+		hasPhotosPlan =
+			payment?.stripe_price_id === STRIPE_PRICES.EVENT_WITH_PHOTOS ||
+			ownerHasFree === true;
+	}
 
 	if (!hasPhotosPlan) {
 		throw error(403, "Cet événement n'a pas le plan avec photos activé");
