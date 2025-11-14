@@ -2,7 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import type { Database } from '$lib/database/database.types';
-	import { LoaderCircle, Download, Image as ImageIcon, Video, DownloadCloud } from 'lucide-svelte';
+	import { LoaderCircle, Download, Image as ImageIcon, Video, DownloadCloud, Trash2 } from 'lucide-svelte';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 
 	type Photo = {
 		id: string;
@@ -23,6 +24,9 @@
 	let isLoading = true;
 	let error: string | null = null;
 	let isDownloadingAll = false;
+	let deletingPhotoId: string | null = null;
+	let showDeleteDialog = false;
+	let photoToDelete: Photo | null = null;
 
 	onMount(async () => {
 		await loadPhotos();
@@ -112,6 +116,44 @@
 			error = "Erreur lors du téléchargement de toutes les photos";
 		} finally {
 			isDownloadingAll = false;
+		}
+	}
+
+	function confirmDelete(photo: Photo) {
+		photoToDelete = photo;
+		showDeleteDialog = true;
+	}
+
+	function cancelDelete() {
+		showDeleteDialog = false;
+		photoToDelete = null;
+	}
+
+	async function deletePhoto() {
+		if (!photoToDelete || deletingPhotoId) return;
+
+		deletingPhotoId = photoToDelete.id;
+
+		try {
+			const response = await fetch(`/api/events/${data.event.id}/photos/${photoToDelete.id}`, {
+				method: 'DELETE',
+			});
+
+			const result = await response.json();
+
+			if (response.ok && result.success) {
+				// Retirer la photo de la liste
+				photos = photos.filter((p) => p.id !== photoToDelete.id);
+				showDeleteDialog = false;
+				photoToDelete = null;
+			} else {
+				error = result.message || result.error || "Erreur lors de la suppression";
+			}
+		} catch (err) {
+			console.error('Error deleting photo:', err);
+			error = "Erreur lors de la suppression de la photo";
+		} finally {
+			deletingPhotoId = null;
 		}
 	}
 </script>
@@ -218,20 +260,88 @@
 							<span>{formatFileSize(photo.fileSize)}</span>
 							<span>{formatDate(photo.uploadedAt)}</span>
 						</div>
-						{#if photo.downloadUrl}
-							<a
-								href={`/api/events/${data.event.id}/photos/${photo.id}/download`}
-								download={photo.fileName}
-								class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium transition-colors hover:bg-neutral-50"
-								style="color: #2C3E50;"
+						<div class="mt-3 flex gap-2">
+							{#if photo.downloadUrl}
+								<a
+									href={`/api/events/${data.event.id}/photos/${photo.id}/download`}
+									download={photo.fileName}
+									class="flex flex-1 items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium transition-colors hover:bg-neutral-50"
+									style="color: #2C3E50;"
+								>
+									<Download class="h-4 w-4" />
+									Télécharger
+								</a>
+							{/if}
+							<button
+								type="button"
+								on:click={() => confirmDelete(photo)}
+								disabled={deletingPhotoId === photo.id}
+								class="rounded-lg border bg-white p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+								on:mouseover={(e) => (e.currentTarget.style.backgroundColor = '#FFF5F5')}
+								on:mouseout={(e) => (e.currentTarget.style.backgroundColor = 'white')}
+								style="color: #9B4A4A; border-color: #9B4A4A;"
+								title="Supprimer la photo"
 							>
-								<Download class="h-4 w-4" />
-								Télécharger
-							</a>
-						{/if}
+								<Trash2 class="h-4 w-4" />
+							</button>
+						</div>
 					</div>
 				</div>
 			{/each}
 		</div>
 	{/if}
 </div>
+
+<!-- Dialog de confirmation de suppression -->
+<AlertDialog.Root bind:open={showDeleteDialog}>
+	<AlertDialog.Content
+		class="rounded-xl border"
+		style="background-color: #FFF9F4; border-color: #E5E5E5;"
+	>
+		<AlertDialog.Header>
+			<AlertDialog.Title
+				style="color: #2C3E50; font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 600;"
+			>
+				Supprimer la photo
+			</AlertDialog.Title>
+			<AlertDialog.Description style="color: #2C3E50; opacity: 0.8;">
+				Êtes-vous sûr de vouloir supprimer cette photo ? Cette action est
+				irréversible.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel
+				on:click={cancelDelete}
+				class="cancel-button rounded-lg border px-4 py-2 transition-colors"
+				style="border-color: #D4A574; color: #2C3E50; background-color: white;"
+			>
+				Annuler
+			</AlertDialog.Cancel>
+			<AlertDialog.Action
+				on:click={deletePhoto}
+				disabled={deletingPhotoId !== null}
+				class="delete-button rounded-lg px-4 py-2 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+				style="background-color: #9B4A4A;"
+			>
+				{#if deletingPhotoId}
+					<span class="flex items-center gap-2">
+						<LoaderCircle class="h-4 w-4 animate-spin" />
+						Suppression...
+					</span>
+				{:else}
+					Supprimer
+				{/if}
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
+
+<style>
+	:global(.cancel-button:hover) {
+		background-color: #f5e6d3 !important;
+	}
+
+	:global(.delete-button:hover:not(:disabled)) {
+		background-color: #8B3E3E !important;
+	}
+</style>
