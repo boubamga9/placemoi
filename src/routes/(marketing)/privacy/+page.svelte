@@ -111,10 +111,16 @@
 							<strong>Nom uniquement :</strong> Le nom de l'invité, fourni par l'organisateur
 							pour l'assignation des places sur le plan de table
 						</li>
+						<li>
+							<strong>Photos et vidéos :</strong> Les photos et vidéos partagées par les
+							invités via la fonctionnalité de collecte (uniquement pour les événements
+							souscrits au Plan Placement + Photos)
+						</li>
 					</ul>
 					<p class="mt-4">
 						<strong>Important :</strong> Aucune autre donnée personnelle (email,
-						téléphone, adresse) n'est collectée pour les invités.
+						téléphone, adresse) n'est collectée pour les invités, sauf les photos et
+						vidéos qu'ils choisissent de partager volontairement.
 					</p>
 
 					<h3 class="mb-2 mt-6 text-lg font-semibold text-gray-900">
@@ -147,6 +153,10 @@
 						<li>Gestion des comptes organisateurs</li>
 						<li>Traitement des paiements pour la création d'événements</li>
 						<li>Génération et partage de QR codes et liens de consultation</li>
+						<li>
+							Collecte, stockage et mise à disposition des photos et vidéos partagées
+							par les invités (Plan Placement + Photos)
+						</li>
 					</ul>
 
 					<h3 class="mb-2 mt-6 text-lg font-semibold text-gray-900">
@@ -218,12 +228,26 @@
 					</p>
 
 					<h3 class="mb-2 mt-6 text-lg font-semibold text-gray-900">
-						5.4 Données techniques
+						5.4 Photos et vidéos collectées
+					</h3>
+					<p>
+						Les photos et vidéos partagées par les invités sont conservées pendant
+						la durée d'utilisation du compte + 3 ans après la dernière activité,
+						ou jusqu'à suppression par l'organisateur.
+					</p>
+					<p>
+						Les photos sont stockées via Supabase Storage (Europe) et Backblaze B2
+						(serveurs en Europe - conformité RGPD). L'organisateur peut à tout moment
+						supprimer les photos de son album.
+					</p>
+
+					<h3 class="mb-2 mt-6 text-lg font-semibold text-gray-900">
+						5.5 Données techniques
 					</h3>
 					<p>Logs de connexion conservés 12 mois maximum.</p>
 
 					<h3 class="mb-2 mt-6 text-lg font-semibold text-gray-900">
-						5.5 Données supprimées
+						5.6 Données supprimées
 					</h3>
 					<p>
 						Après les délais de conservation, les données sont supprimées de
@@ -257,6 +281,11 @@
 					<ul class="list-inside list-disc space-y-2">
 						<li>
 							<strong>Supabase :</strong> Hébergement base de données et stockage
+							(photos et vidéos stockées en Europe)
+						</li>
+						<li>
+							<strong>Backblaze B2 :</strong> Stockage des photos et vidéos collectées
+							par les invités (serveurs en Europe - conformité RGPD)
 						</li>
 						<li><strong>Stripe :</strong> Traitement des paiements</li>
 						<li><strong>Resend :</strong> Envoi d'emails transactionnels</li>
@@ -272,12 +301,25 @@
 							événements et plans de table (noms des invités qu'ils ont fournis)
 						</li>
 						<li>
+							Les organisateurs ayant souscrit au Plan Placement + Photos peuvent
+							accéder, consulter et télécharger toutes les photos et vidéos collectées
+							dans leur album photo
+						</li>
+						<li>
 							Les invités peuvent consulter leur place sur le plan de table via
 							le QR code ou le lien partageable, sans créer de compte
 						</li>
 						<li>
+							Les invités peuvent partager des photos et vidéos via le même QR code
+							(uniquement si l'organisateur a activé cette fonctionnalité)
+						</li>
+						<li>
 							Seuls les noms des invités sont visibles sur le plan de table
 							public (pas d'informations de contact)
+						</li>
+						<li>
+							Les photos partagées par les invités sont accessibles uniquement à
+							l'organisateur de l'événement, pas aux autres invités
 						</li>
 					</ul>
 				</div>
@@ -307,6 +349,11 @@
 							contractuelles types
 						</li>
 					</ul>
+					<p class="mt-4">
+						<strong>Note :</strong> Backblaze B2 stocke les photos et vidéos sur des serveurs
+						situés en Europe, il n'y a donc pas de transfert de données hors de l'Union
+						Européenne pour ce service.
+					</p>
 					<p>
 						Tous les transferts sont encadrés par des garanties appropriées
 						conformément au RGPD.

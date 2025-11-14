@@ -277,6 +277,53 @@ export type Database = {
           },
         ]
       }
+      event_photos: {
+        Row: {
+          id: string
+          event_id: string
+          file_name: string
+          file_size: number
+          file_type: string
+          backblaze_file_id: string
+          backblaze_file_name: string
+          uploaded_at: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          file_name: string
+          file_size: number
+          file_type: string
+          backblaze_file_id: string
+          backblaze_file_name: string
+          uploaded_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          backblaze_file_id?: string
+          backblaze_file_name?: string
+          uploaded_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_photos_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

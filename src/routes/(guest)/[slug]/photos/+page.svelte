@@ -1,6 +1,7 @@
 <script lang="ts">
 	import GuestFooter from '../../components/guest-footer.svelte';
 	import type { Database } from '$lib/database/database.types';
+	import { LoaderCircle, CheckCircle2, XCircle } from 'lucide-svelte';
 
 	type Event = Database['public']['Tables']['events']['Row'];
 	type EventCustomization =
@@ -10,6 +11,13 @@
 		event: Event;
 		customization: EventCustomization;
 	};
+
+	let fileInput: HTMLInputElement;
+	let isUploading = false;
+	let uploadSuccess = false;
+	let uploadError = '';
+	let selectedFiles: File[] = [];
+	let dragActive = false;
 
 	function getFontFallback(fontFamily: string): string {
 		const serifFonts = [
@@ -34,6 +42,79 @@
 			? ` background-image: url('${data.customization.background_image_url}'); background-size: cover; background-position: center;`
 			: ''
 	}`;
+
+	function handleFileSelect(event: Event) {
+		const target = event.target as HTMLInputElement;
+		if (target?.files) {
+			selectedFiles = Array.from(target.files);
+			handleUpload();
+		}
+	}
+
+	function handleDragOver(event: DragEvent) {
+		event.preventDefault();
+		event.stopPropagation();
+		dragActive = true;
+	}
+
+	function handleDragLeave(event: DragEvent) {
+		event.preventDefault();
+		event.stopPropagation();
+		dragActive = false;
+	}
+
+	function handleDrop(event: DragEvent) {
+		event.preventDefault();
+		event.stopPropagation();
+		dragActive = false;
+
+		if (event.dataTransfer?.files) {
+			selectedFiles = Array.from(event.dataTransfer.files);
+			handleUpload();
+		}
+	}
+
+	async function handleUpload() {
+		if (selectedFiles.length === 0 || isUploading) return;
+
+		isUploading = true;
+		uploadSuccess = false;
+		uploadError = '';
+
+		const formData = new FormData();
+		selectedFiles.forEach((file) => {
+			formData.append('files', file);
+		});
+
+		try {
+			const response = await fetch(`/api/events/${data.event.id}/photos/upload`, {
+				method: 'POST',
+				body: formData,
+			});
+
+			const result = await response.json();
+
+			if (response.ok && result.success) {
+				uploadSuccess = true;
+				selectedFiles = [];
+				// Reset after 3 seconds
+				setTimeout(() => {
+					uploadSuccess = false;
+				}, 3000);
+			} else {
+				uploadError = result.message || result.error || "Erreur lors de l'upload";
+			}
+		} catch (error) {
+			console.error('Upload error:', error);
+			uploadError = "Erreur lors de l'upload des photos";
+		} finally {
+			isUploading = false;
+		}
+	}
+
+	function triggerFileInput() {
+		fileInput?.click();
+	}
 </script>
 
 <svelte:head>
@@ -72,27 +153,57 @@
 			</div>
 
 			<div class="mx-auto w-full max-w-2xl">
-				<label
-					class="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors hover:border-opacity-80"
-					style={`color: ${data.customization.font_color}; border-color: ${data.customization.font_color}66; font-family: '${data.customization.font_family || 'Playfair Display'}', ${getFontFallback(data.customization.font_family || 'Playfair Display')};`}
+				<div
+					class="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors"
+					class:opacity-50={isUploading}
+					class:border-opacity-100={dragActive}
+					class:border-opacity-60={!dragActive}
+					style={`color: ${data.customization.font_color}; border-color: ${data.customization.font_color}${dragActive ? 'CC' : '66'}; font-family: '${data.customization.font_family || 'Playfair Display'}', ${getFontFallback(data.customization.font_family || 'Playfair Display')};`}
+					on:click={triggerFileInput}
+					on:dragover={handleDragOver}
+					on:dragleave={handleDragLeave}
+					on:drop={handleDrop}
+					role="button"
+					tabindex="0"
 				>
-					<div
-						class="text-4xl"
-						style={`color: ${data.customization.font_color};`}
-					>
-						+
-					</div>
-					<h2 class="mt-4 text-xl font-semibold">
-						Déposez vos photos/vidéos ici
-					</h2>
+					{#if isUploading}
+						<LoaderCircle class="h-12 w-12 animate-spin" style={`color: ${data.customization.font_color};`} />
+						<h2 class="mt-4 text-xl font-semibold">Upload en cours...</h2>
+					{:else if uploadSuccess}
+						<CheckCircle2 class="h-12 w-12" style={`color: ${data.customization.font_color};`} />
+						<h2 class="mt-4 text-xl font-semibold">Photos envoyées avec succès !</h2>
+					{:else if uploadError}
+						<XCircle class="h-12 w-12" style={`color: ${data.customization.font_color};`} />
+						<h2 class="mt-4 text-xl font-semibold">Erreur</h2>
+						<p class="mt-2 text-sm opacity-80">{uploadError}</p>
+					{:else}
+						<div
+							class="text-4xl"
+							style={`color: ${data.customization.font_color};`}
+						>
+							+
+						</div>
+						<h2 class="mt-4 text-xl font-semibold">
+							Déposez vos photos/vidéos ici
+						</h2>
+					{/if}
 
-					<input type="file" multiple accept="image/*" class="hidden" />
+					<input
+						bind:this={fileInput}
+						type="file"
+						multiple
+						accept="image/*,video/*"
+						class="hidden"
+						on:change={handleFileSelect}
+					/>
 
-					<p class="mt-6 text-xs opacity-70">
-						Vos photos restent privées : seul l'organisateur peut les
-						télécharger.
-					</p>
-				</label>
+					{#if !isUploading && !uploadSuccess && !uploadError}
+						<p class="mt-6 text-xs opacity-70">
+							Vos photos restent privées : seul l'organisateur peut les
+							télécharger.
+						</p>
+					{/if}
+				</div>
 			</div>
 		</div>
 	</div>

@@ -7,6 +7,17 @@
 -- Ajoute également le support pour les événements gratuits via can_generate_qr_free
 
 -- ============================================================================
+-- 0) Créer la colonne can_generate_qr_free si elle n'existe pas
+-- ============================================================================
+
+DO $$ BEGIN
+    ALTER TABLE public.owners
+    ADD COLUMN IF NOT EXISTS can_generate_qr_free BOOLEAN NOT NULL DEFAULT FALSE;
+EXCEPTION
+    WHEN duplicate_column THEN NULL;
+END $$;
+
+-- ============================================================================
 -- 1) Helper: fonction sécurisée pour checker le flag sur owners
 -- ============================================================================
 

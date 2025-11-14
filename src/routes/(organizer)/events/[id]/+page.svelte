@@ -24,6 +24,7 @@
 	export let data: {
 		event: Event;
 		guestsCount: number;
+		photosCount: number;
 		hasPayment: boolean;
 		stripePrices: {
 			placement: string;
@@ -710,13 +711,20 @@
 			</h2>
 			<p class="mb-4 text-sm" style="color: #2C3E50; opacity: 0.75;">
 				Consultez toutes les photos envoyées par vos invités depuis votre espace
-				organisateur. Vous pourrez bientôt y modérer et télécharger en masse.
+				organisateur.
 			</p>
 			<div
 				class="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between"
 			>
 				<div class="space-y-1">
-					<p class="text-lg font-medium" style="color: #2C3E50;">Album</p>
+					<p class="text-lg font-medium" style="color: #2C3E50;">
+						Album
+						{#if data.photosCount > 0}
+							<span class="ml-2 text-sm font-normal" style="color: #2C3E50; opacity: 0.6;">
+								({data.photosCount} photo{data.photosCount > 1 ? 's' : ''})
+							</span>
+						{/if}
+					</p>
 					<p class="text-xs" style="color: #2C3E50; opacity: 0.65;">
 						L’album invité reste accessible depuis le lien public ci-dessous.
 					</p>

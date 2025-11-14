@@ -146,6 +146,10 @@
 						"Organisateurs") de créer des plans de table numériques, d'assigner
 						des places aux invités et de partager un QR code ainsi qu'un lien
 						partageable permettant aux invités de trouver leur place facilement.
+						La Plateforme propose également une fonctionnalité de collecte de
+						photos permettant aux invités de partager leurs souvenirs via le même
+						QR code, et aux organisateurs de récupérer toutes les photos dans un
+						album dédié.
 					</p>
 				</div>
 			</section>
@@ -234,6 +238,8 @@
 						<li>Assignment de places aux invités</li>
 						<li>Génération de QR codes pour chaque événement</li>
 						<li>Lien partageable pour l'accès au plan de table</li>
+						<li>Collecte de photos et vidéos par les invités via QR code</li>
+						<li>Album photo organisateur pour récupérer toutes les photos collectées</li>
 						<li>Interface de consultation pour les invités</li>
 						<li>Interface d'administration pour les organisateurs</li>
 					</ul>
@@ -245,11 +251,13 @@
 						<li>
 							<strong>Pour les Organisateurs :</strong> Création d'événements, configuration
 							des tables et places, import de listes d'invités, assignment de places,
-							génération de QR codes et liens partageables
+							génération de QR codes et liens partageables, activation de la collecte
+							de photos, consultation et téléchargement de l'album photo
 						</li>
 						<li>
 							<strong>Pour les Invités :</strong> Consultation du plan de table via
-							QR code ou lien, recherche de leur place par nom
+							QR code ou lien, recherche de leur place par nom, partage de photos et
+							vidéos via le même QR code
 						</li>
 					</ul>
 				</div>
@@ -307,13 +315,24 @@
 					</h3>
 					<p>
 						La création d'un événement avec plan de table sur la Plateforme est
-						facturée au prix unique de <strong>29,99€ TTC par événement</strong
-						>.
+						facturée selon deux formules :
 					</p>
+					<ul class="list-inside list-disc space-y-2">
+						<li>
+							<strong>Plan Placement :</strong> 49,99€ TTC par événement - Inclut la
+							création du plan de table, l'assignation des places, la génération du QR
+							code et le lien partageable
+						</li>
+						<li>
+							<strong>Plan Placement + Photos :</strong> 99,99€ TTC par événement - Inclut
+							toutes les fonctionnalités du Plan Placement, plus la collecte de photos
+							et vidéos par les invités et l'accès à l'album photo organisateur
+						</li>
+					</ul>
 					<p>
 						Le compte sur la Plateforme est gratuit et permet de gérer plusieurs
-						événements, chaque événement nécessitant un paiement unique de
-						29,99€.
+						événements, chaque événement nécessitant un paiement unique selon le plan
+						choisi.
 					</p>
 
 					<h3 class="mb-2 mt-6 text-lg font-semibold text-gray-900">
@@ -361,7 +380,11 @@
 							L'organisateur crée un nouvel événement et configure son plan de
 							table
 						</li>
-						<li>Paiement unique de 29,99€ via Stripe (3D Secure)</li>
+						<li>
+							L'organisateur choisit son plan : Placement (49,99€) ou Placement + Photos
+							(99,99€)
+						</li>
+						<li>Paiement unique via Stripe (3D Secure) selon le plan choisi</li>
 						<li>Confirmation par email et accès à l'événement créé</li>
 					</ul>
 
@@ -474,6 +497,14 @@
 						<li>L'exactitude des noms des invités et de leur placement</li>
 						<li>La mise à jour du plan de table en cas de modifications</li>
 						<li>La diffusion du QR code et du lien aux invités</li>
+						<li>
+							Le respect du droit à l'image et des droits d'auteur concernant les
+							photos collectées via la Plateforme
+						</li>
+						<li>
+							L'obtention des autorisations nécessaires pour la collecte et l'utilisation
+							des photos partagées par les invités
+						</li>
 					</ul>
 				</div>
 			</section>
@@ -505,6 +536,22 @@
 						<li>Les noms des invités fournis</li>
 						<li>Les informations relatives à leurs événements</li>
 					</ul>
+
+					<h3 class="mb-2 mt-6 text-lg font-semibold text-gray-900">
+						9.3 Photos collectées
+					</h3>
+					<p>
+						Les photos et vidéos partagées par les invités via la Plateforme restent
+						la propriété de leurs auteurs. L'organisateur obtient un droit d'utilisation
+						des photos collectées dans le cadre de son événement, sous réserve du respect
+						du droit à l'image et des droits d'auteur.
+					</p>
+					<p>
+						PLACEMOI agit uniquement en tant qu'intermédiaire technique et ne revendique
+						aucun droit de propriété sur les photos collectées. Les photos sont stockées
+						via Supabase Storage (Europe) et Backblaze B2 (serveurs en Europe - conformité
+						RGPD totale).
+					</p>
 				</div>
 			</section>
 
@@ -530,6 +577,10 @@
 							pour l'assignation des places)
 						</li>
 						<li>
+							<strong>Photos et vidéos :</strong> Les photos et vidéos partagées par les
+							invités via la fonctionnalité de collecte (uniquement pour le Plan Placement + Photos)
+						</li>
+						<li>
 							<strong>Techniques :</strong> Données de session et cookies nécessaires
 							au fonctionnement de la Plateforme
 						</li>
@@ -542,6 +593,9 @@
 					<ul class="list-inside list-disc space-y-2">
 						<li>
 							Fournir les services de la Plateforme (gestion des plans de table)
+						</li>
+						<li>
+							Fournir la fonctionnalité de collecte de photos et vidéos (Plan Placement + Photos)
 						</li>
 						<li>Traiter les paiements via Stripe</li>
 						<li>

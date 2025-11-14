@@ -24,7 +24,18 @@ export const load: PageServerLoad = async ({ params, locals: { safeGetSession, s
 		throw error(404, 'Événement introuvable ou accès refusé');
 	}
 
+	// Récupérer le nombre de photos (pour affichage)
+	const { count, error: countError } = await supabase
+		.from('event_photos')
+		.select('*', { count: 'exact', head: true })
+		.eq('event_id', id);
+
+	if (countError) {
+		console.error('Error counting photos:', countError);
+	}
+
 	return {
 		event: event as Event,
+		photosCount: count || 0,
 	};
 };

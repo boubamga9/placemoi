@@ -124,8 +124,23 @@
 					<h3 class="mb-2 mt-6 text-lg font-semibold text-gray-900">
 						Stockage des fichiers :
 					</h3>
-					<p><strong>Service :</strong> Supabase Storage</p>
+					<p><strong>Service :</strong> Supabase Storage et Backblaze B2</p>
 					<p><strong>Localisation :</strong> Europe (conformité RGPD)</p>
+					<p>
+						<strong>Backblaze B2 :</strong> Backblaze, Inc.<br />
+						<strong>Adresse :</strong> 500 Ben Franklin Ct, San Mateo, CA 94401, États-Unis<br />
+						<strong>Site web :</strong>
+						<a
+							href="https://www.backblaze.com"
+							target="_blank"
+							class="text-blue-600 hover:text-blue-800">www.backblaze.com</a
+						>
+					</p>
+					<p>
+						<strong>Note :</strong> Les photos et vidéos collectées via la fonctionnalité
+						de collecte sont stockées sur Backblaze B2 dans des serveurs situés en Europe,
+						garantissant une conformité totale au RGPD.
+					</p>
 				</div>
 			</section>
 
