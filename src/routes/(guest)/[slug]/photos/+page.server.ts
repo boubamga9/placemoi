@@ -41,19 +41,24 @@ export const load = async ({ params, locals: { supabase, supabaseServiceRole } }
 		});
 	}
 
-	// Vérifier si l'événement a le plan avec photos activé
-	const { data: payment } = await supabase
-		.from('payments')
-		.select('stripe_price_id')
-		.eq('event_id', event.id)
-		.eq('status', 'succeeded')
-		.order('created_at', { ascending: false })
-		.limit(1)
-		.maybeSingle();
-
-	// Vérifier si l'owner a le plan gratuit via owner_has_free()
-	const { data: ownerHasFree, error: ownerHasFreeError } = await supabaseServiceRole
-		.rpc('owner_has_free', { p_owner_id: event.owner_id });
+	// 🚀 OPTIMIZATION: Paralléliser les vérifications du plan photos
+	const [
+		{ data: payment },
+		{ data: ownerHasFree, error: ownerHasFreeError }
+	] = await Promise.all([
+		// 1. Vérifier si l'événement a le plan avec photos activé
+		supabase
+			.from('payments')
+			.select('stripe_price_id')
+			.eq('event_id', event.id)
+			.eq('status', 'succeeded')
+			.order('created_at', { ascending: false })
+			.limit(1)
+			.maybeSingle(),
+		// 2. Vérifier si l'owner a le plan gratuit via owner_has_free()
+		supabaseServiceRole
+			.rpc('owner_has_free', { p_owner_id: event.owner_id })
+	]);
 
 	// Si l'appel RPC échoue, fallback: récupérer directement le flag
 	let hasFreePlan = false;

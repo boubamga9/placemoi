@@ -31,20 +31,24 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 		throw error(410, "Cet événement n'est plus accessible pour l'upload de photos");
 	}
 
-	// Vérifier que l'événement a le plan avec photos activé
-	const { data: payment, error: paymentError } = await supabase
-		.from('payments')
-		.select('stripe_price_id')
-		.eq('event_id', eventId)
-		.eq('status', 'succeeded')
-		.order('created_at', { ascending: false })
-		.limit(1)
-		.single();
-
-	// Si pas de paiement, vérifier si c'est un événement gratuit (can_generate_qr_free)
-	// Utiliser supabaseServiceRole pour bypasser les RLS et utiliser la fonction owner_has_free()
-	const { data: ownerHasFree, error: ownerHasFreeError } = await supabaseServiceRole
-		.rpc('owner_has_free', { p_owner_id: event.owner_id });
+	// 🚀 OPTIMIZATION: Paralléliser les vérifications du plan photos
+	const [
+		{ data: payment },
+		{ data: ownerHasFree, error: ownerHasFreeError }
+	] = await Promise.all([
+		// 1. Vérifier si l'événement a le plan avec photos activé
+		supabase
+			.from('payments')
+			.select('stripe_price_id')
+			.eq('event_id', eventId)
+			.eq('status', 'succeeded')
+			.order('created_at', { ascending: false })
+			.limit(1)
+			.maybeSingle(),
+		// 2. Vérifier si l'owner a le plan gratuit via owner_has_free()
+		supabaseServiceRole
+			.rpc('owner_has_free', { p_owner_id: event.owner_id })
+	]);
 
 	let hasPhotosPlan: boolean;
 
@@ -102,65 +106,91 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 
 	const maxFileSize = 50 * 1024 * 1024; // 50MB
 
+	// 🚀 OPTIMIZATION: Filtrer d'abord les fichiers valides
+	const validFiles = files.filter((file) => {
+		if (!allowedTypes.includes(file.type)) {
+			console.warn(`⚠️ File type not allowed: ${file.type}`);
+			return false;
+		}
+		if (file.size > maxFileSize) {
+			console.warn(`⚠️ File too large: ${file.name} (${file.size} bytes)`);
+			return false;
+		}
+		return true;
+	});
+
+	if (validFiles.length === 0) {
+		throw error(400, 'Aucun fichier valide fourni');
+	}
+
 	const uploadedPhotos = [];
+	const BATCH_SIZE = 3; // Traiter 3 fichiers en parallèle pour éviter la surcharge
 
 	try {
-		for (const file of files) {
-			// Vérifier le type
-			if (!allowedTypes.includes(file.type)) {
-				console.warn(`⚠️ File type not allowed: ${file.type}`);
-				continue;
-			}
+		// Traiter les fichiers par batch
+		for (let i = 0; i < validFiles.length; i += BATCH_SIZE) {
+			const batch = validFiles.slice(i, i + BATCH_SIZE);
 
-			// Vérifier la taille
-			if (file.size > maxFileSize) {
-				console.warn(`⚠️ File too large: ${file.name} (${file.size} bytes)`);
-				continue;
-			}
+			// Traiter tous les fichiers du batch en parallèle
+			const batchResults = await Promise.all(
+				batch.map(async (file) => {
+					try {
+						// Upload vers Backblaze
+						const uploadResult = await backblazeService.uploadFile(
+							file,
+							eventId,
+							file.name,
+						);
 
-			// Upload vers Backblaze
-			const uploadResult = await backblazeService.uploadFile(
-				file,
-				eventId,
-				file.name,
+						// Enregistrer dans la base de données
+						// Utiliser supabaseServiceRole pour contourner les politiques RLS
+						// car les invités (non authentifiés) ne peuvent pas insérer via le client normal
+						const { data: photoRecord, error: dbError } = await supabaseServiceRole
+							.from('event_photos')
+							.insert({
+								event_id: eventId,
+								file_name: file.name,
+								file_size: file.size,
+								file_type: file.type,
+								backblaze_file_id: uploadResult.fileId,
+								backblaze_file_name: uploadResult.fileName,
+							})
+							.select()
+							.single();
+
+						if (dbError) {
+							console.error('❌ Error saving photo to database:', dbError);
+							// Essayer de supprimer le fichier de Backblaze si l'insertion DB échoue
+							try {
+								await backblazeService.deleteFile(
+									uploadResult.fileId,
+									uploadResult.fileName,
+								);
+							} catch (deleteError) {
+								console.error('❌ Error deleting file from Backblaze:', deleteError);
+							}
+							return null;
+						}
+
+						return {
+							id: photoRecord.id,
+							fileName: file.name,
+							size: file.size,
+							type: file.type,
+						};
+					} catch (err) {
+						console.error(`❌ Error processing file ${file.name}:`, err);
+						return null;
+					}
+				})
 			);
 
-			// Enregistrer dans la base de données
-			// Utiliser supabaseServiceRole pour contourner les politiques RLS
-			// car les invités (non authentifiés) ne peuvent pas insérer via le client normal
-			const { data: photoRecord, error: dbError } = await supabaseServiceRole
-				.from('event_photos')
-				.insert({
-					event_id: eventId,
-					file_name: file.name,
-					file_size: file.size,
-					file_type: file.type,
-					backblaze_file_id: uploadResult.fileId,
-					backblaze_file_name: uploadResult.fileName,
-				})
-				.select()
-				.single();
-
-			if (dbError) {
-				console.error('❌ Error saving photo to database:', dbError);
-				// Essayer de supprimer le fichier de Backblaze si l'insertion DB échoue
-				try {
-					await backblazeService.deleteFile(
-						uploadResult.fileId,
-						uploadResult.fileName,
-					);
-				} catch (deleteError) {
-					console.error('❌ Error deleting file from Backblaze:', deleteError);
+			// Ajouter les résultats réussis
+			for (const result of batchResults) {
+				if (result) {
+					uploadedPhotos.push(result);
 				}
-				continue;
 			}
-
-			uploadedPhotos.push({
-				id: photoRecord.id,
-				fileName: file.name,
-				size: file.size,
-				type: file.type,
-			});
 		}
 
 		if (uploadedPhotos.length === 0) {

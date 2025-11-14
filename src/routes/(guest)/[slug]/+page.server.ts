@@ -57,50 +57,37 @@ export const load = async ({ params, locals: { supabase, supabaseServiceRole } }
         updated_at: customization?.updated_at || new Date().toISOString()
     };
 
-    // 🚀 OPTIMIZATION: Preload all guests for this event (si < 2000 invités)
-    // Au-delà de 2000, on utilise l'API pour éviter de surcharger le navigateur
+    // 🚀 OPTIMIZATION: Paralléliser toutes les requêtes indépendantes
     const IN_MEMORY_SEARCH_THRESHOLD = 2000;
 
-    // D'abord, on compte les invités pour décider si on précharge
-    const { count, error: countError } = await supabase
-        .from('guests')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', event.id);
+    // Exécuter toutes les requêtes en parallèle
+    const [
+        { count, error: countError },
+        { data: payment },
+        { data: ownerHasFree, error: ownerHasFreeError }
+    ] = await Promise.all([
+        // 1. Compter les invités pour décider si on précharge
+        supabase
+            .from('guests')
+            .select('*', { count: 'exact', head: true })
+            .eq('event_id', event.id),
+        // 2. Vérifier si l'événement a le plan avec photos activé
+        supabase
+            .from('payments')
+            .select('stripe_price_id')
+            .eq('event_id', event.id)
+            .eq('status', 'succeeded')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+        // 3. Vérifier si l'owner a le plan gratuit via owner_has_free()
+        supabaseServiceRole
+            .rpc('owner_has_free', { p_owner_id: event.owner_id })
+    ]);
 
     if (countError) {
         console.error('Error counting guests:', countError);
     }
-
-    let guests: any[] = [];
-
-    // On précharge seulement si < 2000 invités
-    if (count !== null && count < IN_MEMORY_SEARCH_THRESHOLD) {
-        const { data: guestsData, error: guestsError } = await supabase
-            .from('guests')
-            .select('guest_name, table_number, seat_number')
-            .eq('event_id', event.id);
-
-        if (guestsError) {
-            console.error('Error fetching guests for preload:', guestsError);
-        } else {
-            guests = guestsData || [];
-        }
-    }
-
-    // Vérifier si l'événement a le plan avec photos activé
-    // Utiliser supabaseServiceRole pour bypasser les RLS
-    const { data: payment } = await supabase
-        .from('payments')
-        .select('stripe_price_id')
-        .eq('event_id', event.id)
-        .eq('status', 'succeeded')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-    // Vérifier si l'owner a le plan gratuit via owner_has_free()
-    const { data: ownerHasFree, error: ownerHasFreeError } = await supabaseServiceRole
-        .rpc('owner_has_free', { p_owner_id: event.owner_id });
 
     // Si l'appel RPC échoue, fallback: récupérer directement le flag
     let hasFreePlan = false;
@@ -114,6 +101,21 @@ export const load = async ({ params, locals: { supabase, supabaseServiceRole } }
         hasFreePlan = owner?.can_generate_qr_free === true;
     } else {
         hasFreePlan = ownerHasFree === true;
+    }
+
+    // Précharger les invités seulement si < 2000 (après avoir obtenu le count)
+    let guests: any[] = [];
+    if (count !== null && count < IN_MEMORY_SEARCH_THRESHOLD) {
+        const { data: guestsData, error: guestsError } = await supabase
+            .from('guests')
+            .select('guest_name, table_number, seat_number')
+            .eq('event_id', event.id);
+
+        if (guestsError) {
+            console.error('Error fetching guests for preload:', guestsError);
+        } else {
+            guests = guestsData || [];
+        }
     }
 
     const hasPhotosPlan =
