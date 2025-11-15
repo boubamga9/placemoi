@@ -30,7 +30,7 @@
 		content="Organisez vos événements sans stress. Vos invités trouvent leur table en tapant leur nom. QR code + lien partageable."
 	/>
 	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://seatly.com" />
+	<meta property="og:url" content="https://placemoi.com/" />
 	<meta property="og:image" content="/images/logo_text.svg" />
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>

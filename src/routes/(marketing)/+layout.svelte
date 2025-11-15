@@ -207,6 +207,35 @@
 					</nav>
 				</div>
 
+				<!-- Événements -->
+				<div class="flex flex-col gap-3">
+					<h3
+						class="text-sm font-semibold uppercase tracking-wider text-white/90"
+					>
+						Événements
+					</h3>
+					<nav class="flex flex-col gap-2">
+						<a
+							href="/plan-de-table-mariage"
+							class="text-sm text-white/70 transition-colors hover:text-white/90"
+						>
+							Plan de table mariage
+						</a>
+						<a
+							href="/plan-de-table-anniversaire"
+							class="text-sm text-white/70 transition-colors hover:text-white/90"
+						>
+							Plan de table anniversaire
+						</a>
+						<a
+							href="/plan-de-table-conference"
+							class="text-sm text-white/70 transition-colors hover:text-white/90"
+						>
+							Plan de table conférence
+						</a>
+					</nav>
+				</div>
+
 				<!-- Légal -->
 				<div class="flex flex-col gap-3">
 					<h3
