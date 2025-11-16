@@ -51,7 +51,9 @@
 </script>
 
 <svelte:head>
-	<title>Tarifs plan de table événement | {WebsiteName} - À partir de 49,99€ par événement</title>
+	<title
+		>Tarifs plan de table événement | {WebsiteName} - À partir de 49,99€ par événement</title
+	>
 	<meta
 		name="description"
 		content="Plan Placement 49,99€ | Plan Placement + Photos 99,99€. QR code, page personnalisée, collecte photos. Pour mariages, anniversaires, conférences, séminaires. Paiement unique par événement, sans abonnement."
@@ -329,8 +331,14 @@
 	</section>
 
 	<!-- Liens internes contextuels -->
-	<div class="px-6 pb-10 text-center text-sm sm:px-8 lg:px-12" style="color:#2c3e50; opacity:.8;">
-		Des questions sur les offres ? Consultez la <a href="/faq" class="underline">FAQ</a> ou
+	<div
+		class="px-6 pb-10 text-center text-sm sm:px-8 lg:px-12"
+		style="color:#2c3e50; opacity:.8;"
+	>
+		Des questions sur les offres ? Consultez la <a href="/faq" class="underline"
+			>FAQ</a
+		>
+		ou
 		<a href="/contact" class="underline">contactez-nous</a>.
 	</div>
 </main>

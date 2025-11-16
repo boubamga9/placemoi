@@ -739,7 +739,8 @@
 				de table mariage. Créez votre événement dès maintenant.
 			</p>
 			<p class="mt-2 text-sm" style="color:#2c3e50; opacity:.8;">
-				Questions ? Consultez la <a href="/faq" class="underline">FAQ</a> ou découvrez nos
+				Questions ? Consultez la <a href="/faq" class="underline">FAQ</a> ou
+				découvrez nos
 				<a href="/pricing" class="underline">tarifs</a>.
 			</p>
 			<div

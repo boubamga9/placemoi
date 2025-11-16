@@ -83,7 +83,12 @@
 </div>
 
 <!-- Liens internes contextuels -->
-<div class="mt-8 px-6 text-center text-sm sm:px-8 lg:px-12" style="color:#2c3e50; opacity:.8;">
-	En savoir plus sur nos <a href="/pricing" class="underline">tarifs</a> ou consulter la
-	<a href="/faq" class="underline">FAQ</a>. Besoin d'aide ? <a href="/contact" class="underline">Contactez-nous</a>.
+<div
+	class="mt-8 px-6 text-center text-sm sm:px-8 lg:px-12"
+	style="color:#2c3e50; opacity:.8;"
+>
+	En savoir plus sur nos <a href="/pricing" class="underline">tarifs</a> ou
+	consulter la
+	<a href="/faq" class="underline">FAQ</a>. Besoin d'aide ?
+	<a href="/contact" class="underline">Contactez-nous</a>.
 </div>
