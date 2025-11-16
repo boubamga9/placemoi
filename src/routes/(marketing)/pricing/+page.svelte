@@ -51,15 +51,28 @@
 </script>
 
 <svelte:head>
-	<title>{WebsiteName} - Tarifs et fonctionnalités</title>
+	<title>Tarifs plan de table événement | {WebsiteName} - À partir de 49,99€ par événement</title>
 	<meta
 		name="description"
-		content="Découvrez les plans Placemoi : placement des invités, personnalisation de la page, collecte de photos et album collaboratif. Choisissez l’offre adaptée à votre événement."
+		content="Plan Placement 49,99€ | Plan Placement + Photos 99,99€. QR code, page personnalisée, collecte photos. Pour mariages, anniversaires, conférences, séminaires. Paiement unique par événement, sans abonnement."
 	/>
 	<meta
 		name="keywords"
-		content="placemoi tarifs, plan de table mariage prix, QR code invités, collecte photo mariage"
+		content="tarif plan de table mariage, prix placement invités, coût QR code mariage, tarif collecte photos mariage, prix album photo collaboratif, plan de table pas cher, tarif plan de table événement, prix plan de table anniversaire, tarif plan de table conférence, prix plan de table séminaire, placemoi tarifs, plan de table mariage prix, QR code invités prix"
 	/>
+	<meta
+		property="og:title"
+		content="Tarifs plan de table événement | {WebsiteName} - À partir de 49,99€"
+	/>
+	<meta
+		property="og:description"
+		content="Plan Placement 49,99€ | Plan Placement + Photos 99,99€. QR code, page personnalisée, collecte photos. Pour mariages, anniversaires, conférences, séminaires. Paiement unique."
+	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://placemoi.com/pricing" />
+	<meta property="og:image" content="/images/logo_text.svg" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<link rel="canonical" href="https://placemoi.com/pricing" />
 	<script type="application/ld+json">
 		{_offerStructuredDataJson}
 	</script>
@@ -314,4 +327,10 @@
 			</div>
 		</div>
 	</section>
+
+	<!-- Liens internes contextuels -->
+	<div class="px-6 pb-10 text-center text-sm sm:px-8 lg:px-12" style="color:#2c3e50; opacity:.8;">
+		Des questions sur les offres ? Consultez la <a href="/faq" class="underline">FAQ</a> ou
+		<a href="/contact" class="underline">contactez-nous</a>.
+	</div>
 </main>

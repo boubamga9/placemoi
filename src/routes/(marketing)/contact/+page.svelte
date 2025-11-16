@@ -66,15 +66,28 @@
 </script>
 
 <svelte:head>
-	<title>{WebsiteName} - Contact</title>
+	<title>Contact {WebsiteName} | Support plan de table événement</title>
 	<meta
 		name="description"
-		content="Contactez l'équipe PLACEMOI pour toute question sur notre solution de placement d'invités pour vos événements."
+		content="Contactez l'équipe PLACEMOI pour toute question sur votre plan de table événement. Mariage, anniversaire, conférence, séminaire. Support réactif sous 24h. Aide à la personnalisation et au QR code."
 	/>
 	<meta
 		name="keywords"
-		content="contact, support, aide, événements, placement d'invités"
+		content="contact placemoi, support plan de table, aide organisation événement, assistance QR code, support plan de table mariage, support plan de table conférence, contact plan de table, support placemoi, aide plan de table"
 	/>
+	<meta
+		property="og:title"
+		content="Contact {WebsiteName} | Support plan de table événement"
+	/>
+	<meta
+		property="og:description"
+		content="Contactez l'équipe PLACEMOI pour toute question sur votre plan de table événement. Mariage, anniversaire, conférence, séminaire. Support réactif sous 24h."
+	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://placemoi.com/contact" />
+	<meta property="og:image" content="/images/logo_text.svg" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<link rel="canonical" href="https://placemoi.com/contact" />
 </svelte:head>
 
 <main class="flex flex-col">
@@ -244,4 +257,10 @@
 			</div>
 		</div>
 	</section>
+
+	<!-- Liens internes contextuels -->
+	<div class="px-6 pb-10 text-center text-sm sm:px-8 lg:px-12" style="color:#2c3e50; opacity:.8;">
+		Avant d'écrire, vous pouvez consulter la <a href="/faq" class="underline">FAQ</a> ou découvrir nos
+		<a href="/pricing" class="underline">tarifs</a>.
+	</div>
 </main>

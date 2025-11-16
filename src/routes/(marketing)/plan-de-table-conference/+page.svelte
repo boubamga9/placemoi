@@ -666,6 +666,10 @@
 			>
 				Créez votre événement en 5 minutes, personnalisez la page, recevez votre QR code. Vos participants trouveront leur table en 3 secondes, votre événement démarrera à l'heure.
 			</p>
+			<p class="mt-2 text-sm" style="color:#2c3e50; opacity:.8;">
+				Questions ? Consultez la <a href="/faq" class="underline">FAQ</a> ou découvrez nos
+				<a href="/pricing" class="underline">tarifs</a>.
+			</p>
 			<div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
 				<a href="/auth">
 					<Button

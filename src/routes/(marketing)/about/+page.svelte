@@ -64,6 +64,7 @@
 		},
 	];
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const structuredData = {
 		'@context': 'https://schema.org',
 		'@type': 'AboutPage',
@@ -74,21 +75,37 @@
 </script>
 
 <svelte:head>
-	<title>{WebsiteName} - À propos</title>
+	<title
+		>À propos de {WebsiteName} - Notre histoire | Plan de table événement en ligne</title
+	>
 	<meta
 		name="description"
-		content="PlaceMoi est né d’un défi : rendre un plan de table élégant et facile pour tous les invités. Découvrez comment l’idée a grandi pour devenir une solution complète pour vos événements."
+		content="Découvrez l'histoire de PLACEMOI : née d'un plan de table ingérable, notre plateforme aide les organisateurs d'événements (mariages, anniversaires, conférences, séminaires) à offrir une expérience fluide et moderne à leurs invités."
 	/>
+	<meta
+		name="keywords"
+		content="à propos placemoi, histoire placemoi, qui sommes nous, plan de table événement, solution plan de table, organisation événement, QR code événement, placement invités"
+	/>
+	<meta
+		property="og:title"
+		content="À propos de {WebsiteName} - Notre histoire | Plan de table événement"
+	/>
+	<meta
+		property="og:description"
+		content="Découvrez l'histoire de PLACEMOI : née d'un plan de table ingérable, notre plateforme aide les organisateurs d'événements à offrir une expérience fluide et moderne à leurs invités."
+	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://placemoi.com/about" />
+	<meta property="og:image" content="/images/logo_text.svg" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<link rel="canonical" href="https://placemoi.com/about" />
 	<script type="application/ld+json">
 		{JSON.stringify(structuredData)}
 	</script>
 </svelte:head>
 
 <main class="flex flex-col">
-	<section
-		class="w-full"
-		style="background-color: #fff9f4;"
-	>
+	<section class="w-full" style="background-color: #fff9f4;">
 		<div
 			class="mx-auto flex max-w-6xl flex-col gap-10 px-6 pb-20 pt-32 sm:px-8 md:flex-row md:items-center md:justify-between md:gap-16 lg:px-12"
 		>
@@ -103,7 +120,7 @@
 					class="mt-4 text-3xl font-normal leading-[120%] tracking-tight md:text-4xl xl:text-5xl"
 					style="color: #2c3e50; font-family: 'Playfair Display', serif;"
 				>
-					L’origine de PlaceMoi
+					L’origine de Placemoi
 				</h1>
 				<p
 					class="mt-6 text-base leading-[160%] md:text-lg"
@@ -111,14 +128,16 @@
 				>
 					PlaceMoi est né d’un constat très simple : un plan de table peut vite
 					se transformer en casse-tête. Face à un mariage de 400 invités, il
-					fallait une solution élégante, lisible et moderne pour guider
-					chacun — sans sacrifier le décor ni multiplier les supports.
+					fallait une solution élégante, lisible et moderne pour guider chacun —
+					sans sacrifier le décor ni multiplier les supports.
 				</p>
 			</div>
 
-			<div class="mx-auto w-full max-w-md rounded-3xl border border-[#d4a574] bg-white p-8 shadow-lg md:mx-0">
+			<div
+				class="mx-auto w-full max-w-md rounded-3xl border border-[#d4a574] bg-white p-8 shadow-lg md:mx-0"
+			>
 				<h2
-					class="text-lg font-semibold uppercase tracking-[0.2em] text-center md:text-left"
+					class="text-center text-lg font-semibold uppercase tracking-[0.2em] md:text-left"
 					style="color: #2c3e50;"
 				>
 					Le déclic
@@ -127,7 +146,8 @@
 					class="mt-4 text-sm leading-relaxed md:text-base"
 					style="color: #2c3e50; opacity: 0.85;"
 				>
-					« Et si les invités retrouvaient leur place en scannant simplement un QR code ? »
+					« Et si les invités retrouvaient leur place en scannant simplement un
+					QR code ? »
 				</p>
 				<p
 					class="mt-4 text-sm leading-relaxed md:text-base"
@@ -146,9 +166,7 @@
 		style="background-color: white; border-color: #f0e8df;"
 	>
 		<div class="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
-			<div
-				class="mt-12 grid gap-12 md:grid-cols-[3fr,2fr] md:items-start"
-			>
+			<div class="mt-12 grid gap-12 md:grid-cols-[3fr,2fr] md:items-start">
 				<div class="space-y-6">
 					<h2
 						class="text-2xl font-normal leading-[120%] tracking-tight md:text-3xl"
@@ -160,23 +178,32 @@
 						class="text-sm leading-relaxed md:text-base"
 						style="color: #2c3e50; opacity: 0.85;"
 					>
-						En concevant ce fameux panneau de mariage, on s’est heurtés à une évidence :
-						les solutions existantes n’étaient ni assez modernes, ni assez simples pour respecter la scénographie du jour J.
+						En concevant ce fameux panneau de mariage, on s’est heurtés à une
+						évidence : les solutions existantes n’étaient ni assez modernes, ni
+						assez simples pour respecter la scénographie du jour J.
 					</p>
 					<p
 						class="text-sm leading-relaxed md:text-base"
 						style="color: #2c3e50; opacity: 0.85;"
 					>
-						Plutôt que de multiplier les outils, nous avons réuni tout ce qui fait gagner du temps aux organisateurs — et ce qui rassure les invités — dans une seule expérience.
+						Plutôt que de multiplier les outils, nous avons réuni tout ce qui
+						fait gagner du temps aux organisateurs — et ce qui rassure les
+						invités — dans une seule expérience.
 					</p>
 				</div>
 				<div class="rounded-3xl border border-[#e8dccf] bg-white p-6 shadow-sm">
-					<h3 class="text-sm font-semibold uppercase tracking-[0.15em]" style="color: #2c3e50; opacity: 0.8;">
+					<h3
+						class="text-sm font-semibold uppercase tracking-[0.15em]"
+						style="color: #2c3e50; opacity: 0.8;"
+					>
 						Ce que nous voulions résoudre
 					</h3>
 					<ul class="mt-5 space-y-4">
 						{#each storyReasons as reason}
-							<li class="flex gap-3 text-sm leading-relaxed md:text-base" style="color: #2c3e50; opacity: 0.9;">
+							<li
+								class="flex gap-3 text-sm leading-relaxed md:text-base"
+								style="color: #2c3e50; opacity: 0.9;"
+							>
 								<span
 									class="mt-1 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs"
 									style="background-color: #d4a574; color: white;"
@@ -184,10 +211,17 @@
 									✓
 								</span>
 								<div>
-									<strong class="block text-sm font-semibold md:text-base" style="color: #2c3e50;">
+									<strong
+										class="block text-sm font-semibold md:text-base"
+										style="color: #2c3e50;"
+									>
 										{reason.title}
 									</strong>
-									<span class="block text-sm md:text-base" style="color: #2c3e50; opacity: 0.85;">{reason.description}</span>
+									<span
+										class="block text-sm md:text-base"
+										style="color: #2c3e50; opacity: 0.85;"
+										>{reason.description}</span
+									>
 								</div>
 							</li>
 						{/each}
@@ -197,10 +231,7 @@
 		</div>
 	</section>
 
-	<section
-		class="py-16 sm:py-20 md:py-24"
-		style="background-color: #fafaFA;"
-	>
+	<section class="py-16 sm:py-20 md:py-24" style="background-color: #fafaFA;">
 		<div class="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
 			<div class="rounded-3xl border border-[#e8dccf] bg-white p-8 shadow-sm">
 				<div class="md:flex md:items-start md:justify-between">
@@ -215,7 +246,8 @@
 							class="mt-3 text-sm leading-relaxed md:text-base"
 							style="color: #2c3e50; opacity: 0.85;"
 						>
-							Suis notre ligne du temps : de la première intuition aux événements que nous accompagnons aujourd’hui.
+							Suis notre ligne du temps : de la première intuition aux
+							événements que nous accompagnons aujourd’hui.
 						</p>
 					</div>
 				</div>
@@ -227,7 +259,9 @@
 							<div class="relative flex flex-col items-center">
 								<span
 									class="flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold shadow-sm"
-									style="background-color: {isFirst ? '#2c3e50' : '#d4a574'}; color: white;"
+									style="background-color: {isFirst
+										? '#2c3e50'
+										: '#d4a574'}; color: white;"
 								>
 									{index + 1}
 								</span>
@@ -236,13 +270,22 @@
 								{/if}
 							</div>
 							<div>
-								<p class="text-xs font-semibold uppercase tracking-[0.2em]" style="color: #2c3e50; opacity: 0.6;">
+								<p
+									class="text-xs font-semibold uppercase tracking-[0.2em]"
+									style="color: #2c3e50; opacity: 0.6;"
+								>
 									{item.tag}
 								</p>
-								<h3 class="mt-2 text-lg font-semibold md:text-xl" style="color: #2c3e50;">
+								<h3
+									class="mt-2 text-lg font-semibold md:text-xl"
+									style="color: #2c3e50;"
+								>
 									{item.title}
 								</h3>
-								<p class="mt-2 text-sm leading-relaxed md:text-base" style="color: #2c3e50; opacity: 0.85;">
+								<p
+									class="mt-2 text-sm leading-relaxed md:text-base"
+									style="color: #2c3e50; opacity: 0.85;"
+								>
 									{item.description}
 								</p>
 							</div>
@@ -275,7 +318,10 @@
 						<h3 class="text-base font-semibold" style="color: #2c3e50;">
 							{item.title}
 						</h3>
-						<p class="mt-3 text-sm leading-relaxed md:text-base" style="color: #2c3e50; opacity: 0.85;">
+						<p
+							class="mt-3 text-sm leading-relaxed md:text-base"
+							style="color: #2c3e50; opacity: 0.85;"
+						>
 							{item.description}
 						</p>
 					</div>
@@ -284,12 +330,14 @@
 		</div>
 	</section>
 
-	<section
-		class="relative overflow-hidden bg-white py-16 sm:py-20 md:py-24"
-	>
-		<div class="absolute inset-0 bg-gradient-to-br from-[#fff9f4] via-white to-white opacity-70"></div>
+	<section class="relative overflow-hidden bg-white py-16 sm:py-20 md:py-24">
+		<div
+			class="absolute inset-0 bg-gradient-to-br from-[#fff9f4] via-white to-white opacity-70"
+		></div>
 		<div class="relative mx-auto max-w-4xl px-6 sm:px-8 lg:px-12">
-			<div class="rounded-3xl border border-[#e8dccf] bg-white/50 p-8 text-center shadow-sm backdrop-blur-sm">
+			<div
+				class="rounded-3xl border border-[#e8dccf] bg-white/50 p-8 text-center shadow-sm backdrop-blur-sm"
+			>
 				<p
 					class="text-sm font-semibold uppercase tracking-[0.3em]"
 					style="color: #d4a574;"
@@ -300,19 +348,22 @@
 					class="mt-6 text-lg leading-relaxed md:text-xl"
 					style="color: #2c3e50; font-family: 'Playfair Display', serif;"
 				>
-					« On ne voulait plus choisir entre un bel accueil et une organisation efficace.
-					PlaceMoi est né pour que les organisateurs retrouvent de la sérénité et que les invités vivent un moment fluide. »
+					« On ne voulait plus choisir entre un bel accueil et une organisation
+					efficace. PlaceMoi est né pour que les organisateurs retrouvent de la
+					sérénité et que les invités vivent un moment fluide. »
 				</blockquote>
-				<p class="mt-6 text-sm leading-relaxed md:text-base" style="color: #2c3e50; opacity: 0.75;">
-					Nous continuons d’améliorer la plateforme avec les retours de la communauté : chaque événement nous inspire une nouvelle attention.
+				<p
+					class="mt-6 text-sm leading-relaxed md:text-base"
+					style="color: #2c3e50; opacity: 0.75;"
+				>
+					Nous continuons d’améliorer la plateforme avec les retours de la
+					communauté : chaque événement nous inspire une nouvelle attention.
 				</p>
 			</div>
 		</div>
 	</section>
 
-	<section
-		class="bg-[#fff9f4] py-16 sm:py-20 md:py-24"
-	>
+	<section class="bg-[#fff9f4] py-16 sm:py-20 md:py-24">
 		<div class="mx-auto max-w-4xl px-6 text-center sm:px-8 lg:px-12">
 			<h2
 				class="text-2xl font-normal leading-[120%] tracking-tight md:text-3xl"
@@ -324,9 +375,13 @@
 				class="mt-4 text-sm leading-relaxed md:text-base"
 				style="color: #2c3e50; opacity: 0.85;"
 			>
-				PlaceMoi te permet de guider tes invités en toute simplicité, de partager un QR code unique et de collecter leurs souvenirs sans stress. On t’accompagne à chaque étape.
+				PlaceMoi te permet de guider tes invités en toute simplicité, de
+				partager un QR code unique et de collecter leurs souvenirs sans stress.
+				On t’accompagne à chaque étape.
 			</p>
-			<div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+			<div
+				class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row"
+			>
 				<a
 					href="/auth"
 					class="inline-flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.02]"
@@ -344,5 +399,10 @@
 			</div>
 		</div>
 	</section>
-</main>
 
+	<!-- Liens internes contextuels -->
+	<div class="px-6 pb-10 text-center text-sm sm:px-8 lg:px-12" style="color:#2c3e50; opacity:.8;">
+		Découvrir nos <a href="/pricing" class="underline">tarifs</a> ou poser une question via la
+		<a href="/contact" class="underline">page contact</a>.
+	</div>
+</main>

@@ -137,11 +137,28 @@
 </script>
 
 <svelte:head>
-	<title>{WebsiteName} - FAQ</title>
+	<title>FAQ Plan de table événement | Questions fréquentes - {WebsiteName}</title>
 	<meta
 		name="description"
-		content="Toutes les réponses sur Placemoi : fonctionnement, expérience invités, collecte de photos, tarifs et support. Préparez votre événement en toute confiance."
+		content="FAQ complète sur le plan de table événement : fonctionnement, QR code, collecte photos, tarifs. Pour mariages, anniversaires, conférences, séminaires. Toutes les réponses pour organiser votre événement sereinement."
 	/>
+	<meta
+		name="keywords"
+		content="FAQ plan de table, questions plan de table mariage, FAQ QR code événement, questions placement invités, FAQ collecte photos, questions plan de table conférence, FAQ placemoi, aide plan de table"
+	/>
+	<meta
+		property="og:title"
+		content="FAQ Plan de table événement | Questions fréquentes - {WebsiteName}"
+	/>
+	<meta
+		property="og:description"
+		content="FAQ complète sur le plan de table événement : fonctionnement, QR code, collecte photos, tarifs. Pour mariages, anniversaires, conférences, séminaires."
+	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://placemoi.com/faq" />
+	<meta property="og:image" content="/images/logo_text.svg" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<link rel="canonical" href="https://placemoi.com/faq" />
 	<script type="application/ld+json">
 		{JSON.stringify(faqStructuredData)}
 	</script>
@@ -298,5 +315,11 @@
 			</div>
 		</div>
 	</section>
+
+	<!-- Liens internes contextuels -->
+	<div class="px-6 pb-10 text-center text-sm sm:px-8 lg:px-12" style="color:#2c3e50; opacity:.8;">
+		Vous cherchez les tarifs ? Consultez la page <a href="/pricing" class="underline">Tarifs</a>.
+		Une autre question ? <a href="/contact" class="underline">Contactez-nous</a>.
+	</div>
 </main>
 

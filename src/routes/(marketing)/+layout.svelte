@@ -51,7 +51,7 @@
 			>
 				<img
 					src="/images/logo_text.svg"
-					alt="Logo Pattyly"
+					alt="Logo PLACEMOI"
 					class="h-[70px] w-[124px] object-contain transition-transform duration-200 hover:scale-105"
 				/>
 			</Button>
@@ -232,6 +232,12 @@
 							class="text-sm text-white/70 transition-colors hover:text-white/90"
 						>
 							Plan de table conférence
+						</a>
+						<a
+							href="/plan-de-table-bapteme"
+							class="text-sm text-white/70 transition-colors hover:text-white/90"
+						>
+							Plan de table baptême
 						</a>
 					</nav>
 				</div>
