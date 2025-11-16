@@ -51,7 +51,9 @@
 </script>
 
 <svelte:head>
-	<title>Tarifs plan de table événement | {WebsiteName} - À partir de 49,99€ par événement</title>
+	<title
+		>Tarifs plan de table événement | {WebsiteName} - À partir de 49,99€ par événement</title
+	>
 	<meta
 		name="description"
 		content="Plan Placement 49,99€ | Plan Placement + Photos 99,99€. QR code, page personnalisée, collecte photos. Pour mariages, anniversaires, conférences, séminaires. Paiement unique par événement, sans abonnement."
