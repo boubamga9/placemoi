@@ -5,8 +5,10 @@
 	import Solutions from './components/sections/benefits.svelte';
 	import PhotoSharing from './components/sections/photo-sharing.svelte';
 	import Pricing from './components/sections/pricing.svelte';
+	import WeddingPlannersCta from './components/sections/wedding-planners-cta.svelte';
 	import LastCta from './components/sections/last-cta.svelte';
 	import Faq from './components/sections/faq.svelte';
+	import ScrollToTop from './components/scroll-to-top.svelte';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const structuredData = {
@@ -78,6 +80,8 @@
 	<Solutions />
 	<PhotoSharing />
 	<Pricing />
+	<WeddingPlannersCta />
 	<LastCta />
 	<Faq />
+	<ScrollToTop />
 </div>

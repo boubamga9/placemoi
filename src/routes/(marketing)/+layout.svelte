@@ -306,6 +306,17 @@
 			</div>
 		</div>
 
+		<!-- Wedding Planner CTA -->
+		<div class="flex justify-center">
+			<a
+				href="/wedding-planners"
+				class="inline-flex items-center justify-center rounded-xl border-2 px-6 py-3 text-sm font-semibold transition-all duration-200 hover:scale-105"
+				style="border-color: #d4a574; background-color: rgba(212, 165, 116, 0.1); color: #d4a574;"
+			>
+				Je suis wedding planner
+			</a>
+		</div>
+
 		<!-- Bottom section: Copyright -->
 		<div class="border-t pt-8" style="border-color: #3A4E66;">
 			<p class="text-center text-sm text-white/60">
