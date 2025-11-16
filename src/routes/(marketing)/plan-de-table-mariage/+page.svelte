@@ -479,9 +479,12 @@
 							style="color: #2c3e50; opacity: 0.85;"
 						>
 							Un couple organisait son mariage avec 200 invités répartis sur 20
-							tables. Le panneau avec tous les noms devenait illisible, et ils
-							recevaient encore des appels la veille du mariage pour savoir "à
-							quelle table je suis ?".
+							tables. Le panneau avec tous les noms devenait illisible et
+							cassait l'esthétique de leur décoration. Les changements de
+							dernière minute les stressaient : un invité en plus, un autre en
+							moins, et il fallait tout réimprimer. La veille du mariage, ils
+							étaient encore en train d'ajuster le plan de table au lieu de
+							profiter de leur soirée.
 						</p>
 						<h3
 							class="mb-4 text-xl font-semibold"
@@ -496,8 +499,10 @@
 							Ils ont créé leur événement en 10 minutes, importé leur liste
 							Excel, personnalisé la page avec leurs couleurs de mariage. Le
 							jour J, un QR code discret à l'entrée a remplacé le panneau géant.
-							Résultat : aucun appel, aucun stress, et leurs invités ont trouvé
-							leur table en 3 secondes.
+							Résultat : plus de stress, modifications en un clic jusqu'au
+							dernier moment, et leurs invités ont trouvé leur table en 3
+							secondes. Ils ont pu profiter pleinement du plus beau jour de leur
+							vie.
 						</p>
 					</div>
 					<div
@@ -737,11 +742,6 @@
 			>
 				Rejoignez les couples qui ont choisi PLACEMOI pour simplifier leur plan
 				de table mariage. Créez votre événement dès maintenant.
-			</p>
-			<p class="mt-2 text-sm" style="color:#2c3e50; opacity:.8;">
-				Questions ? Consultez la <a href="/faq" class="underline">FAQ</a> ou
-				découvrez nos
-				<a href="/pricing" class="underline">tarifs</a>.
 			</p>
 			<div
 				class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row"

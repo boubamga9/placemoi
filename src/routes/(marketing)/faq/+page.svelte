@@ -315,11 +315,5 @@
 			</div>
 		</div>
 	</section>
-
-	<!-- Liens internes contextuels -->
-	<div class="px-6 pb-10 text-center text-sm sm:px-8 lg:px-12" style="color:#2c3e50; opacity:.8;">
-		Vous cherchez les tarifs ? Consultez la page <a href="/pricing" class="underline">Tarifs</a>.
-		Une autre question ? <a href="/contact" class="underline">Contactez-nous</a>.
-	</div>
 </main>
 

@@ -8,83 +8,111 @@
 	} from '$lib/components/ui/collapsible';
 	import { ChevronDown } from 'lucide-svelte';
 
-	const baptismBenefits = [
+	const baptismPainPoints = [
 		{
-			icon: '🙏',
-			title: 'Discret et élégant',
+			icon: '🍼',
+			title: 'Panneaux illisibles et encombrants',
 			description:
-				"Un QR code discret à l'entrée permet aux invités de trouver leur table sans perturber l'ambiance familiale et spirituelle du baptême.",
-		},
-		{
-			icon: '🎨',
-			title: 'Personnalisation simple',
-			description:
-				'Couleurs douces, photo de votre enfant, message personnalisé pour accueillir vos proches : la page invitée reflète votre cérémonie.',
+				"Vous avez famille proche, parrains/marraines et invités? Le panneau avec tous les noms devient illisible et casse l'esthétique du lieu.",
 		},
 		{
 			icon: '🔄',
-			title: 'Modifications de dernière minute',
+			title: "Changements de dernière minute",
 			description:
-				"Ajoutez un invité, changez une table, corrigez une faute : tout se met à jour instantanément, sans réimpression d'affiches.",
+				"Un invité en plus, un autre en moins... Vous devez réimprimer les plans. Le stress monte à l'approche du jour J.",
+		},
+		{
+			icon: '⏰',
+			title: "Files d'attente à l'entrée",
+			description:
+				"Tout le monde cherche son nom au même endroit. L'entrée devient un embouteillage alors que vous voulez accueillir sereinement.",
+		},
+	];
+
+	const baptismBenefits = [
+		{
+			icon: '🎯',
+			title: 'Rapide et clair',
+			description:
+				'Un QR code discret remplace le panneau géant. Les invités scannent et trouvent leur table en 3 secondes.',
+		},
+		{
+			icon: '🎨',
+			title: '100% personnalisable',
+			description:
+				"Logo, couleurs, message d'accueil: créez une page invitée à l'image de votre baptême.",
 		},
 		{
 			icon: '📸',
-			title: 'Collecte de photos en option',
+			title: 'Souvenirs partagés',
 			description:
-				"Les proches partagent leurs photos du jour depuis le même QR code. Vous récupérez tout dans un album unique (optionnel).",
+				"Collecte des photos depuis le même QR code pour rassembler les beaux moments de la journée.",
+		},
+		{
+			icon: '🔄',
+			title: "Modifiable jusqu'au jour J",
+			description:
+				'Vous ajustez en ligne, les invités voient automatiquement la mise à jour. Plus de réimpression.',
 		},
 	];
 
 	const baptismTimeline = [
 		{
-			time: '2-3 semaines avant',
-			title: 'Créez votre page invitée',
+			time: '1 mois avant',
+			title: 'Créez votre événement',
 			description:
-				"Ajoutez vos invités, organisez les tables (ou les groupes), personnalisez les couleurs et le message d'accueil.",
+				"Importez votre liste d'invités (Excel ou manuel). Organisez vos tables par familles, parrains et marraines.",
+		},
+		{
+			time: '2 semaines avant',
+			title: 'Personnalisez la page',
+			description:
+				"Ajoutez le prénom de l'enfant, vos couleurs et un message d'accueil. La page reflète l'identité de votre baptême.",
 		},
 		{
 			time: '1 semaine avant',
 			title: 'Partagez le QR code',
 			description:
-				"Envoyez le lien par message ou email aux proches, ou imprimez un petit QR code à poser à l'entrée de la salle.",
+				"Recevez votre QR code et votre lien unique. Partagez-les avec vos invités par email, sur les réseaux sociaux, ou affichez le QR code à l'entrée.",
 		},
 		{
 			time: 'Jour J',
-			title: 'Un accueil fluide',
+			title: 'Profitez sereinement',
 			description:
-				"Les invités scannent, trouvent leur table en 3 secondes, et s'installent sereinement. Vous profitez du moment.",
+				"Les invités scannent, trouvent leur table, s'installent. Vous profitez du moment en famille. Les photos arrivent automatiquement dans votre album.",
 		},
 	];
 
 	const baptismFaq = [
 		{
-			question: 'Est-ce adapté à un petit baptême familial ?',
+			question: 'Peut-on gérer des places assises précises ?',
 			answer:
-				'Oui, même pour 20 à 50 invités, le QR code évite les files et les panneaux. C’est discret, élégant et pratique.',
+				'Oui. Vous pouvez indiquer la table et éventuellement la place. Les invités voient l’information immédiatement.',
 		},
 		{
-			question: 'Peut-on personnaliser aux couleurs du baptême ?',
+			question: "Faut-il une application côté invité ?",
 			answer:
-				'Oui, vous pouvez choisir des couleurs douces, ajouter une photo et un message, et adapter le style à votre cérémonie.',
+				"Non. Ils scannent le QR code avec l'appareil photo de leur téléphone et arrivent sur la page invitée.",
 		},
 		{
-			question: 'Peut-on changer les tables au dernier moment ?',
+			question: "Puis-je modifier jusqu'au dernier moment ?",
 			answer:
-				'Oui, vous pouvez mettre à jour la liste et les tables jusqu’au jour J. Les invités voient automatiquement la dernière version.',
+				"Oui, vous pouvez ajuster la liste et les tables jusqu'au jour J. Les changements sont instantanés.",
 		},
 		{
-			question: 'Les invités doivent-ils installer une application ?',
+			question: "Combien d'invités peut-on gérer ?",
 			answer:
-				'Non. Ils scannent simplement le QR code avec leur appareil photo et accèdent immédiatement à la page invitée.',
+				'Jusqu’à 500 invités par événement. Contactez-nous si vous avez un besoin supérieur.',
 		},
 	];
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const structuredData = {
 		'@context': 'https://schema.org',
 		'@type': 'WebPage',
 		name: 'Plan de table baptême en ligne - PLACEMOI',
 		description:
-			"Créez votre plan de table de baptême en ligne avec QR code. Discret, personnalisable, modifiable jusqu'au jour J. Parfait pour 20 à 150 invités.",
+			"Créez votre plan de table baptême en ligne avec QR code. Personnalisable, modifiable jusqu'au jour J. Pour 30 à 200 invités.",
 		about: {
 			'@type': 'Thing',
 			name: 'Plan de table baptême',
@@ -98,11 +126,11 @@
 	>
 	<meta
 		name="description"
-		content="Créez votre plan de table de baptême en ligne en 5 minutes. QR code discret, page personnalisée, modifications jusqu'au jour J. Parfait pour 20 à 150 invités."
+		content="Créez votre plan de table baptême en ligne en 5 minutes. QR code élégant, page personnalisable, modifications jusqu'au jour J. Pour 30 à 200 invités. À partir de 49,99€."
 	/>
 	<meta
 		name="keywords"
-		content="plan de table baptême, placement invités baptême, QR code baptême, organisation baptême, plan de table baptême en ligne, gestion invités baptême, plan de table discret, page invités baptême, collecte photos baptême, idées plan de table baptême"
+		content="plan de table baptême, placement invités baptême, QR code baptême, organisation baptême, plan de table baptême en ligne, application baptême, logiciel baptême, liste invités baptême, accueil invités baptême, idées plan de table baptême"
 	/>
 	<meta
 		property="og:title"
@@ -110,13 +138,10 @@
 	/>
 	<meta
 		property="og:description"
-		content="Créez votre plan de table de baptême en ligne. QR code discret, page personnalisée, modifications jusqu'au jour J. Vos invités trouvent leur table en 3 secondes."
+		content="Créez votre plan de table baptême en ligne. QR code élégant, page personnalisable, modifications jusqu'au jour J. Vos invités trouvent leur table en 3 secondes."
 	/>
 	<meta property="og:type" content="website" />
-	<meta
-		property="og:url"
-		content="https://placemoi.com/plan-de-table-bapteme"
-	/>
+	<meta property="og:url" content="https://placemoi.com/plan-de-table-bapteme" />
 	<meta property="og:image" content="/images/logo_text.svg" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<link rel="canonical" href="https://placemoi.com/plan-de-table-bapteme" />
@@ -142,14 +167,15 @@
 					class="mt-4 text-3xl font-normal leading-[120%] tracking-tight md:text-4xl xl:text-5xl"
 					style="color: #2c3e50; font-family: 'Playfair Display', serif;"
 				>
-					Organisez le placement de vos invités de baptême en toute sérénité
+					Organisez l’accueil de vos invités de baptême en quelques minutes
 				</h1>
 				<p
 					class="mt-6 text-base leading-[160%] md:text-lg"
 					style="color: #2c3e50; opacity: 0.85;"
 				>
-					Un QR code discret, une page personnalisée et des invités sereins. Vous
-					maîtrisez l’accueil sans stress et profitez pleinement de la cérémonie.
+					Fini les panneaux encombrants et les changements de dernière minute.
+					Un QR code discret et une page invitée personnalisée guident vos
+					invités immédiatement vers leur table.
 				</p>
 				<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
 					<Button
@@ -168,11 +194,6 @@
 						Voir les tarifs
 					</Button>
 				</div>
-				<p class="mt-3 text-xs" style="color: #2c3e50; opacity: 0.7;">
-					Vous avez des questions ? Consultez la <a href="/faq" class="underline"
-						>FAQ</a
-					> ou <a href="/contact" class="underline">contactez-nous</a>.
-				</p>
 			</div>
 			<div class="flex-1">
 				<img
@@ -184,8 +205,134 @@
 		</div>
 	</section>
 
-	<!-- Benefits -->
+	<!-- Use Cases - Baptême -->
 	<section class="py-16 sm:py-20 md:py-24" style="background-color: white;">
+		<div class="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
+			<div class="text-center">
+				<p
+					class="text-sm font-semibold uppercase tracking-[0.3em]"
+					style="color: #d4a574;"
+				>
+					Cas d'usage réels
+				</p>
+				<h2
+					class="mt-4 text-2xl font-normal leading-[120%] tracking-tight md:text-3xl xl:text-4xl"
+					style="color: #2c3e50; font-family: 'Playfair Display', serif;"
+				>
+					Deux exemples concrets pour un baptême sans stress
+				</h2>
+			</div>
+
+			<div class="mt-12 grid gap-8 md:grid-cols-2">
+				<!-- Cas 1 -->
+				<div class="rounded-3xl border border-[#e8dccf] bg-[#fff9f4] p-8">
+					<h3 class="mb-2 text-xl font-semibold" style="color: #2c3e50;">
+						Petit comité (40 invités) – Déjeuner de famille
+					</h3>
+					<p class="text-sm leading-relaxed" style="color: #2c3e50; opacity: 0.85;">
+						Accueil dans une salle paroissiale, 6 tables de 6-8 personnes.
+						Les invités scannent le QR code à l’entrée et trouvent immédiatement leur table. 
+						Aucun panneau à imprimer, changement de dernière minute géré en ligne.
+					</p>
+					<div class="mt-6 grid grid-cols-2 gap-4 text-sm" style="color: #2c3e50;">
+						<div class="rounded-xl bg-white p-4">
+							<p class="opacity-70">Invités</p>
+							<p class="text-lg font-semibold">40</p>
+						</div>
+						<div class="rounded-xl bg-white p-4">
+							<p class="opacity-70">Tables</p>
+							<p class="text-lg font-semibold">6</p>
+						</div>
+						<div class="rounded-xl bg-white p-4">
+							<p class="opacity-70">Mise en place</p>
+							<p class="text-lg font-semibold">10 min</p>
+						</div>
+						<div class="rounded-xl bg-white p-4">
+							<p class="opacity-70">Réimpression</p>
+							<p class="text-lg font-semibold" style="color:#d4a574;">0</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Cas 2 -->
+				<div class="rounded-3xl border border-[#e8dccf] bg-[#fff9f4] p-8">
+					<h3 class="mb-2 text-xl font-semibold" style="color: #2c3e50;">
+						Groupe élargi (120 invités) – Salle de réception
+					</h3>
+					<p class="text-sm leading-relaxed" style="color: #2c3e50; opacity: 0.85;">
+						Organisation par familles et parrains/marraines, 12 tables de 10 personnes.
+						Le QR code fluidifie l’arrivée, et la personnalisation (prénom de l’enfant, couleurs) 
+						offre un rendu élégant. Ajustements possibles jusqu’au matin même.
+					</p>
+					<div class="mt-6 grid grid-cols-2 gap-4 text-sm" style="color: #2c3e50;">
+						<div class="rounded-xl bg-white p-4">
+							<p class="opacity-70">Invités</p>
+							<p class="text-lg font-semibold">120</p>
+						</div>
+						<div class="rounded-xl bg-white p-4">
+							<p class="opacity-70">Tables</p>
+							<p class="text-lg font-semibold">12</p>
+						</div>
+						<div class="rounded-xl bg-white p-4">
+							<p class="opacity-70">Temps accueil</p>
+							<p class="text-lg font-semibold">-70%</p>
+						</div>
+						<div class="rounded-xl bg-white p-4">
+							<p class="opacity-70">Appels le jour J</p>
+							<p class="text-lg font-semibold" style="color:#d4a574;">0</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Pain Points -->
+	<section class="py-16 sm:py-20 md:py-24" style="background-color: white;">
+		<div class="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
+			<div class="text-center">
+				<p
+					class="text-sm font-semibold uppercase tracking-[0.3em]"
+					style="color: #d4a574;"
+				>
+					Les problèmes fréquents
+				</p>
+				<h2
+					class="mt-4 text-2xl font-normal leading-[120%] tracking-tight md:text-3xl xl:text-4xl"
+					style="color: #2c3e50; font-family: 'Playfair Display', serif;"
+				>
+					Pourquoi un plan de table numérique pour un baptême ?
+				</h2>
+			</div>
+
+			<div class="mt-12 grid gap-8 md:grid-cols-2">
+				{#each baptismPainPoints as point}
+					<div class="flex gap-4">
+						<div
+							class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-2xl"
+							style="background-color: #f5e6d3;"
+						>
+							{point.icon}
+						</div>
+						<div>
+							<h3 class="mb-2 text-lg font-semibold" style="color: #2c3e50;">
+								{point.title}
+							</h3>
+							<p
+								class="text-sm leading-relaxed md:text-base"
+								style="color: #2c3e50; opacity: 0.85;"
+							>
+								{point.description}
+							</p>
+						</div>
+					</div>
+				{/each}
+			</div>
+		</div>
+	</section>
+
+	<!-- Benefits -->
+	<section class="py-16 sm:py-20 md:py-24" style="background-color: #fff9f4;">
 		<div class="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
 			<div class="text-center">
 				<p
@@ -198,7 +345,7 @@
 					class="mt-4 text-2xl font-normal leading-[120%] tracking-tight md:text-3xl xl:text-4xl"
 					style="color: #2c3e50; font-family: 'Playfair Display', serif;"
 				>
-					Votre plan de table baptême, discret et fluide
+					Votre plan de table baptême, simplifié
 				</h2>
 			</div>
 
@@ -225,16 +372,11 @@
 					</div>
 				{/each}
 			</div>
-
-			<p class="mt-10 text-center text-sm" style="color: #2c3e50; opacity: 0.8;">
-				Questions fréquentes ? Découvrez la <a href="/faq" class="underline">FAQ</a> ou
-				<a href="/pricing" class="underline">nos tarifs</a>.
-			</p>
 		</div>
 	</section>
 
 	<!-- Timeline -->
-	<section class="py-16 sm:py-20 md:py-24" style="background-color: #fff9f4;">
+	<section class="py-16 sm:py-20 md:py-24" style="background-color: white;">
 		<div class="mx-auto max-w-5xl px-6 sm:px-8 lg:px-12">
 			<div class="text-center">
 				<p
@@ -288,8 +430,103 @@
 		</div>
 	</section>
 
-	<!-- FAQ -->
+	<!-- Family Organization Section - UNIQUE TO BAPTISM -->
 	<section class="py-16 sm:py-20 md:py-24" style="background-color: #fafafa;">
+		<div class="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
+			<div class="text-center">
+				<p
+					class="text-sm font-semibold uppercase tracking-[0.3em]"
+					style="color: #d4a574;"
+				>
+					Organisation par familles
+				</p>
+				<h2
+					class="mt-4 text-2xl font-normal leading-[120%] tracking-tight md:text-3xl xl:text-4xl"
+					style="color: #2c3e50; font-family: 'Playfair Display', serif;"
+				>
+					Organisez vos tables selon vos liens familiaux
+				</h2>
+			</div>
+
+			<div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<div class="rounded-2xl border border-[#e8dccf] bg-white p-6 shadow-sm">
+					<div class="mb-4 text-3xl">👨‍👩‍👧‍👦</div>
+					<h3 class="mb-2 text-lg font-semibold" style="color: #2c3e50;">
+						Famille proche
+					</h3>
+					<p
+						class="text-sm leading-relaxed"
+						style="color: #2c3e50; opacity: 0.85;"
+					>
+						Réservez une table pour les parents, grands-parents, frères et sœurs. La famille proche peut être ensemble pour partager ce moment important.
+					</p>
+				</div>
+				<div class="rounded-2xl border border-[#e8dccf] bg-white p-6 shadow-sm">
+					<div class="mb-4 text-3xl">👫</div>
+					<h3 class="mb-2 text-lg font-semibold" style="color: #2c3e50;">
+						Parrains et marraines
+					</h3>
+					<p
+						class="text-sm leading-relaxed"
+						style="color: #2c3e50; opacity: 0.85;"
+					>
+						Placez les parrains et marraines à une table privilégiée, proche de la famille. Ils jouent un rôle central dans la cérémonie.
+					</p>
+				</div>
+				<div class="rounded-2xl border border-[#e8dccf] bg-white p-6 shadow-sm">
+					<div class="mb-4 text-3xl">👨‍👩‍👦‍👦</div>
+					<h3 class="mb-2 text-lg font-semibold" style="color: #2c3e50;">
+						Famille élargie
+					</h3>
+					<p
+						class="text-sm leading-relaxed"
+						style="color: #2c3e50; opacity: 0.85;"
+					>
+						Organisez les oncles, tantes, cousins par branches familiales. Cela facilite les conversations et crée une ambiance chaleureuse.
+					</p>
+				</div>
+				<div class="rounded-2xl border border-[#e8dccf] bg-white p-6 shadow-sm">
+					<div class="mb-4 text-3xl">👥</div>
+					<h3 class="mb-2 text-lg font-semibold" style="color: #2c3e50;">
+						Amis proches
+					</h3>
+					<p
+						class="text-sm leading-relaxed"
+						style="color: #2c3e50; opacity: 0.85;"
+					>
+						Regroupez les amis proches qui se connaissent. Une table dédiée aux amis permet des échanges détendus et joyeux.
+					</p>
+				</div>
+				<div class="rounded-2xl border border-[#e8dccf] bg-white p-6 shadow-sm">
+					<div class="mb-4 text-3xl">👶</div>
+					<h3 class="mb-2 text-lg font-semibold" style="color: #2c3e50;">
+						Enfants et jeunes
+					</h3>
+					<p
+						class="text-sm leading-relaxed"
+						style="color: #2c3e50; opacity: 0.85;"
+					>
+						Si vous avez des enfants invités, regroupez-les à une table adaptée. Cela permet aux parents de profiter sereinement de la cérémonie.
+					</p>
+				</div>
+				<div class="rounded-2xl border border-[#e8dccf] bg-white p-6 shadow-sm">
+					<div class="mb-4 text-3xl">🤝</div>
+					<h3 class="mb-2 text-lg font-semibold" style="color: #2c3e50;">
+						Mix famille/amis
+					</h3>
+					<p
+						class="text-sm leading-relaxed"
+						style="color: #2c3e50; opacity: 0.85;"
+					>
+						Pour les baptêmes plus intimes, n'hésitez pas à mixer famille et amis proches. L'important est que chacun se sente à l'aise.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- FAQ -->
+	<section class="py-16 sm:py-20 md:py-24" style="background-color: white;">
 		<div class="mx-auto max-w-4xl px-6 sm:px-8 lg:px-12">
 			<div class="text-center">
 				<p
@@ -302,19 +539,15 @@
 					class="mt-4 text-2xl font-normal leading-[120%] tracking-tight md:text-3xl xl:text-4xl"
 					style="color: #2c3e50; font-family: 'Playfair Display', serif;"
 				>
-					Tout sur le plan de table baptême
+					Tout ce que vous voulez savoir sur le plan de table baptême
 				</h2>
 			</div>
+
 			<div class="mt-12 space-y-4">
 				{#each baptismFaq as faqItem}
 					<Collapsible class="rounded-lg border border-[#e8dccf] bg-white shadow-sm">
-						<CollapsibleTrigger
-							class="flex w-full items-center justify-between p-6 text-left transition-colors"
-						>
-							<h3
-								class="flex-1 break-words pr-4 text-lg font-medium lg:text-xl"
-								style="color: #2c3e50;"
-							>
+						<CollapsibleTrigger class="flex w-full items-center justify-between p-6 text-left transition-colors">
+							<h3 class="flex-1 break-words pr-4 text-lg font-medium lg:text-xl" style="color: #2c3e50;">
 								{faqItem.question}
 							</h3>
 							<ChevronDown
@@ -323,46 +556,40 @@
 							/>
 						</CollapsibleTrigger>
 						<CollapsibleContent class="px-6 pb-6">
-							<p
-								class="text-base leading-relaxed lg:text-lg"
-								style="color: #2c3e50; opacity: 0.9;"
-							>
+							<p class="text-base leading-relaxed lg:text-lg" style="color: #2c3e50; opacity: 0.9;">
 								{faqItem.answer}
 							</p>
 						</CollapsibleContent>
 					</Collapsible>
 				{/each}
 			</div>
+
 			<div class="mt-8 text-center">
 				<a
-					href="/pricing"
+					href="/faq"
 					class="inline-flex items-center justify-center rounded-xl border px-6 py-3 text-sm font-semibold transition-colors duration-200"
 					style="border-color: #d4a574; color: #2c3e50;"
 				>
-					Voir les tarifs
+					Consulter toutes les questions
 				</a>
 			</div>
 		</div>
 	</section>
 
 	<!-- Final CTA -->
-	<section
-		class="border-t py-16 sm:py-20 md:py-24"
-		style="background-color: #fff9f4; border-color: #f0e8df;"
-	>
+	<section class="border-t py-16 sm:py-20 md:py-24" style="background-color: #fff9f4; border-color: #f0e8df;">
 		<div class="mx-auto max-w-4xl px-6 text-center sm:px-8 lg:px-12">
 			<h2
 				class="text-2xl font-normal leading-[120%] tracking-tight md:text-3xl"
 				style="color: #2c3e50; font-family: 'Playfair Display', serif;"
 			>
-				Un baptême serein et mémorable
+				Organisez votre baptême sereinement
 			</h2>
 			<p
 				class="mt-4 text-sm leading-relaxed md:text-base"
 				style="color: #2c3e50; opacity: 0.85;"
 			>
-				Créez votre événement dès maintenant, testez gratuitement, puis activez
-				quand tout est prêt. <a href="/faq" class="underline">Questions ?</a>
+				Rejoignez les familles qui ont choisi PLACEMOI pour simplifier leur plan de table baptême. Créez votre événement dès maintenant.
 			</p>
 			<div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
 				<a href="/auth">

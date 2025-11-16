@@ -228,16 +228,22 @@
 							Plan de table anniversaire
 						</a>
 						<a
+							href="/plan-de-table-bapteme"
+							class="text-sm text-white/70 transition-colors hover:text-white/90"
+						>
+							Plan de table baptême
+						</a>
+						<a
 							href="/plan-de-table-conference"
 							class="text-sm text-white/70 transition-colors hover:text-white/90"
 						>
 							Plan de table conférence
 						</a>
 						<a
-							href="/plan-de-table-bapteme"
+							href="/plan-de-table-gala"
 							class="text-sm text-white/70 transition-colors hover:text-white/90"
 						>
-							Plan de table baptême
+							Plan de table gala
 						</a>
 					</nav>
 				</div>

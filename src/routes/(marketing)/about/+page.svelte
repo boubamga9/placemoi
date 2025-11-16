@@ -64,7 +64,6 @@
 		},
 	];
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const structuredData = {
 		'@context': 'https://schema.org',
 		'@type': 'AboutPage',
@@ -399,14 +398,4 @@
 			</div>
 		</div>
 	</section>
-
-	<!-- Liens internes contextuels -->
-	<div
-		class="px-6 pb-10 text-center text-sm sm:px-8 lg:px-12"
-		style="color:#2c3e50; opacity:.8;"
-	>
-		Découvrir nos <a href="/pricing" class="underline">tarifs</a> ou poser une
-		question via la
-		<a href="/contact" class="underline">page contact</a>.
-	</div>
 </main>

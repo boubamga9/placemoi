@@ -257,16 +257,4 @@
 			</div>
 		</div>
 	</section>
-
-	<!-- Liens internes contextuels -->
-	<div
-		class="px-6 pb-10 text-center text-sm sm:px-8 lg:px-12"
-		style="color:#2c3e50; opacity:.8;"
-	>
-		Avant d'écrire, vous pouvez consulter la <a href="/faq" class="underline"
-			>FAQ</a
-		>
-		ou découvrir nos
-		<a href="/pricing" class="underline">tarifs</a>.
-	</div>
 </main>

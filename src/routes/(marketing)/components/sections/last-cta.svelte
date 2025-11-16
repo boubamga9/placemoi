@@ -7,7 +7,7 @@
 		class="mb-6 text-2xl font-normal leading-[120%] tracking-tight lg:text-3xl xl:text-4xl"
 		style="color: #2C3E50; font-family: 'Playfair Display', serif;"
 	>
-		Prêt à organiser votre événement ?
+		Prêt.e à organiser votre événement ?
 	</h2>
 	<p
 		class="mb-8 max-w-2xl text-center text-lg sm:text-xl lg:text-xl"
@@ -30,6 +30,7 @@
 		</a>
 	</div>
 	<p class="mt-4 text-sm font-light" style="color: #2C3E50; opacity: 0.8;">
-		✔️ <strong>À partir de 49,99€</strong> par événement • Paiement unique • QR code + lien inclus
+		✔️ <strong>À partir de 49,99€</strong> par événement • Paiement unique • QR code
+		+ lien inclus
 	</p>
 </div>
