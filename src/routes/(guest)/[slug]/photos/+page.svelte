@@ -87,10 +87,13 @@
 		});
 
 		try {
-			const response = await fetch(`/api/events/${data.event.id}/photos/upload`, {
-				method: 'POST',
-				body: formData,
-			});
+			const response = await fetch(
+				`/api/events/${data.event.id}/photos/upload`,
+				{
+					method: 'POST',
+					body: formData,
+				},
+			);
 
 			const result = await response.json();
 
@@ -103,17 +106,21 @@
 				}, 3000);
 			} else {
 				// Améliorer les messages d'erreur
-				let errorMsg = result.message || result.error || "Erreur lors de l'upload";
-				
+				let errorMsg =
+					result.message || result.error || "Erreur lors de l'upload";
+
 				// Si l'erreur contient des détails sur les fichiers rejetés, les afficher
 				if (errorMsg.includes('fichier trop volumineux')) {
-					errorMsg = 'Vidéo trop volumineuse. Taille maximum : 100MB. Essayez de compresser votre vidéo ou choisissez une vidéo plus courte.';
+					errorMsg =
+						'Vidéo trop volumineuse. Taille maximum : 100MB. Essayez de compresser votre vidéo ou choisissez une vidéo plus courte.';
 				} else if (errorMsg.includes('type non supporté')) {
-					errorMsg = 'Format de fichier non supporté. Formats acceptés : MP4, MOV, AVI, WebM, MKV.';
+					errorMsg =
+						'Format de fichier non supporté. Formats acceptés : MP4, MOV, AVI, WebM, MKV.';
 				} else if (errorMsg.includes('Aucun fichier valide')) {
-					errorMsg = 'Aucun fichier valide. Vérifiez que vos fichiers sont des images ou vidéos et qu\'ils ne dépassent pas 100MB.';
+					errorMsg =
+						"Aucun fichier valide. Vérifiez que vos fichiers sont des images ou vidéos et qu'ils ne dépassent pas 100MB.";
 				}
-				
+
 				uploadError = errorMsg;
 			}
 		} catch (error) {
@@ -179,13 +186,24 @@
 					tabindex="0"
 				>
 					{#if isUploading}
-						<LoaderCircle class="h-12 w-12 animate-spin" style={`color: ${data.customization.font_color};`} />
+						<LoaderCircle
+							class="h-12 w-12 animate-spin"
+							style={`color: ${data.customization.font_color};`}
+						/>
 						<h2 class="mt-4 text-xl font-semibold">Upload en cours...</h2>
 					{:else if uploadSuccess}
-						<CheckCircle2 class="h-12 w-12" style={`color: ${data.customization.font_color};`} />
-						<h2 class="mt-4 text-xl font-semibold">Photos envoyées avec succès !</h2>
+						<CheckCircle2
+							class="h-12 w-12"
+							style={`color: ${data.customization.font_color};`}
+						/>
+						<h2 class="mt-4 text-xl font-semibold">
+							Photos envoyées avec succès !
+						</h2>
 					{:else if uploadError}
-						<XCircle class="h-12 w-12" style={`color: ${data.customization.font_color};`} />
+						<XCircle
+							class="h-12 w-12"
+							style={`color: ${data.customization.font_color};`}
+						/>
 						<h2 class="mt-4 text-xl font-semibold">Erreur</h2>
 						<p class="mt-2 text-sm opacity-80">{uploadError}</p>
 					{:else}
