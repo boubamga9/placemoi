@@ -152,26 +152,6 @@
 
 <svelte:head>
 	<title>Photos partagées - {data.event.event_name}</title>
-	<style>
-		.scrollable-gradient-wrapper {
-			position: relative;
-		}
-		.scrollable-gradient-overlay {
-			position: absolute;
-			bottom: -1rem;
-			left: 0;
-			right: 0;
-			height: 6rem;
-			pointer-events: none;
-			z-index: 10;
-			background: linear-gradient(
-				to bottom,
-				transparent,
-				var(--gradient-color) 80%,
-				var(--gradient-color)
-			);
-		}
-	</style>
 </svelte:head>
 
 <div class="flex h-screen flex-col overflow-hidden" style={backgroundStyle}>
@@ -220,12 +200,7 @@
 	{/if}
 
 	<!-- Zone scrollable : Photos uniquement -->
-	<div
-		class="scrollable-gradient-wrapper relative mb-8 min-h-0 flex-1"
-		style="--gradient-color: {data.customization.background_color};"
-	>
-		<!-- Dégradé fixe en bas de la zone scrollable -->
-		<div class="scrollable-gradient-overlay"></div>
+	<div class="relative mb-8 min-h-0 flex-1">
 		<div class="h-full overflow-y-auto">
 			<div class="container mx-auto w-full max-w-4xl px-4 pb-4">
 				{#if isLoadingPhotos}
@@ -255,7 +230,7 @@
 						style="background-color: rgba(255, 255, 255, 0.1);"
 					>
 						<div
-							class="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4"
+							class="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 lg:gap-5"
 						>
 							{#each photos as photo}
 								<div class="relative aspect-square overflow-hidden rounded-lg">

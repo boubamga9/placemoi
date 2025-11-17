@@ -41,6 +41,8 @@ export const GET: RequestHandler = async ({ params, request, locals: { supabase 
 
 	try {
 		// Construire la requête avec filtrage obligatoire par device_id
+		// Le filtrage par device_id est fait côté application pour la sécurité
+		// La politique RLS s'assure que seules les photos des événements publics sont accessibles
 		const { data: photos, error: photosError } = await supabase
 			.from('event_photos')
 			.select('id, file_name, file_type, uploaded_at, backblaze_file_name, device_id')
