@@ -50,6 +50,24 @@ export const load: PageServerLoad = async () => {
 			ctaLabel: 'Activer les photos invitées',
 			ctaHref: '/auth',
 		},
+		{
+			id: 'wedding-planners',
+			name: 'Pour Wedding Planners',
+			price: 0, // 0 signifie "Sur devis"
+			description:
+				'Tarifs dégressifs et gestion multi-événements pour les professionnels.',
+			badge: 'Professionnel',
+			features: [
+				'Toutes les fonctionnalités Placement + Photos',
+				'Gestion de plusieurs événements simultanés',
+				'Tableau de bord professionnel centralisé',
+				'Tarifs dégressifs selon volume',
+				'Support prioritaire dédié',
+			],
+			extras: [],
+			ctaLabel: 'Contactez-nous',
+			ctaHref: '/wedding-planners',
+		},
 	];
 
 	return {

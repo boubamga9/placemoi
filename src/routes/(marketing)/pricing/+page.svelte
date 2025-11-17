@@ -39,14 +39,16 @@
 		name: 'Placemoi',
 		description:
 			'Outil de placement et collecte de photos pour les événements et mariages.',
-		offers: plans.map((plan) => ({
-			'@type': 'Offer',
-			name: plan.name,
-			price: plan.price.toFixed(2),
-			priceCurrency: 'EUR',
-			availability: 'https://schema.org/InStock',
-			url: `https://placemoi.com/pricing#${plan.id}`,
-		})),
+		offers: plans
+			.filter((plan) => plan.price > 0)
+			.map((plan) => ({
+				'@type': 'Offer',
+				name: plan.name,
+				price: plan.price.toFixed(2),
+				priceCurrency: 'EUR',
+				availability: 'https://schema.org/InStock',
+				url: `https://placemoi.com/pricing#${plan.id}`,
+			})),
 	});
 </script>
 
@@ -164,19 +166,19 @@
 		class="py-16 sm:py-20 md:py-24"
 		style="background-color: #fafaFA;"
 	>
-		<div class="mx-auto max-w-6xl px-6 sm:px-8 lg:px-12">
-			<div class="grid gap-8 lg:grid-cols-2">
+		<div class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+			<div class="grid gap-8 lg:grid-cols-3">
 				{#each plans as plan}
 					<div
-						class={`flex h-full flex-col rounded-3xl border bg-white ${plan.id === 'placement-photos' ? 'relative px-10 pb-10 pt-16 shadow-lg' : 'p-10 shadow-sm'}`}
-						style={`border-color: ${plan.id === 'placement-photos' ? '#D4A574' : '#E8DCCF'};`}
+						class={`flex h-full flex-col rounded-3xl border ${plan.id === 'placement-photos' ? 'relative bg-white px-10 pb-10 pt-16 shadow-lg' : plan.id === 'wedding-planners' ? 'p-10 shadow-sm' : 'bg-white p-10 shadow-sm'}`}
+						style={`border-color: ${plan.id === 'placement-photos' ? '#D4A574' : '#E8DCCF'}; ${plan.id === 'wedding-planners' ? 'background-color: #FFF9F4;' : ''}`}
 					>
 						<div class="space-y-6">
 							<div>
 								{#if plan.badge}
 									<span
 										class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]"
-										style={`background-color: ${plan.id === 'placement-photos' ? 'transparent' : '#FFF1E0'}; color: ${plan.id === 'placement-photos' ? '#2C3E50' : '#D4A574'}; border: ${plan.id === 'placement-photos' ? '1px solid #2C3E50' : 'none'};`}
+										style={`background-color: ${plan.id === 'placement-photos' ? 'transparent' : plan.id === 'wedding-planners' ? '#D4A574' : '#FFF1E0'}; color: ${plan.id === 'placement-photos' ? '#2C3E50' : plan.id === 'wedding-planners' ? 'white' : '#D4A574'}; border: ${plan.id === 'placement-photos' ? '1px solid #2C3E50' : 'none'};`}
 									>
 										{plan.badge}
 									</span>
@@ -205,11 +207,16 @@
 
 							<div>
 								<span class="text-4xl font-bold" style="color: #2c3e50;"
-									>{plan.price.toFixed(2)}€</span
+									>{plan.price === 0
+										? 'Sur devis'
+										: `${plan.price.toFixed(2)}€`}</span
 								>
-								<span class="ml-2 text-sm" style="color: #2c3e50; opacity: 0.6;"
-									>/ événement</span
-								>
+								{#if plan.price > 0}
+									<span
+										class="ml-2 text-sm"
+										style="color: #2c3e50; opacity: 0.6;">/ événement</span
+									>
+								{/if}
 							</div>
 
 							<ul class="space-y-4 text-sm leading-relaxed md:text-base">
@@ -217,7 +224,7 @@
 									<li class="flex items-start gap-3" style="color: #2c3e50;">
 										<span
 											class="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold"
-											style={`background-color: ${plan.id === 'placement-photos' ? '#2C3E50' : '#D4A574'}; color: white;`}
+											style={`background-color: ${plan.id === 'placement' ? '#D4A574' : '#2C3E50'}; color: white;`}
 										>
 											✓
 										</span>
@@ -246,8 +253,32 @@
 
 						<a
 							href={plan.ctaHref}
-							class="mt-10 inline-flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.02]"
-							style={`background-color: ${plan.id === 'placement-photos' ? '#2C3E50' : '#D4A574'};`}
+							class={`mt-10 inline-flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold transition-transform duration-200 hover:scale-[1.02] ${plan.id === 'wedding-planners' ? 'border-2 text-[#2C3E50]' : 'text-white'}`}
+							style={`${plan.id === 'wedding-planners' ? 'border-color: #2C3E50; background-color: transparent;' : `background-color: ${plan.id === 'placement-photos' ? '#2C3E50' : '#D4A574'};`}`}
+							on:mouseover={(e) => {
+								if (plan.id === 'wedding-planners') {
+									e.currentTarget.style.backgroundColor = '#2C3E50';
+									e.currentTarget.style.color = 'white';
+								}
+							}}
+							on:mouseout={(e) => {
+								if (plan.id === 'wedding-planners') {
+									e.currentTarget.style.backgroundColor = 'transparent';
+									e.currentTarget.style.color = '#2C3E50';
+								}
+							}}
+							on:focus={(e) => {
+								if (plan.id === 'wedding-planners') {
+									e.currentTarget.style.backgroundColor = '#2C3E50';
+									e.currentTarget.style.color = 'white';
+								}
+							}}
+							on:blur={(e) => {
+								if (plan.id === 'wedding-planners') {
+									e.currentTarget.style.backgroundColor = 'transparent';
+									e.currentTarget.style.color = '#2C3E50';
+								}
+							}}
 						>
 							{plan.ctaLabel}
 						</a>

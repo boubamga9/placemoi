@@ -58,7 +58,7 @@
 		<div class="block lg:hidden">
 			<img
 				src={heroImageUrl}
-				alt="Interface de gestion des événements"
+				alt="Plan de table événement PLACEMOI avec QR code - Interface de gestion pour mariage, anniversaire, baptême, conférence et gala"
 				class="mx-auto w-3/4 max-w-md rounded-2xl border-2 border-[#D4A574]"
 				loading="eager"
 			/>
@@ -68,7 +68,7 @@
 		<div class="hidden lg:block">
 			<img
 				src={heroImageUrl}
-				alt="Interface de gestion des événements"
+				alt="Plan de table événement PLACEMOI avec QR code - Interface de gestion pour mariage, anniversaire, baptême, conférence et gala"
 				class="mx-auto w-3/4 max-w-lg rounded-2xl border-2 border-[#D4A574]"
 				loading="eager"
 			/>

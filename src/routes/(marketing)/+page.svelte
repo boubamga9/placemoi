@@ -2,6 +2,7 @@
 	import { WebsiteName } from './../../config';
 	import HeroSection from './components/sections/hero.svelte';
 	import PainPoints from './components/sections/pain-points.svelte';
+	import EventCategories from './components/sections/event-categories.svelte';
 	import Solutions from './components/sections/benefits.svelte';
 	import PhotoSharing from './components/sections/photo-sharing.svelte';
 	import Pricing from './components/sections/pricing.svelte';
@@ -39,6 +40,63 @@
 			'query-input': 'required name=search_term_string',
 		},
 	};
+
+	// FAQ structured data for SEO
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const faqStructuredData = {
+		'@context': 'https://schema.org',
+		'@type': 'FAQPage',
+		mainEntity: [
+			{
+				'@type': 'Question',
+				name: 'Combien de temps ça prend pour créer mon événement ?',
+				acceptedAnswer: {
+					'@type': 'Answer',
+					text: "Environ 5 minutes ! Créez votre événement, importez votre liste d'invités (CSV ou manuellement), et recevez immédiatement votre QR code et votre lien partageable.",
+				},
+			},
+			{
+				'@type': 'Question',
+				name: 'Comment mes invités trouvent-ils leur table ?',
+				acceptedAnswer: {
+					'@type': 'Answer',
+					text: "Vos invités scannent simplement le QR code que vous affichez à l'entrée ou suivent le lien. Ils tapent leur nom, et le système leur indique leur table et leur place en un instant.",
+				},
+			},
+			{
+				'@type': 'Question',
+				name: "Combien d'invités puis-je ajouter ?",
+				acceptedAnswer: {
+					'@type': 'Answer',
+					text: "Jusqu'à 500 invités par événement. Vous pouvez importer votre liste via un fichier CSV ou les ajouter un par un.",
+				},
+			},
+			{
+				'@type': 'Question',
+				name: "Puis-je personnaliser l'apparence de la page ?",
+				acceptedAnswer: {
+					'@type': 'Answer',
+					text: 'Absolument ! Choisissez les couleurs, ajoutez une image de fond ou un logo pour que la page corresponde à votre événement.',
+				},
+			},
+			{
+				'@type': 'Question',
+				name: 'Combien ça coûte ?',
+				acceptedAnswer: {
+					'@type': 'Answer',
+					text: "À partir de 49,99€ par événement, paiement unique. Aucun abonnement, aucune limite de durée. Vous gardez l'accès à votre événement tant que vous en avez besoin.",
+				},
+			},
+			{
+				'@type': 'Question',
+				name: "Puis-je modifier ma liste d'invités après paiement ?",
+				acceptedAnswer: {
+					'@type': 'Answer',
+					text: 'Oui, vous pouvez ajouter, modifier ou supprimer des invités à tout moment depuis votre tableau de bord.',
+				},
+			},
+		],
+	};
 </script>
 
 <svelte:head>
@@ -63,13 +121,20 @@
 	/>
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://placemoi.com/" />
-	<meta property="og:image" content="/images/logo_text.svg" />
+	<meta
+		property="og:image"
+		content="https://placemoi.com/images/logo_text.svg"
+	/>
 	<meta name="twitter:card" content="summary_large_image" />
+	<link rel="canonical" href="https://placemoi.com/" />
 	<script type="application/ld+json">
 		{JSON.stringify(structuredData)}
 	</script>
 	<script type="application/ld+json">
 		{JSON.stringify(websiteStructuredData)}
+	</script>
+	<script type="application/ld+json">
+		{JSON.stringify(faqStructuredData)}
 	</script>
 </svelte:head>
 
@@ -77,6 +142,7 @@
 	<!-- Hero section takes full viewport height -->
 	<HeroSection />
 	<PainPoints />
+	<EventCategories />
 	<Solutions />
 	<PhotoSharing />
 	<Pricing />
