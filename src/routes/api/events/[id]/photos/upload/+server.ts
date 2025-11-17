@@ -113,26 +113,53 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 
 	// 🚀 OPTIMIZATION: Filtrer d'abord les fichiers valides
 	const validFiles = files.filter((file) => {
+		// Log pour debug
+		console.log(`🔍 Validating file: ${file.name}`, {
+			type: file.type,
+			size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+			extension: file.name.split('.').pop()?.toLowerCase(),
+		});
+
 		// Vérifier si c'est une image ou une vidéo
 		const isImage = file.type.startsWith('image/');
 		const isVideo = file.type.startsWith('video/');
 
-		// Accepter si c'est une image dans la liste, ou n'importe quelle vidéo
-		if (!isImage && !isVideo) {
-			console.warn(`⚠️ File type not allowed: ${file.type} (not an image or video)`);
-			return false;
+		// Si le type MIME est vide ou incorrect, essayer de le détecter par extension
+		if (!file.type || file.type === 'application/octet-stream' || file.type === '') {
+			const extension = file.name.split('.').pop()?.toLowerCase();
+			const videoExtensions = ['mp4', 'mov', 'avi', 'webm', 'mkv', '3gp', 'm4v', 'flv', 'wmv'];
+			const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'];
+
+			if (extension && videoExtensions.includes(extension)) {
+				console.log(`✅ Detected video by extension: ${extension}`);
+				// On accepte, le type sera corrigé plus tard si nécessaire
+			} else if (extension && imageExtensions.includes(extension)) {
+				console.log(`✅ Detected image by extension: ${extension}`);
+				// On accepte, le type sera corrigé plus tard si nécessaire
+			} else {
+				console.warn(`⚠️ File type unknown and extension not recognized: ${file.name} (type: ${file.type}, extension: ${extension})`);
+				return false;
+			}
+		} else {
+			// Accepter si c'est une image dans la liste, ou n'importe quelle vidéo
+			if (!isImage && !isVideo) {
+				console.warn(`⚠️ File type not allowed: ${file.type} (not an image or video)`);
+				return false;
+			}
+
+			if (isImage && !allowedTypes.includes(file.type)) {
+				console.warn(`⚠️ Image type not allowed: ${file.type}`);
+				return false;
+			}
 		}
 
-		if (isImage && !allowedTypes.includes(file.type)) {
-			console.warn(`⚠️ Image type not allowed: ${file.type}`);
-			return false;
-		}
-
-		// Pour les vidéos, accepter tous les types vidéo (plus permissif)
+		// Vérifier la taille
 		if (file.size > maxFileSize) {
 			console.warn(`⚠️ File too large: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB, max: ${maxFileSize / 1024 / 1024}MB)`);
 			return false;
 		}
+
+		console.log(`✅ File validated: ${file.name}`);
 		return true;
 	});
 

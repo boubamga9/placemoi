@@ -43,8 +43,10 @@
 			: ''
 	}`;
 
-	function handleFileSelect(event: Event) {
-		const target = event.target as HTMLInputElement;
+	function handleFileSelect(event: globalThis.Event) {
+		const target =
+			(event.target as HTMLInputElement) ||
+			(event.currentTarget as HTMLInputElement);
 		if (target?.files) {
 			selectedFiles = Array.from(target.files);
 			handleUpload();
@@ -87,6 +89,17 @@
 		});
 
 		try {
+			// Log des fichiers avant upload pour debug
+			selectedFiles.forEach((file) => {
+				console.log('📤 Uploading file:', {
+					name: file.name,
+					type: file.type,
+					size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+					isVideo: file.type.startsWith('video/'),
+					isImage: file.type.startsWith('image/'),
+				});
+			});
+
 			const response = await fetch(
 				`/api/events/${data.event.id}/photos/upload`,
 				{
@@ -95,7 +108,23 @@
 				},
 			);
 
-			const result = await response.json();
+			console.log('📥 Response status:', response.status);
+			console.log(
+				'📥 Response headers:',
+				Object.fromEntries(response.headers.entries()),
+			);
+
+			let result;
+			try {
+				result = await response.json();
+				console.log('📦 Response data:', result);
+			} catch (jsonError) {
+				console.error('❌ Error parsing JSON response:', jsonError);
+				const text = await response.text();
+				console.error('❌ Response text:', text);
+				uploadError = `Erreur serveur (${response.status}): ${text.substring(0, 200)}`;
+				return;
+			}
 
 			if (response.ok && result.success) {
 				uploadSuccess = true;
@@ -119,13 +148,22 @@
 				} else if (errorMsg.includes('Aucun fichier valide')) {
 					errorMsg =
 						"Aucun fichier valide. Vérifiez que vos fichiers sont des images ou vidéos et qu'ils ne dépassent pas 100MB.";
+				} else if (!response.ok) {
+					// Si la réponse n'est pas OK, inclure le status
+					errorMsg = `Erreur ${response.status}: ${errorMsg}`;
 				}
 
 				uploadError = errorMsg;
 			}
 		} catch (error) {
-			console.error('Upload error:', error);
-			uploadError = "Erreur lors de l'upload des photos";
+			console.error('❌ Upload error:', error);
+			if (error instanceof Error) {
+				console.error('Error message:', error.message);
+				console.error('Error stack:', error.stack);
+				uploadError = `Erreur réseau: ${error.message}`;
+			} else {
+				uploadError = "Erreur lors de l'upload des photos";
+			}
 		} finally {
 			isUploading = false;
 		}
@@ -179,6 +217,12 @@
 					class:border-opacity-60={!dragActive}
 					style={`color: ${data.customization.font_color}; border-color: ${data.customization.font_color}${dragActive ? 'CC' : '66'}; font-family: '${data.customization.font_family || 'Playfair Display'}', ${getFontFallback(data.customization.font_family || 'Playfair Display')};`}
 					on:click={triggerFileInput}
+					on:keydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							triggerFileInput();
+						}
+					}}
 					on:dragover={handleDragOver}
 					on:dragleave={handleDragLeave}
 					on:drop={handleDrop}
