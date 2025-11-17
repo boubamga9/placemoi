@@ -102,25 +102,66 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 		'video/mp4',
 		'video/mov',
 		'video/quicktime',
+		'video/x-msvideo', // AVI
+		'video/webm',
+		'video/3gpp',
+		'video/x-matroska', // MKV
+		'video/', // Accepter tous les types vidéo (fallback pour types non standards)
 	];
 
-	const maxFileSize = 50 * 1024 * 1024; // 50MB
+	const maxFileSize = 100 * 1024 * 1024; // 100MB (augmenté pour les vidéos de galerie)
 
 	// 🚀 OPTIMIZATION: Filtrer d'abord les fichiers valides
 	const validFiles = files.filter((file) => {
-		if (!allowedTypes.includes(file.type)) {
-			console.warn(`⚠️ File type not allowed: ${file.type}`);
+		// Vérifier si c'est une image ou une vidéo
+		const isImage = file.type.startsWith('image/');
+		const isVideo = file.type.startsWith('video/');
+
+		// Accepter si c'est une image dans la liste, ou n'importe quelle vidéo
+		if (!isImage && !isVideo) {
+			console.warn(`⚠️ File type not allowed: ${file.type} (not an image or video)`);
 			return false;
 		}
+
+		if (isImage && !allowedTypes.includes(file.type)) {
+			console.warn(`⚠️ Image type not allowed: ${file.type}`);
+			return false;
+		}
+
+		// Pour les vidéos, accepter tous les types vidéo (plus permissif)
 		if (file.size > maxFileSize) {
-			console.warn(`⚠️ File too large: ${file.name} (${file.size} bytes)`);
+			console.warn(`⚠️ File too large: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB, max: ${maxFileSize / 1024 / 1024}MB)`);
 			return false;
 		}
 		return true;
 	});
 
 	if (validFiles.length === 0) {
-		throw error(400, 'Aucun fichier valide fourni');
+		const rejectedFiles = files.filter((file) => {
+			const isImage = file.type.startsWith('image/');
+			const isVideo = file.type.startsWith('video/');
+			if (!isImage && !isVideo) return true;
+			if (isImage && !allowedTypes.includes(file.type)) return true;
+			if (file.size > maxFileSize) return true;
+			return false;
+		});
+
+		const errors = rejectedFiles.map((file) => {
+			const isImage = file.type.startsWith('image/');
+			const isVideo = file.type.startsWith('video/');
+			if (!isImage && !isVideo) {
+				return `${file.name}: type non supporté (${file.type})`;
+			}
+			if (isImage && !allowedTypes.includes(file.type)) {
+				return `${file.name}: format image non supporté (${file.type})`;
+			}
+			if (file.size > maxFileSize) {
+				return `${file.name}: fichier trop volumineux (${(file.size / 1024 / 1024).toFixed(2)}MB, max: ${maxFileSize / 1024 / 1024}MB)`;
+			}
+			return `${file.name}: fichier invalide`;
+		});
+
+		throw error(400, `Aucun fichier valide fourni. Erreurs: ${errors.join('; ')}`);
 	}
 
 	const uploadedPhotos = [];

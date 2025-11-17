@@ -102,7 +102,19 @@
 					uploadSuccess = false;
 				}, 3000);
 			} else {
-				uploadError = result.message || result.error || "Erreur lors de l'upload";
+				// Améliorer les messages d'erreur
+				let errorMsg = result.message || result.error || "Erreur lors de l'upload";
+				
+				// Si l'erreur contient des détails sur les fichiers rejetés, les afficher
+				if (errorMsg.includes('fichier trop volumineux')) {
+					errorMsg = 'Vidéo trop volumineuse. Taille maximum : 100MB. Essayez de compresser votre vidéo ou choisissez une vidéo plus courte.';
+				} else if (errorMsg.includes('type non supporté')) {
+					errorMsg = 'Format de fichier non supporté. Formats acceptés : MP4, MOV, AVI, WebM, MKV.';
+				} else if (errorMsg.includes('Aucun fichier valide')) {
+					errorMsg = 'Aucun fichier valide. Vérifiez que vos fichiers sont des images ou vidéos et qu\'ils ne dépassent pas 100MB.';
+				}
+				
+				uploadError = errorMsg;
 			}
 		} catch (error) {
 			console.error('Upload error:', error);
