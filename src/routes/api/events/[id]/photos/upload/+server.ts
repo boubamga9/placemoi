@@ -79,9 +79,12 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 		throw error(403, "Cet événement n'a pas le plan avec photos activé");
 	}
 
-	// Récupérer les fichiers depuis FormData
+	// Récupérer les fichiers et device_id depuis FormData
 	const formData = await request.formData();
 	const files = formData.getAll('files') as File[];
+	const deviceId = formData.get('device_id') as string | null;
+
+	console.log('📥 Upload reçu avec device_id:', deviceId);
 
 	if (!files || files.length === 0) {
 		throw error(400, 'Aucun fichier fourni');
@@ -101,15 +104,10 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 		'image/heif',
 		'video/mp4',
 		'video/mov',
-		'video/quicktime',
-		'video/x-msvideo', // AVI
-		'video/webm',
-		'video/3gpp',
-		'video/x-matroska', // MKV
-		'video/', // Accepter tous les types vidéo (fallback pour types non standards)
+		'video/quicktime'
 	];
 
-	const maxFileSize = 100 * 1024 * 1024; // 100MB (augmenté pour les vidéos de galerie)
+	const maxFileSize = 50 * 1024 * 1024; // 50MB
 
 	// 🚀 OPTIMIZATION: Filtrer d'abord les fichiers valides
 	const validFiles = files.filter((file) => {
@@ -127,7 +125,7 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 		// Si le type MIME est vide ou incorrect, essayer de le détecter par extension
 		if (!file.type || file.type === 'application/octet-stream' || file.type === '') {
 			const extension = file.name.split('.').pop()?.toLowerCase();
-			const videoExtensions = ['mp4', 'mov', 'avi', 'webm', 'mkv', '3gp', 'm4v', 'flv', 'wmv'];
+			const videoExtensions = ['mp4', 'mov', 'avi', 'webm', 'mkv', '3gp', 'm4v', 'flv', 'wmv', 'quicktime'];
 			const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'];
 
 			if (extension && videoExtensions.includes(extension)) {
@@ -213,16 +211,21 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 						// Enregistrer dans la base de données
 						// Utiliser supabaseServiceRole pour contourner les politiques RLS
 						// car les invités (non authentifiés) ne peuvent pas insérer via le client normal
+						const photoData = {
+							event_id: eventId,
+							file_name: file.name,
+							file_size: file.size,
+							file_type: file.type,
+							backblaze_file_id: uploadResult.fileId,
+							backblaze_file_name: uploadResult.fileName,
+							device_id: deviceId || null, // Lier la photo à l'appareil
+						};
+						
+						console.log('💾 Enregistrement photo avec device_id:', deviceId);
+						
 						const { data: photoRecord, error: dbError } = await supabaseServiceRole
 							.from('event_photos')
-							.insert({
-								event_id: eventId,
-								file_name: file.name,
-								file_size: file.size,
-								file_type: file.type,
-								backblaze_file_id: uploadResult.fileId,
-								backblaze_file_name: uploadResult.fileName,
-							})
+							.insert(photoData)
 							.select()
 							.single();
 

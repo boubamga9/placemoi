@@ -1,7 +1,8 @@
 <script lang="ts">
 	import GuestFooter from '../../components/guest-footer.svelte';
 	import type { Database } from '$lib/database/database.types';
-	import { LoaderCircle, CheckCircle2, XCircle } from 'lucide-svelte';
+	import { LoaderCircle, XCircle } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
 
 	type Event = Database['public']['Tables']['events']['Row'];
 	type EventCustomization =
@@ -14,10 +15,39 @@
 
 	let fileInput: HTMLInputElement;
 	let isUploading = false;
-	let uploadSuccess = false;
 	let uploadError = '';
 	let selectedFiles: File[] = [];
 	let dragActive = false;
+
+	// Générer ou récupérer un identifiant unique pour cet appareil
+	function getDeviceId(): string {
+		const STORAGE_KEY = `placemoi_device_id_${data.event.id}`;
+
+		// Vérifier si localStorage est disponible
+		if (typeof window === 'undefined' || !window.localStorage) {
+			console.warn(
+				"⚠️ localStorage non disponible, génération d'un device_id temporaire",
+			);
+			return `temp-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+		}
+
+		let deviceId = localStorage.getItem(STORAGE_KEY);
+
+		if (!deviceId) {
+			// Générer un UUID simple (version simplifiée)
+			deviceId = `device-${Date.now()}-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
+			try {
+				localStorage.setItem(STORAGE_KEY, deviceId);
+				console.log('✅ Nouveau device_id généré et sauvegardé:', deviceId);
+			} catch (e) {
+				console.error('❌ Erreur lors de la sauvegarde du device_id:', e);
+			}
+		} else {
+			console.log('✅ Device_id récupéré depuis localStorage:', deviceId);
+		}
+
+		return deviceId;
+	}
 
 	function getFontFallback(fontFamily: string): string {
 		const serifFonts = [
@@ -80,13 +110,16 @@
 		if (selectedFiles.length === 0 || isUploading) return;
 
 		isUploading = true;
-		uploadSuccess = false;
 		uploadError = '';
 
 		const formData = new FormData();
 		selectedFiles.forEach((file) => {
 			formData.append('files', file);
 		});
+		// Ajouter l'identifiant de l'appareil
+		const deviceId = getDeviceId();
+		formData.append('device_id', deviceId);
+		console.log('📤 Upload avec device_id:', deviceId);
 
 		try {
 			// Log des fichiers avant upload pour debug
@@ -108,12 +141,6 @@
 				},
 			);
 
-			console.log('📥 Response status:', response.status);
-			console.log(
-				'📥 Response headers:',
-				Object.fromEntries(response.headers.entries()),
-			);
-
 			let result;
 			try {
 				result = await response.json();
@@ -127,33 +154,14 @@
 			}
 
 			if (response.ok && result.success) {
-				uploadSuccess = true;
 				selectedFiles = [];
-				// Reset after 3 seconds
-				setTimeout(() => {
-					uploadSuccess = false;
-				}, 3000);
+				// Rediriger immédiatement vers la page des photos partagées
+				// Ajouter ?refresh=true pour forcer le rafraîchissement du cache
+				goto(`/${data.event.slug}/shared?refresh=true`);
 			} else {
 				// Améliorer les messages d'erreur
-				let errorMsg =
+				uploadError =
 					result.message || result.error || "Erreur lors de l'upload";
-
-				// Si l'erreur contient des détails sur les fichiers rejetés, les afficher
-				if (errorMsg.includes('fichier trop volumineux')) {
-					errorMsg =
-						'Vidéo trop volumineuse. Taille maximum : 100MB. Essayez de compresser votre vidéo ou choisissez une vidéo plus courte.';
-				} else if (errorMsg.includes('type non supporté')) {
-					errorMsg =
-						'Format de fichier non supporté. Formats acceptés : MP4, MOV, AVI, WebM, MKV.';
-				} else if (errorMsg.includes('Aucun fichier valide')) {
-					errorMsg =
-						"Aucun fichier valide. Vérifiez que vos fichiers sont des images ou vidéos et qu'ils ne dépassent pas 100MB.";
-				} else if (!response.ok) {
-					// Si la réponse n'est pas OK, inclure le status
-					errorMsg = `Erreur ${response.status}: ${errorMsg}`;
-				}
-
-				uploadError = errorMsg;
 			}
 		} catch (error) {
 			console.error('❌ Upload error:', error);
@@ -179,24 +187,24 @@
 </svelte:head>
 
 <div
-	class="flex min-h-screen flex-col items-center justify-between"
+	class="flex h-screen flex-col items-center justify-between overflow-hidden"
 	style={backgroundStyle}
 >
-	<div class="flex w-full flex-1 items-center justify-center">
-		<div class="container mx-auto max-w-2xl px-4 py-12">
+	<div class="flex min-h-0 w-full flex-1 items-center justify-center">
+		<div class="container mx-auto max-w-2xl px-4 py-6 sm:py-12">
 			{#if data.customization.logo_url}
-				<div class="flex justify-center">
+				<div class="mb-2 flex justify-center sm:mb-4">
 					<img
 						src={data.customization.logo_url}
 						alt="Logo"
-						class="h-32 w-auto object-contain"
+						class="h-20 w-auto object-contain sm:h-32"
 					/>
 				</div>
 			{/if}
 
-			<div class="mb-8 text-center">
+			<div class="mb-4 text-center sm:mb-2">
 				<h1
-					class="mb-4 text-4xl font-semibold"
+					class="mb-2 text-3xl font-medium sm:mb-4 sm:text-4xl"
 					style="
 						color: {data.customization.font_color};
 						font-family: '{data.customization.font_family ||
@@ -210,8 +218,28 @@
 			</div>
 
 			<div class="mx-auto w-full max-w-2xl">
+				<!-- Bouton pour voir les photos partagées -->
+				<div class="mb-4 flex justify-center">
+					<a
+						href={`/${data.event.slug}/shared`}
+						class="rounded-lg border px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-80"
+						style="
+							color: {data.customization.font_color};
+							border-color: {data.customization.font_color};
+							background-color: transparent;
+							font-family: '{data.customization.font_family ||
+							'Playfair Display'}', {getFontFallback(
+							data.customization.font_family || 'Playfair Display',
+						)};
+						"
+					>
+						Voir mes photos partagées
+					</a>
+				</div>
+
+				<!-- Zone d'upload -->
 				<div
-					class="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors"
+					class="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-4 py-6 text-center transition-colors sm:px-6 sm:py-10"
 					class:opacity-50={isUploading}
 					class:border-opacity-100={dragActive}
 					class:border-opacity-60={!dragActive}
@@ -231,33 +259,29 @@
 				>
 					{#if isUploading}
 						<LoaderCircle
-							class="h-12 w-12 animate-spin"
+							class="h-10 w-10 animate-spin sm:h-12 sm:w-12"
 							style={`color: ${data.customization.font_color};`}
 						/>
-						<h2 class="mt-4 text-xl font-semibold">Upload en cours...</h2>
-					{:else if uploadSuccess}
-						<CheckCircle2
-							class="h-12 w-12"
-							style={`color: ${data.customization.font_color};`}
-						/>
-						<h2 class="mt-4 text-xl font-semibold">
-							Photos envoyées avec succès !
+						<h2 class="mt-3 text-lg font-semibold sm:mt-4 sm:text-xl">
+							Upload en cours...
 						</h2>
 					{:else if uploadError}
 						<XCircle
-							class="h-12 w-12"
+							class="h-10 w-10 sm:h-12 sm:w-12"
 							style={`color: ${data.customization.font_color};`}
 						/>
-						<h2 class="mt-4 text-xl font-semibold">Erreur</h2>
-						<p class="mt-2 text-sm opacity-80">{uploadError}</p>
+						<h2 class="mt-3 text-lg font-semibold sm:mt-4 sm:text-xl">
+							Erreur
+						</h2>
+						<p class="mt-2 text-xs opacity-80 sm:text-sm">{uploadError}</p>
 					{:else}
 						<div
-							class="text-4xl"
+							class="text-3xl sm:text-4xl"
 							style={`color: ${data.customization.font_color};`}
 						>
 							+
 						</div>
-						<h2 class="mt-4 text-xl font-semibold">
+						<h2 class="mt-3 text-lg font-semibold sm:mt-4 sm:text-xl">
 							Déposez vos photos/vidéos ici
 						</h2>
 					{/if}
@@ -271,8 +295,8 @@
 						on:change={handleFileSelect}
 					/>
 
-					{#if !isUploading && !uploadSuccess && !uploadError}
-						<p class="mt-6 text-xs opacity-70">
+					{#if !isUploading && !uploadError}
+						<p class="mt-4 text-xs opacity-70 sm:mt-6">
 							Vos photos restent privées : seul l'organisateur peut les
 							télécharger.
 						</p>

@@ -185,26 +185,26 @@
 </svelte:head>
 
 <div
-	class="flex min-h-screen flex-col items-center justify-between"
+	class="flex h-screen flex-col items-center justify-between overflow-hidden"
 	style={backgroundStyle}
 >
-	<div class="flex w-full flex-1 items-center justify-center">
-		<div class="container mx-auto max-w-2xl px-4 py-12">
+	<div class="flex min-h-0 w-full flex-1 items-center justify-center">
+		<div class="container mx-auto max-w-2xl px-4 py-6 sm:py-12">
 			<!-- Logo (if exists) -->
 			{#if data.customization.logo_url}
-				<div class="flex justify-center">
+				<div class="mb-2 flex justify-center sm:mb-4">
 					<img
 						src={data.customization.logo_url}
 						alt="Logo"
-						class="h-32 w-auto object-contain"
+						class="h-20 w-auto object-contain sm:h-32"
 					/>
 				</div>
 			{/if}
 
 			<!-- Welcome Section -->
-			<div class="mb-8 text-center">
+			<div class="mb-4 text-center sm:mb-8">
 				<h1
-					class="mb-4 text-5xl font-medium"
+					class="mb-2 text-4xl font-medium sm:mb-4 sm:text-5xl"
 					style="
 						color: {data.customization.font_color};
 						font-family: '{data.customization.font_family ||
@@ -216,7 +216,7 @@
 					{data.customization.welcome_text || 'Bienvenue'}
 				</h1>
 				<p
-					class="text-xl"
+					class="text-lg sm:text-xl"
 					style="color: {data.customization
 						.font_color}; opacity: 0.9; font-family: '{data.customization
 						.font_family || 'Playfair Display'}', {getFontFallback(
@@ -228,7 +228,7 @@
 			</div>
 
 			<!-- Search Section -->
-			<div id="guest-search-section" class="mb-6">
+			<div id="guest-search-section" class="mb-4 sm:mb-6">
 				<div class="relative">
 					<input
 						id="guest-search"
@@ -262,7 +262,7 @@
 			</div>
 
 			<!-- Result Section (always reserve space) -->
-			<div class="min-h-[220px]">
+			<div class="min-h-[180px] sm:min-h-[220px]">
 				{#if result}
 					<div
 						class="rounded-xl p-6 shadow-lg"
@@ -300,16 +300,14 @@
 	<GuestFooter
 		customization={data.customization}
 		fontFallback={getFontFallback}
-		buttons={
-			data.hasPhotosPlan
-				? [
-						{
-							label: 'Envoyer des photos',
-							href: `/${data.event.slug}/photos`,
-							variant: 'solid',
-						},
-					]
-				: []
-		}
+		buttons={data.hasPhotosPlan
+			? [
+					{
+						label: 'Envoyer des photos',
+						href: `/${data.event.slug}/photos`,
+						variant: 'solid',
+					},
+				]
+			: []}
 	/>
 </div>

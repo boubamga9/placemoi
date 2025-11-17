@@ -19,7 +19,7 @@
 			{#each buttons as button}
 				<a
 					href={button.href}
-					class="rounded-lg border px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-80"
+					class="rounded-lg border px-8 py-4 text-base font-semibold transition-opacity hover:opacity-80 min-h-[56px] flex items-center justify-center"
 					style={button.variant === 'solid'
 						? `
 						color: ${customization.background_color};
