@@ -135,8 +135,9 @@
 			if (response.ok) {
 				// Retirer la photo de la liste localement
 				photos = photos.filter((photo) => photo.id !== photoId);
-				// Forcer le rafraîchissement pour mettre à jour le cache
+				// Forcer le rafraîchissement du cache en rechargeant les photos
 				lastFetchTime = 0;
+				await loadPhotos(true);
 			} else {
 				const errorData = await response.json();
 				alert(errorData.message || 'Erreur lors de la suppression de la photo');
