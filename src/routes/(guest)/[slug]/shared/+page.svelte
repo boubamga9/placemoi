@@ -239,7 +239,11 @@
 					>
 						<p
 							class="text-base sm:text-lg"
-							style="color: {data.customization.font_color}; opacity: 0.8;"
+							style="color: {data.customization
+								.font_color}; opacity: 0.8; font-family: '{data.customization
+								.font_family || 'Playfair Display'}', {getFontFallback(
+								data.customization.font_family || 'Playfair Display',
+							)};"
 						>
 							Vous n'avez pas encore partagé de photos.
 						</p>
