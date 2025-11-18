@@ -120,7 +120,8 @@ async function processFileWithAI(fileContent: string) {
                 {
                     role: 'system',
                     content: `You are an expert at extracting guest information from various file formats. 
-                    Extract names and table numbers from the following data.
+                    Extract names and table information from the following data.
+                    The table_number can be a number (e.g., "1", "2") or a table name (e.g., "Table VIP", "Table des mariés", "Table 1").
                     Return a JSON object with a "guests" array containing objects with the format:
                     {"guests": [{"guest_name": "Name", "table_number": "Table"}]}`
                 },
@@ -261,7 +262,7 @@ export const actions = {
                 console.error('Error fetching existing guests:', existingGuestsResult.error);
             }
 
-            const existingNames = existingGuestsResult.data?.map(g => g.guest_name) || [];
+            const existingNames = existingGuestsResult.data?.map((g: any) => g.guest_name) || [];
 
             // Prepare guests data
             const guestsPrepared = guests.map((guest: any) => ({

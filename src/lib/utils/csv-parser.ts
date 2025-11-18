@@ -14,10 +14,13 @@ export interface ParsedGuest {
  * Returns null if format is too complex (requires AI)
  * 
  * Expected formats:
- * - "Name,Table,Seat"
+ * - "Name,Table,Seat" (comma-separated)
+ * - "Name;Table;Seat" (semicolon-separated, common in European CSVs)
  * - "Name,Table"
  * - "Nom,Table,Place"
  * - "Name | Table | Seat" (pipe-separated)
+ * 
+ * Supports both numeric table numbers and named tables (e.g., "Table VIP", "PAIX")
  */
 export function tryParseCSV(csvContent: string): ParsedGuest[] | null {
     if (!csvContent || csvContent.trim().length === 0) {
@@ -35,16 +38,18 @@ export function tryParseCSV(csvContent: string): ParsedGuest[] | null {
             return null;
         }
 
-        // Detect delimiter (comma or pipe)
+        // Detect delimiter (comma, semicolon, or pipe)
         const firstLine = lines[0];
         const hasComma = firstLine.includes(',');
+        const hasSemicolon = firstLine.includes(';');
         const hasPipe = firstLine.includes('|');
         
-        if (!hasComma && !hasPipe) {
+        if (!hasComma && !hasSemicolon && !hasPipe) {
             return null; // Unknown format, use AI
         }
 
-        const delimiter = hasComma ? ',' : '|';
+        // Priority: semicolon > comma > pipe (semicolon is common in European CSVs)
+        const delimiter = hasSemicolon ? ';' : (hasComma ? ',' : '|');
         
         // Parse header (if exists) or use first line
         const headerLine = lines[0].toLowerCase();
@@ -75,7 +80,7 @@ export function tryParseCSV(csvContent: string): ParsedGuest[] | null {
                 h.includes('nom') || h.includes('name') || h.includes('invité') || h.includes('guest')
             );
             
-            // Find table column
+            // Find table column (first one that contains 'table' but not 'seat' or 'place')
             tableIndex = headers.findIndex(h => 
                 h.includes('table') && !h.includes('seat') && !h.includes('place')
             );
@@ -100,37 +105,52 @@ export function tryParseCSV(csvContent: string): ParsedGuest[] | null {
         const guests: ParsedGuest[] = [];
         
         for (const line of dataLines) {
-            const columns = line.split(delimiter).map(col => col.trim());
+            // Simple CSV parsing - split by delimiter
+            // Note: This doesn't handle quoted values with commas, but works for most simple CSVs
+            const columns = line.split(delimiter).map(col => col.trim().replace(/^["']|["']$/g, ''));
+            
+            // Skip if not enough columns
+            if (columns.length <= Math.max(nameIndex, tableIndex)) {
+                continue;
+            }
             
             const name = columns[nameIndex]?.trim();
             const table = columns[tableIndex]?.trim();
-            const seat = seatIndex !== -1 ? columns[seatIndex]?.trim() || null : null;
+            const seat = seatIndex !== -1 && seatIndex < columns.length ? columns[seatIndex]?.trim() || null : null;
 
-            // Validate required fields
-            if (!name || name.length === 0 || !table || table.length === 0) {
-                continue; // Skip invalid rows
+            // Validate required fields - accept any non-empty table value (number or name)
+            if (!name || name.length === 0) {
+                continue; // Skip rows without name
+            }
+            
+            // Accept any non-empty table value (can be number or table name)
+            if (!table || table.length === 0) {
+                continue; // Skip rows without table
             }
 
-            // Extract number from table/seat if contains text (e.g., "Table 1" → "1")
-            const extractNumber = (value: string): string => {
-                const match = value.match(/\d+/);
-                return match ? match[0] : value;
+            // For table_number: keep as-is (can be number or table name like "Table VIP")
+            // For seat_number: extract number if present, otherwise keep as-is
+            const cleanSeatNumber = (value: string): string | null => {
+                if (!value || value.trim().length === 0) return null;
+                const trimmed = value.trim();
+                // Extract number if present, otherwise return the string
+                const match = trimmed.match(/\d+/);
+                return match ? match[0] : trimmed;
             };
 
             guests.push({
                 guest_name: name,
-                table_number: extractNumber(table),
-                seat_number: seat ? extractNumber(seat) : null
+                table_number: table.trim(), // Keep table name as-is (supports both numbers and names)
+                seat_number: seat ? cleanSeatNumber(seat) : null
             });
         }
 
-        // Only return if we found at least 3 guests (to avoid false positives)
-        // If less, format might be too complex for simple parsing
-        if (guests.length >= 3) {
+        // Only return if we found at least 1 guest
+        if (guests.length >= 1) {
             return guests;
         }
 
-        return null; // Too few guests, might be complex format, use AI
+        return null; // No valid guests found, use AI
     } catch (error) {
         console.error('Error parsing CSV locally:', error);
         return null; // Fallback to AI
@@ -160,4 +180,3 @@ export function isSimpleCSV(fileName: string, content: string): boolean {
 
     return true;
 }
-

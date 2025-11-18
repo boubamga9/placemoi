@@ -94,12 +94,12 @@ async function processFileWithAI(fileContent: string) {
                     Extract names and table numbers from the following data.
                     
                     Important rules:
-                    - Extract ONLY the number from table field (e.g., if it says "Table 1" or "table 1", extract just "1")
-                    - Extract ONLY the number from seat field if present
+                    - For table_number: Keep the value as-is. It can be a number (e.g., "1", "2") or a table name (e.g., "Table VIP", "Table des mariés", "Table 1").
+                    - For seat_number: Extract the number if present, otherwise keep as-is
                     - Return a JSON object with a "guests" array containing objects with the format:
                     {"guests": [{"guest_name": "Full Name", "table_number": "1", "seat_number": "1"}]}
                     
-                    The table_number and seat_number should contain ONLY the numeric value, no text.`
+                    The table_number can be either numeric or text (table names are allowed).`
                 },
                 {
                     role: 'user',
@@ -228,11 +228,18 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 
         const existingNames = existingGuestsResult.data?.map(g => g.guest_name) || [];
 
-        // Helper function to extract numbers from strings
-        const extractNumber = (value: any): string => {
+        // Helper function to clean and normalize values
+        // For table_number: accept both numbers and text (e.g., "Table VIP", "1", "Table des mariés")
+        // For seat_number: extract number if present, otherwise keep as is
+        const cleanTableNumber = (value: any): string => {
             if (!value) return '';
-            const str = value.toString();
-            // Extract only digits
+            return value.toString().trim();
+        };
+
+        const cleanSeatNumber = (value: any): string | null => {
+            if (!value) return null;
+            const str = value.toString().trim();
+            // Extract number if present, otherwise return the string
             const match = str.match(/\d+/);
             return match ? match[0] : str;
         };
@@ -240,8 +247,8 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
         // Prepare guests data
         const guestsPrepared = guests.map((guest: any) => ({
             guest_name: guest.guest_name || guest.name || '',
-            table_number: extractNumber(guest.table_number || guest.table || ''),
-            seat_number: guest.seat_number || guest.seat ? extractNumber(guest.seat_number || guest.seat) : null
+            table_number: cleanTableNumber(guest.table_number || guest.table || ''),
+            seat_number: guest.seat_number || guest.seat ? cleanSeatNumber(guest.seat_number || guest.seat) : null
         }));
 
         // Handle duplicate names (adds 1, 2, 3, etc. to duplicates)

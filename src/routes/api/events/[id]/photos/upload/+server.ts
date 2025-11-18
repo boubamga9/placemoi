@@ -147,7 +147,7 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 
 			if (isImage && !allowedTypes.includes(file.type)) {
 				console.warn(`⚠️ Image type not allowed: ${file.type}`);
-				return false;
+			return false;
 			}
 		}
 
@@ -212,12 +212,12 @@ export const POST: RequestHandler = async ({ request, params, locals: { supabase
 						// Utiliser supabaseServiceRole pour contourner les politiques RLS
 						// car les invités (non authentifiés) ne peuvent pas insérer via le client normal
 						const photoData = {
-							event_id: eventId,
-							file_name: file.name,
-							file_size: file.size,
-							file_type: file.type,
-							backblaze_file_id: uploadResult.fileId,
-							backblaze_file_name: uploadResult.fileName,
+								event_id: eventId,
+								file_name: file.name,
+								file_size: file.size,
+								file_type: file.type,
+								backblaze_file_id: uploadResult.fileId,
+								backblaze_file_name: uploadResult.fileName,
 							device_id: deviceId || null, // Lier la photo à l'appareil
 						};
 						
