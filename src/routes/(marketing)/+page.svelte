@@ -45,6 +45,43 @@
 			},
 			'query-input': 'required name=search_term_string',
 		},
+		// Sitelinks suggérés pour Google (Google décide finalement quels liens afficher)
+		// Ces pages importantes sont déjà dans le sitemap et la navigation
+		mainEntity: {
+			'@type': 'ItemList',
+			itemListElement: [
+				{
+					'@type': 'ListItem',
+					position: 1,
+					name: 'Tarifs',
+					url: 'https://placemoi.com/pricing',
+				},
+				{
+					'@type': 'ListItem',
+					position: 2,
+					name: 'Plan de table mariage',
+					url: 'https://placemoi.com/plan-de-table-mariage',
+				},
+				{
+					'@type': 'ListItem',
+					position: 3,
+					name: 'Plan de table anniversaire',
+					url: 'https://placemoi.com/plan-de-table-anniversaire',
+				},
+				{
+					'@type': 'ListItem',
+					position: 4,
+					name: 'FAQ',
+					url: 'https://placemoi.com/faq',
+				},
+				{
+					'@type': 'ListItem',
+					position: 5,
+					name: 'Contact',
+					url: 'https://placemoi.com/contact',
+				},
+			],
+		},
 	};
 
 	// FAQ structured data for SEO
