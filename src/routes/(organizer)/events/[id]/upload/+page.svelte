@@ -39,17 +39,12 @@
 		formData.append('file', selectedFile);
 
 		try {
-			console.log('📤 Uploading file...', selectedFile.name);
-
 			const response = await fetch(`/api/events/${data.event.id}/upload`, {
 				method: 'POST',
 				body: formData,
 			});
 
-			console.log('📥 Response status:', response.status);
-
 			const result = await response.json();
-			console.log('📦 Response:', result);
 
 			if (response.ok && result?.success) {
 				uploadSuccess = true;
@@ -60,7 +55,6 @@
 					goto(`/events/${data.event.id}/list`);
 				}, 2000);
 			} else {
-				console.log('❌ Upload failed:', result);
 				uploadMessage =
 					result?.message || result?.error || "Erreur lors de l'upload";
 			}

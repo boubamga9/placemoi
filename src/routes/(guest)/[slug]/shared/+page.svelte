@@ -3,6 +3,7 @@
 	import type { Database } from '$lib/database/database.types';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { Trash2 } from 'lucide-svelte';
 
 	type Event = Database['public']['Tables']['events']['Row'];
 	type EventCustomization =
@@ -45,12 +46,9 @@
 			deviceId = `device-${Date.now()}-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
 			try {
 				localStorage.setItem(STORAGE_KEY, deviceId);
-				console.log('✅ Nouveau device_id généré et sauvegardé:', deviceId);
 			} catch (e) {
 				console.error('❌ Erreur lors de la sauvegarde du device_id:', e);
 			}
-		} else {
-			console.log('✅ Device_id récupéré depuis localStorage:', deviceId);
 		}
 
 		return deviceId;
@@ -80,6 +78,8 @@
 			: ''
 	}`;
 
+	$: borderColor = data.customization.font_color || '#2C3E50';
+
 	async function loadPhotos(forceRefresh = false) {
 		if (isLoadingPhotos) return;
 
@@ -90,16 +90,12 @@
 			photos.length > 0 &&
 			now - lastFetchTime < CACHE_DURATION
 		) {
-			console.log(
-				'✅ Utilisation du cache (dernière récupération il y a moins de 5 min)',
-			);
 			return;
 		}
 
 		isLoadingPhotos = true;
 		try {
 			const deviceId = getDeviceId();
-			console.log('📡 Chargement des photos avec device_id:', deviceId);
 
 			const response = await fetch(
 				`/api/events/slug/${data.event.slug}/photos?device_id=${encodeURIComponent(deviceId)}`,
@@ -109,15 +105,11 @@
 				},
 			);
 
-			console.log('📥 Réponse API:', response.status, response.statusText);
-
 			if (response.ok) {
 				const result = await response.json();
-				console.log('📦 Photos reçues:', result);
 				if (result.success) {
 					photos = result.photos || [];
 					lastFetchTime = now;
-					console.log(`✅ ${photos.length} photo(s) chargée(s)`);
 				}
 			} else {
 				const errorText = await response.text();
@@ -130,13 +122,37 @@
 		}
 	}
 
+	async function deletePhoto(photoId: string) {
+		try {
+			const deviceId = getDeviceId();
+			const response = await fetch(
+				`/api/events/slug/${data.event.slug}/photos/${photoId}?device_id=${encodeURIComponent(deviceId)}`,
+				{
+					method: 'DELETE',
+				},
+			);
+
+			if (response.ok) {
+				// Retirer la photo de la liste localement
+				photos = photos.filter((photo) => photo.id !== photoId);
+				// Forcer le rafraîchissement pour mettre à jour le cache
+				lastFetchTime = 0;
+			} else {
+				const errorData = await response.json();
+				alert(errorData.message || 'Erreur lors de la suppression de la photo');
+			}
+		} catch (error) {
+			console.error('❌ Error deleting photo:', error);
+			alert('Erreur lors de la suppression de la photo');
+		}
+	}
+
 	onMount(() => {
 		// Vérifier si on vient d'un upload (paramètre refresh=true dans l'URL)
 		const shouldRefresh = $page.url.searchParams.get('refresh') === 'true';
 
 		if (shouldRefresh) {
 			// Forcer le rafraîchissement du cache après un upload
-			console.log('🔄 Rafraîchissement forcé après upload');
 			loadPhotos(true);
 
 			// Nettoyer l'URL en retirant le paramètre refresh
@@ -200,9 +216,12 @@
 	{/if}
 
 	<!-- Zone scrollable : Photos uniquement -->
-	<div class="relative mb-8 min-h-0 flex-1">
-		<div class="h-full overflow-y-auto">
-			<div class="container mx-auto w-full max-w-4xl px-4 pb-4">
+	<div class="relative mb-8 min-h-0 flex-1 px-6 sm:px-6">
+		<div
+			class="h-full overflow-y-auto rounded-lg border"
+			style="border-color: {borderColor};"
+		>
+			<div class="container mx-auto w-full max-w-4xl px-2 pb-2">
 				{#if isLoadingPhotos}
 					<div class="flex justify-center">
 						<div
@@ -264,6 +283,14 @@
 											</svg>
 										</div>
 									{/if}
+									<!-- Bouton de suppression -->
+									<button
+										on:click={() => deletePhoto(photo.id)}
+										class="absolute right-2 top-2 z-10 rounded-full bg-red-500 p-1.5 transition-colors hover:bg-red-600 active:bg-red-700"
+										title="Supprimer cette photo"
+									>
+										<Trash2 class="h-4 w-4 text-white" />
+									</button>
 								</div>
 							{/each}
 						</div>

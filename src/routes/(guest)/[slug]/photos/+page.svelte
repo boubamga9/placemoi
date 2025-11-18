@@ -38,12 +38,9 @@
 			deviceId = `device-${Date.now()}-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
 			try {
 				localStorage.setItem(STORAGE_KEY, deviceId);
-				console.log('✅ Nouveau device_id généré et sauvegardé:', deviceId);
 			} catch (e) {
 				console.error('❌ Erreur lors de la sauvegarde du device_id:', e);
 			}
-		} else {
-			console.log('✅ Device_id récupéré depuis localStorage:', deviceId);
 		}
 
 		return deviceId;
@@ -119,20 +116,8 @@
 		// Ajouter l'identifiant de l'appareil
 		const deviceId = getDeviceId();
 		formData.append('device_id', deviceId);
-		console.log('📤 Upload avec device_id:', deviceId);
 
 		try {
-			// Log des fichiers avant upload pour debug
-			selectedFiles.forEach((file) => {
-				console.log('📤 Uploading file:', {
-					name: file.name,
-					type: file.type,
-					size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
-					isVideo: file.type.startsWith('video/'),
-					isImage: file.type.startsWith('image/'),
-				});
-			});
-
 			const response = await fetch(
 				`/api/events/${data.event.id}/photos/upload`,
 				{
@@ -144,7 +129,6 @@
 			let result;
 			try {
 				result = await response.json();
-				console.log('📦 Response data:', result);
 			} catch (jsonError) {
 				console.error('❌ Error parsing JSON response:', jsonError);
 				const text = await response.text();
@@ -218,25 +202,6 @@
 			</div>
 
 			<div class="mx-auto w-full max-w-2xl">
-				<!-- Bouton pour voir les photos partagées -->
-				<div class="mb-4 flex justify-center">
-					<a
-						href={`/${data.event.slug}/shared`}
-						class="rounded-lg border px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-80"
-						style="
-							color: {data.customization.font_color};
-							border-color: {data.customization.font_color};
-							background-color: transparent;
-							font-family: '{data.customization.font_family ||
-							'Playfair Display'}', {getFontFallback(
-							data.customization.font_family || 'Playfair Display',
-						)};
-						"
-					>
-						Voir mes photos partagées
-					</a>
-				</div>
-
 				<!-- Zone d'upload -->
 				<div
 					class="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-4 py-6 text-center transition-colors sm:px-6 sm:py-10"
@@ -301,6 +266,25 @@
 							télécharger.
 						</p>
 					{/if}
+				</div>
+
+				<!-- Bouton pour voir les photos partagées -->
+				<div class="mt-6 flex justify-center">
+					<a
+						href={`/${data.event.slug}/shared`}
+						class="rounded-lg border px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-80"
+						style="
+							color: {data.customization.font_color};
+							border-color: {data.customization.font_color};
+							background-color: transparent;
+							font-family: '{data.customization.font_family ||
+							'Playfair Display'}', {getFontFallback(
+							data.customization.font_family || 'Playfair Display',
+						)};
+						"
+					>
+						Voir mes photos partagées
+					</a>
 				</div>
 			</div>
 		</div>

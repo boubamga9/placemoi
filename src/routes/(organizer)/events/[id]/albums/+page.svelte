@@ -2,8 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import type { Database } from '$lib/database/database.types';
-	import { LoaderCircle, Download, Image as ImageIcon, Video, DownloadCloud, Trash2 } from 'lucide-svelte';
+	import { LoaderCircle, Download, Image as ImageIcon, Video, DownloadCloud, Trash2, Clock } from 'lucide-svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { WebsiteName } from '../../../../../config';
 
 	type Photo = {
 		id: string;
@@ -77,6 +78,59 @@
 	function isVideo(fileType: string): boolean {
 		return fileType.startsWith('video/');
 	}
+
+	// Calculer la date de suppression (3 mois après l'événement)
+	function getDeletionDate(): Date {
+		const eventDate = new Date(data.event.event_date);
+		const deletionDate = new Date(eventDate);
+		deletionDate.setMonth(deletionDate.getMonth() + 3);
+		return deletionDate;
+	}
+
+	// Calculer le temps restant avant suppression
+	function getTimeRemaining(): { days: number; hours: number; minutes: number; isExpired: boolean } {
+		const deletionDate = getDeletionDate();
+		const now = new Date();
+		const diff = deletionDate.getTime() - now.getTime();
+
+		if (diff <= 0) {
+			return { days: 0, hours: 0, minutes: 0, isExpired: true };
+		}
+
+		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+		const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+		const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+		return { days, hours, minutes, isExpired: false };
+	}
+
+	// Formater le temps restant en texte lisible
+	function formatTimeRemaining(): string {
+		const { days, hours, minutes, isExpired } = getTimeRemaining();
+
+		if (isExpired) {
+			return 'Les photos seront supprimées prochainement';
+		}
+
+		if (days > 0) {
+			return `${days} jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}`;
+		}
+
+		if (hours > 0) {
+			return `${hours} heure${hours > 1 ? 's' : ''} restante${hours > 1 ? 's' : ''}`;
+		}
+
+		return `${minutes} minute${minutes > 1 ? 's' : ''} restante${minutes > 1 ? 's' : ''}`;
+	}
+
+	// Vérifier si on est proche de la date de suppression (moins de 7 jours)
+	function isNearDeletion(): boolean {
+		const { days, isExpired } = getTimeRemaining();
+		return isExpired || days <= 7;
+	}
+
+	// Calculer la classe de l'icône Clock
+	$: clockIconClass = isNearDeletion() ? 'h-5 w-5 flex-shrink-0' : 'h-5 w-5 flex-shrink-0';
 
 	async function downloadAllPhotos() {
 		if (photos.length === 0 || isDownloadingAll) return;
@@ -158,6 +212,14 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Album photos — {data.event.event_name} - {WebsiteName}</title>
+	<meta
+		name="description"
+		content="Consultez et téléchargez les photos envoyées par vos invités pour l'événement {data.event.event_name}."
+	/>
+</svelte:head>
+
 <div class="container mx-auto max-w-6xl px-4 py-12">
 	<button
 		on:click={() => goto(`/events/${data.event.id}`)}
@@ -172,9 +234,39 @@
 	>
 		Album photos — {data.event.event_name}
 	</h1>
-	<p class="mb-10 text-sm" style="color: #2C3E50; opacity: 0.75;">
+	<p class="mb-4 text-sm" style="color: #2C3E50; opacity: 0.75;">
 		Consultez et téléchargez les photos envoyées par vos invités.
 	</p>
+
+	<!-- Indicateur de temps restant avant suppression -->
+	{#if photos.length > 0}
+		<div
+			class="mb-6 flex items-center gap-2 rounded-lg border px-4 py-3"
+			style="background-color: {isNearDeletion() ? '#FFF9F4' : '#F8F9FA'}; border-color: {isNearDeletion() ? '#D4A574' : '#2C3E50'}; border-width: 1px;"
+		>
+			<Clock
+				class={clockIconClass}
+				style="color: {isNearDeletion() ? '#D4A574' : '#2C3E50'};"
+			/>
+			<div class="flex-1">
+				<p
+					class="text-sm font-medium"
+					style="color: #2C3E50;"
+				>
+					Suppression automatique dans {formatTimeRemaining()}
+				</p>
+				<p
+					class="mt-0.5 text-xs"
+					style="color: #2C3E50; opacity: 0.75;"
+				>
+					Les photos seront automatiquement supprimées 3 mois après l'événement ({getDeletionDate().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}).
+					{#if isNearDeletion()}
+						Pensez à télécharger vos photos avant cette date.
+					{/if}
+				</p>
+			</div>
+		</div>
+	{/if}
 
 	{#if isLoading}
 		<div class="flex items-center justify-center py-20">
