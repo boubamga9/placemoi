@@ -17,7 +17,13 @@
 		'@type': 'Organization',
 		name: 'PLACEMOI',
 		url: 'https://placemoi.com',
-		logo: 'https://placemoi.com/images/logo_text.svg',
+		logo: {
+			'@type': 'ImageObject',
+			url: 'https://placemoi.com/images/logo_icone.png',
+			width: 400,
+			height: 400,
+		},
+		image: 'https://placemoi.com/images/logo_icone.png',
 		description:
 			'PLACEMOI - Solution de plan de table événement en ligne avec QR code. Pour mariages, anniversaires, baptêmes, conférences, séminaires et galas.',
 		sameAs: [],
