@@ -3,7 +3,6 @@ import type { Database } from '$lib/database/database.types';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { eventCustomizationSchema } from '$lib/validations';
-import { validateAndRecompressImage } from '$lib/utils/images/server-image-validation';
 import { uploadValidatedImage, deleteImage, extractPublicIdFromUrl, isCloudinaryConfigured, CloudinaryUploadError } from '$lib/utils/cloudinary';
 
 type Event = Database['public']['Tables']['events']['Row'];
@@ -100,13 +99,18 @@ export const actions = {
                     if (!isCloudinaryConfigured())
                         throw new Error("Cloudinary n'est pas configuré.");
 
-                    const validationResult = await validateAndRecompressImage(backgroundImageFile, 'BACKGROUND');
-                    if (!validationResult.isValid) throw new Error(validationResult.error || 'Image invalide');
+                    // Validation basique : vérifier que c'est bien une image
+                    if (!backgroundImageFile.type.startsWith('image/')) {
+                        throw new Error('Le fichier doit être une image');
+                    }
 
+                    // Cloudinary s'occupe de la compression et de l'optimisation
+                    // Les images sont organisées par événement : events/{userId}/{eventId}
                     const uploadResult = await uploadValidatedImage(
-                        validationResult.compressedFile || backgroundImageFile,
+                        backgroundImageFile,
                         'BACKGROUND',
-                        session.user.id
+                        session.user.id,
+                        id // eventId pour organiser par événement
                     );
 
                     finalBackgroundImageUrl = uploadResult.secure_url;
@@ -120,13 +124,18 @@ export const actions = {
                     if (!isCloudinaryConfigured())
                         throw new Error("Cloudinary n'est pas configuré.");
 
-                    const validationResult = await validateAndRecompressImage(logoFile, 'LOGO');
-                    if (!validationResult.isValid) throw new Error(validationResult.error || 'Logo invalide');
+                    // Validation basique : vérifier que c'est bien une image
+                    if (!logoFile.type.startsWith('image/')) {
+                        throw new Error('Le fichier doit être une image');
+                    }
 
+                    // Cloudinary s'occupe de la compression et de l'optimisation
+                    // Les images sont organisées par événement : events/{userId}/{eventId}
                     const uploadResult = await uploadValidatedImage(
-                        validationResult.compressedFile || logoFile,
+                        logoFile,
                         'LOGO',
-                        session.user.id
+                        session.user.id,
+                        id // eventId pour organiser par événement
                     );
 
                     finalLogoUrl = uploadResult.secure_url;

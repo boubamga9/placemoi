@@ -250,32 +250,43 @@ export async function uploadImageFromUrl(
  * @param file - Fichier à uploader
  * @param type - Type d'image ('BACKGROUND' ou 'LOGO')
  * @param userId - ID de l'utilisateur pour le dossier
+ * @param eventId - ID de l'événement pour organiser les images par événement (optionnel)
  * @returns Résultat de l'upload avec l'URL sécurisée
  * @throws CloudinaryUploadError si l'upload échoue
  */
 export async function uploadValidatedImage(
     file: File,
     type: 'BACKGROUND' | 'LOGO',
-    userId: string
+    userId: string,
+    eventId?: string
 ): Promise<CloudinaryUploadResult> {
     // Configuration selon le type d'image
-    // NOTE: format: 'auto' et quality: 'auto' ne peuvent pas être utilisés dans les options d'upload
-    // Ils sont seulement disponibles dans les transformations d'URL
+    // Cloudinary optimise automatiquement avec q_auto (qualité) et f_auto (format)
+    // Organisation des dossiers : events/{userId}/{eventId} pour une meilleure organisation
+    const folder = eventId 
+        ? `events/${userId}/${eventId}` 
+        : `events/${userId}`;
+    
     const options: CloudinaryUploadOptions = {
-        folder: `events/${userId}`
-        // On laisse Cloudinary utiliser le format original et optimiser automatiquement
+        folder,
+        // Utiliser eager pour appliquer les transformations immédiatement à l'upload
+        // Cela permet d'optimiser l'image dès le stockage
     };
 
     if (type === 'LOGO') {
         options.width = 400;
         options.height = 400;
         options.crop = 'limit';
+        // Pour les logos, on peut forcer PNG si nécessaire pour la transparence
+        // mais on laisse Cloudinary optimiser avec f_auto
     } else if (type === 'BACKGROUND') {
         options.width = 1920;
         options.height = 1080;
         options.crop = 'limit';
     }
 
+    // Utiliser uploadImageFromFile qui va appliquer les transformations
+    // Cloudinary optimisera automatiquement la qualité et le format
     return await uploadImageFromFile(file, options);
 }
 

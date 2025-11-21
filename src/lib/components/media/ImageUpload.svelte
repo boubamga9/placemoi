@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Upload, X, LoaderCircle } from 'lucide-svelte';
-	import {
-		ImageService,
-		type ProcessedImage,
-	} from '$lib/utils/images/image-service';
+	import { Upload, X } from 'lucide-svelte';
+	import { ImageService } from '$lib/utils/images/image-service';
 
 	export let type: 'product' | 'logo' = 'product';
 	export let currentImageUrl: string | null = null;
@@ -13,17 +10,16 @@
 	export let className = '';
 
 	const dispatch = createEventDispatcher<{
-		imageSelected: ProcessedImage;
+		imageSelected: File;
 		imageRemoved: void;
 	}>();
 
 	let imageFile: File | null = null;
 	let imagePreview: string | null = currentImageUrl;
-	let isProcessing = false;
 	let errorMessage = '';
 
 	// Gestionnaire de sélection de fichier
-	async function handleFileSelect(event: Event) {
+	function handleFileSelect(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const file = target.files?.[0];
 
@@ -36,24 +32,13 @@
 			return;
 		}
 
-		try {
-			isProcessing = true;
-			errorMessage = '';
+		// Créer une prévisualisation locale
+		imageFile = file;
+		imagePreview = ImageService.createPreviewUrl(file);
 
-			// Traiter l'image
-			const processedImage = await ImageService.processImage(file, type);
-
-			// Mettre à jour l'état
-			imageFile = processedImage.file;
-			imagePreview = processedImage.url;
-
-			// Émettre l'événement
-			dispatch('imageSelected', processedImage);
-		} catch (error) {
-			errorMessage = "Erreur lors du traitement de l'image";
-		} finally {
-			isProcessing = false;
-		}
+		// Émettre l'événement avec le fichier original
+		// Cloudinary s'occupera de la compression et de l'optimisation
+		dispatch('imageSelected', file);
 
 		// Réinitialiser l'input
 		target.value = '';
@@ -120,22 +105,13 @@
 				on:click={() =>
 					document.getElementById(`image-upload-${type}`)?.click()}
 			>
-				{#if isProcessing}
-					<LoaderCircle
-						class="mb-2 h-8 w-8 animate-spin text-muted-foreground"
-					/>
-					<p class="text-center text-xs text-muted-foreground">
-						Traitement en cours...
-					</p>
-				{:else}
-					<Upload class="mb-2 h-8 w-8 text-muted-foreground" />
-					<p class="text-center text-xs text-muted-foreground">
-						Cliquez pour sélectionner une image
-					</p>
-					<p class="text-center text-xs text-muted-foreground">
-						{type === 'logo' ? '400×400px max' : '800×800px max'}
-					</p>
-				{/if}
+				<Upload class="mb-2 h-8 w-8 text-muted-foreground" />
+				<p class="text-center text-xs text-muted-foreground">
+					Cliquez pour sélectionner une image
+				</p>
+				<p class="text-center text-xs text-muted-foreground">
+					{type === 'logo' ? 'JPG, PNG ou WebP' : 'JPG, PNG ou WebP'}
+				</p>
 			</div>
 		</div>
 	{/if}
@@ -153,7 +129,7 @@
 		accept="image/*"
 		on:change={handleFileSelect}
 		class="hidden"
-		disabled={disabled || isProcessing}
+		disabled={disabled}
 	/>
 
 	<!-- Bouton de sélection (si pas d'image) -->
@@ -164,7 +140,7 @@
 				variant="outline"
 				on:click={() =>
 					document.getElementById(`image-upload-${type}`)?.click()}
-				disabled={disabled || isProcessing}
+				disabled={disabled}
 			>
 				<Upload class="mr-2 h-4 w-4" />
 				Sélectionner une image

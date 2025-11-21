@@ -1,7 +1,8 @@
 // Export des utilitaires d'images côté client uniquement
-// Ces fonctions utilisent l'API Canvas et fonctionnent dans le navigateur
+// La compression est gérée par Cloudinary
 
 export * from './image-compression';
+export * from './image-service';
 
 
 

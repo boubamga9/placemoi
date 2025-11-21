@@ -10,10 +10,7 @@
 	import LoaderCircle from '~icons/lucide/loader-circle';
 	import { eventCustomizationSchema } from '$lib/validations';
 	import { goto } from '$app/navigation';
-	import {
-		compressLogo,
-		compressBackgroundImage,
-	} from '$lib/utils/images/client';
+	import { ImageService } from '$lib/utils/images/image-service';
 
 	type Database = import('$lib/database/database.types').Database;
 	type Event = Database['public']['Tables']['events']['Row'];
@@ -37,13 +34,11 @@
 		data.customization?.background_image_url || null;
 	let backgroundImageFileName: string | null = null;
 	let backgroundInputElement: HTMLInputElement;
-	let isBackgroundCompressing = false;
 
 	let logoFile: File | null = null;
 	let logoPreview: string | null = data.customization?.logo_url || null;
 	let logoFileName: string | null = null;
 	let logoInputElement: HTMLInputElement;
-	let isLogoCompressing = false;
 
 	const fontFamilies = [
 		// Serif élégants
@@ -89,76 +84,46 @@
 		}
 	}
 
-	async function handleBackgroundImageSelect(e: Event) {
+	function handleBackgroundImageSelect(e: Event) {
 		const target = e.target as HTMLInputElement;
 		const file = target.files?.[0];
 
-		if (!file || !file.type.startsWith('image/')) return;
+		if (!file) return;
 
-		try {
-			isBackgroundCompressing = true;
-
-			// Compress the image
-			const compressionResult = await compressBackgroundImage(file);
-
-			// Use compressed image
-			backgroundImageFile = compressionResult.file;
-			backgroundImageFileName = file.name;
-
-			// Sync the input element with the compressed file
-			const dataTransfer = new DataTransfer();
-			dataTransfer.items.add(compressionResult.file);
-			if (backgroundInputElement) {
-				backgroundInputElement.files = dataTransfer.files;
-			}
-
-			// Create preview
-			const reader = new FileReader();
-			reader.onload = (ev) => {
-				backgroundImagePreview = ev.target?.result as string;
-			};
-			reader.readAsDataURL(compressionResult.file);
-		} catch (error) {
-			console.error('Error compressing background image:', error);
-		} finally {
-			isBackgroundCompressing = false;
+		// Valider le fichier
+		const validation = ImageService.validateImage(file, 'product');
+		if (!validation.valid) {
+			console.error('Image invalide:', validation.error);
+			return;
 		}
+
+		// Utiliser le fichier original - Cloudinary s'occupera de la compression
+		backgroundImageFile = file;
+		backgroundImageFileName = file.name;
+
+		// Créer une prévisualisation locale
+		backgroundImagePreview = ImageService.createPreviewUrl(file);
 	}
 
-	async function handleLogoSelect(e: Event) {
+	function handleLogoSelect(e: Event) {
 		const target = e.target as HTMLInputElement;
 		const file = target.files?.[0];
 
-		if (!file || !file.type.startsWith('image/')) return;
+		if (!file) return;
 
-		try {
-			isLogoCompressing = true;
-
-			// Compress the logo
-			const compressionResult = await compressLogo(file);
-
-			// Use compressed logo
-			logoFile = compressionResult.file;
-			logoFileName = file.name;
-
-			// Sync the input element with the compressed file
-			const dataTransfer = new DataTransfer();
-			dataTransfer.items.add(compressionResult.file);
-			if (logoInputElement) {
-				logoInputElement.files = dataTransfer.files;
-			}
-
-			// Create preview
-			const reader = new FileReader();
-			reader.onload = (ev) => {
-				logoPreview = ev.target?.result as string;
-			};
-			reader.readAsDataURL(compressionResult.file);
-		} catch (error) {
-			console.error('Error compressing logo:', error);
-		} finally {
-			isLogoCompressing = false;
+		// Valider le fichier
+		const validation = ImageService.validateImage(file, 'logo');
+		if (!validation.valid) {
+			console.error('Logo invalide:', validation.error);
+			return;
 		}
+
+		// Utiliser le fichier original - Cloudinary s'occupera de la compression
+		logoFile = file;
+		logoFileName = file.name;
+
+		// Créer une prévisualisation locale
+		logoPreview = ImageService.createPreviewUrl(file);
 	}
 
 	async function removeBackgroundImage() {
@@ -496,11 +461,6 @@
 						×
 					</button>
 				</div>
-			{:else if isBackgroundCompressing}
-				<div class="flex items-center gap-2 text-sm text-blue-600">
-					<LoaderCircle class="h-4 w-4 animate-spin" />
-					Compression en cours...
-				</div>
 			{:else}
 				<label class="cursor-pointer">
 					<span
@@ -553,11 +513,6 @@
 					>
 						×
 					</button>
-				</div>
-			{:else if isLogoCompressing}
-				<div class="flex items-center gap-2 text-sm text-blue-600">
-					<LoaderCircle class="h-4 w-4 animate-spin" />
-					Compression en cours...
 				</div>
 			{:else}
 				<label class="cursor-pointer">
