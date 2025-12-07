@@ -22,12 +22,7 @@
 		{
 			question: 'Comment se passe le paiement ?',
 			answer:
-				'Chaque plan est facturé par événement. Vous payez une seule fois pour activer la page invitée et profiter des fonctionnalités jusqu’au jour J.',
-		},
-		{
-			question: 'Les photos sont-elles sécurisées ?',
-			answer:
-				'Toutes les photos sont hébergées de façon sécurisée. Seul l’organisateur peut les télécharger ou les supprimer.',
+				"Chaque plan est facturé par événement. Vous payez une seule fois pour activer la page invitée et profiter des fonctionnalités jusqu'au jour J.",
 		},
 	];
 
@@ -38,7 +33,7 @@
 		'@type': 'Product',
 		name: 'Placemoi',
 		description:
-			'Outil de placement et collecte de photos pour les événements et mariages.',
+			'Outil de placement pour les événements et mariages.',
 		offers: plans
 			.filter((plan) => plan.price > 0)
 			.map((plan) => ({
@@ -58,11 +53,11 @@
 	>
 	<meta
 		name="description"
-		content="Plan Placement 49,99€ | Plan Placement + Photos 99,99€. QR code, page personnalisée, collecte photos. Pour mariages, anniversaires, conférences, séminaires. Paiement unique par événement, sans abonnement."
+		content="Plan Placement 49,99€. QR code, page personnalisée. Pour mariages, anniversaires, conférences, séminaires. Paiement unique par événement, sans abonnement."
 	/>
 	<meta
 		name="keywords"
-		content="tarif plan de table mariage, prix placement invités, coût QR code mariage, tarif collecte photos mariage, prix album photo collaboratif, plan de table pas cher, tarif plan de table événement, prix plan de table anniversaire, tarif plan de table conférence, prix plan de table séminaire, placemoi tarifs, plan de table mariage prix, QR code invités prix"
+		content="tarif plan de table mariage, prix placement invités, coût QR code mariage, plan de table pas cher, tarif plan de table événement, prix plan de table anniversaire, tarif plan de table conférence, prix plan de table séminaire, placemoi tarifs, plan de table mariage prix, QR code invités prix"
 	/>
 	<meta
 		property="og:title"
@@ -70,7 +65,7 @@
 	/>
 	<meta
 		property="og:description"
-		content="Plan Placement 49,99€ | Plan Placement + Photos 99,99€. QR code, page personnalisée, collecte photos. Pour mariages, anniversaires, conférences, séminaires. Paiement unique."
+		content="Plan Placement 49,99€. QR code, page personnalisée. Pour mariages, anniversaires, conférences, séminaires. Paiement unique."
 	/>
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://placemoi.com/pricing" />
@@ -104,8 +99,7 @@
 					class="mt-6 text-base leading-[160%] md:text-lg"
 					style="color: #2c3e50; opacity: 0.85;"
 				>
-					Un QR code, une page invitée élégante, et désormais un album photo
-					collaboratif. Vous payez par événement, sans abonnement caché.
+					Un QR code et une page invitée élégante. Vous payez par événement, sans abonnement caché.
 				</p>
 				<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
 					<a
@@ -167,18 +161,18 @@
 		style="background-color: #fafaFA;"
 	>
 		<div class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
-			<div class="grid gap-8 lg:grid-cols-3">
+			<div class="grid gap-8 lg:grid-cols-2">
 				{#each plans as plan}
 					<div
-						class={`flex h-full flex-col rounded-3xl border ${plan.id === 'placement-photos' ? 'relative bg-white px-10 pb-10 pt-16 shadow-lg' : plan.id === 'wedding-planners' ? 'p-10 shadow-sm' : 'bg-white p-10 shadow-sm'}`}
-						style={`border-color: ${plan.id === 'placement-photos' ? '#D4A574' : '#E8DCCF'}; ${plan.id === 'wedding-planners' ? 'background-color: #FFF9F4;' : ''}`}
+						class={`flex h-full flex-col rounded-3xl border ${plan.id === 'wedding-planners' ? 'p-10 shadow-sm' : 'bg-white p-10 shadow-sm'}`}
+						style={`border-color: #E8DCCF; ${plan.id === 'wedding-planners' ? 'background-color: #FFF9F4;' : ''}`}
 					>
 						<div class="space-y-6">
 							<div>
 								{#if plan.badge}
 									<span
 										class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]"
-										style={`background-color: ${plan.id === 'placement-photos' ? 'transparent' : plan.id === 'wedding-planners' ? '#D4A574' : '#FFF1E0'}; color: ${plan.id === 'placement-photos' ? '#2C3E50' : plan.id === 'wedding-planners' ? 'white' : '#D4A574'}; border: ${plan.id === 'placement-photos' ? '1px solid #2C3E50' : 'none'};`}
+										style={`background-color: ${plan.id === 'wedding-planners' ? '#D4A574' : '#FFF1E0'}; color: ${plan.id === 'wedding-planners' ? 'white' : '#D4A574'};`}
 									>
 										{plan.badge}
 									</span>
@@ -254,7 +248,7 @@
 						<a
 							href={plan.ctaHref}
 							class={`mt-10 inline-flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold transition-transform duration-200 hover:scale-[1.02] ${plan.id === 'wedding-planners' ? 'border-2 text-[#2C3E50]' : 'text-white'}`}
-							style={`${plan.id === 'wedding-planners' ? 'border-color: #2C3E50; background-color: transparent;' : `background-color: ${plan.id === 'placement-photos' ? '#2C3E50' : '#D4A574'};`}`}
+							style={`${plan.id === 'wedding-planners' ? 'border-color: #2C3E50; background-color: transparent;' : 'background-color: #D4A574;'}`}
 							on:mouseover={(e) => {
 								if (plan.id === 'wedding-planners') {
 									e.currentTarget.style.backgroundColor = '#2C3E50';

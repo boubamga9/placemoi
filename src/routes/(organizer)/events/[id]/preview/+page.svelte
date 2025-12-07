@@ -305,8 +305,7 @@
 					class="text-sm"
 					style="color: {data.customization.font_color}; opacity: 0.7;"
 				>
-					Activez le QR code ou ajoutez l’album photo collaboratif depuis la
-					page événement.
+					Activez le QR code depuis la page événement.
 				</p>
 				<div class="flex justify-center">
 					<a

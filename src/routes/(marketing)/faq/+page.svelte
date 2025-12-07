@@ -104,7 +104,7 @@
 				{
 					question: 'Comment puis-je vous contacter ?',
 					answer:
-						'Vous pouvez nous écrire à tout moment via le formulaire de contact. Nous répondons sous 24h (souvent plus rapidement).',
+						'Vous pouvez nous écrire directement à contact@placemoi.com. Nous répondons sous 24h (souvent plus rapidement).',
 				},
 				{
 					question: 'Proposez-vous une aide à la mise en place ?',
@@ -293,7 +293,7 @@
 				class="mt-4 text-sm leading-relaxed md:text-base"
 				style="color: #2c3e50; opacity: 0.85;"
 			>
-				Écrivez-nous via le formulaire de contact ou sur Instagram. Nous serons ravis de vous guider pour que votre événement reste un moment fluide et mémorable.
+				Écrivez-nous à contact@placemoi.com ou sur Instagram. Nous serons ravis de vous guider pour que votre événement reste un moment fluide et mémorable.
 			</p>
 			<div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
 				<a

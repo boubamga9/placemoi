@@ -15,7 +15,6 @@
 		event: Database['public']['Tables']['events']['Row'];
 		customization: EventCustomization;
 		guests: Guest[];
-		hasPhotosPlan: boolean;
 	};
 
 	let searchTerm = '';
@@ -300,14 +299,5 @@
 	<GuestFooter
 		customization={data.customization}
 		fontFallback={getFontFallback}
-		buttons={data.hasPhotosPlan
-			? [
-					{
-						label: 'Envoyer des photos',
-						href: `/${data.event.slug}/photos`,
-						variant: 'solid',
-					},
-				]
-			: []}
 	/>
 </div>

@@ -33,24 +33,6 @@ export const load: PageServerLoad = async () => {
 			ctaHref: '/auth',
 		},
 		{
-			id: 'placement-photos',
-			name: 'Placement + Photos',
-			price: 99.99,
-			description:
-				'Tout le placement + la collecte des souvenirs de vos invités depuis la même page.',
-			badge: 'Nouveau',
-			highlight: 'Album collaboratif',
-			features: [
-				'Toutes les fonctionnalités du plan Placement',
-				'Collecte photo via la page invitée et le QR code',
-				'Espace organisateur pour visualiser et télécharger vos photos',
-				'Exports groupés des souvenirs',
-			],
-			extras: [],
-			ctaLabel: 'Activer les photos invitées',
-			ctaHref: '/auth',
-		},
-		{
 			id: 'wedding-planners',
 			name: 'Pour Wedding Planners',
 			price: 0, // 0 signifie "Sur devis"
@@ -58,7 +40,7 @@ export const load: PageServerLoad = async () => {
 				'Tarifs dégressifs et gestion multi-événements pour les professionnels.',
 			badge: 'Professionnel',
 			features: [
-				'Toutes les fonctionnalités Placement + Photos',
+				'Toutes les fonctionnalités du plan Placement',
 				'Gestion de plusieurs événements simultanés',
 				'Tableau de bord professionnel centralisé',
 				'Tarifs dégressifs selon volume',

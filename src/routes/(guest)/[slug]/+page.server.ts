@@ -1,7 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { Database } from '$lib/database/database.types';
 import { isEventAccessible } from '$lib/utils/event-utils';
-import { STRIPE_PRICES } from '$lib/config/server';
 
 type Event = Database['public']['Tables']['events']['Row'];
 type EventCustomization = Database['public']['Tables']['event_customizations']['Row'];
@@ -63,7 +62,6 @@ export const load = async ({ params, locals: { supabase, supabaseServiceRole } }
     // Exécuter toutes les requêtes en parallèle
     const [
         { count, error: countError },
-        { data: payment },
         { data: ownerHasFree, error: ownerHasFreeError }
     ] = await Promise.all([
         // 1. Compter les invités pour décider si on précharge
@@ -71,16 +69,7 @@ export const load = async ({ params, locals: { supabase, supabaseServiceRole } }
             .from('guests')
             .select('*', { count: 'exact', head: true })
             .eq('event_id', event.id),
-        // 2. Vérifier si l'événement a le plan avec photos activé
-        supabase
-            .from('payments')
-            .select('stripe_price_id')
-            .eq('event_id', event.id)
-            .eq('status', 'succeeded')
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-        // 3. Vérifier si l'owner a le plan gratuit via owner_has_free()
+        // 2. Vérifier si l'owner a le plan gratuit via owner_has_free()
         supabaseServiceRole
             .rpc('owner_has_free', { p_owner_id: event.owner_id })
     ]);
@@ -118,15 +107,10 @@ export const load = async ({ params, locals: { supabase, supabaseServiceRole } }
         }
     }
 
-    const hasPhotosPlan =
-        payment?.stripe_price_id === STRIPE_PRICES.EVENT_WITH_PHOTOS ||
-        hasFreePlan;
-
     return {
         event: event as Event,
         customization: customizationWithDefaults,
         // Preloaded guests data (vide si >= 2000 invités, pour utiliser l'API)
-        guests: guests,
-        hasPhotosPlan: hasPhotosPlan || false
+        guests: guests
     };
 };

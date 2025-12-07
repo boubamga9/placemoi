@@ -4,7 +4,6 @@
 	import PainPoints from './components/sections/pain-points.svelte';
 	import EventCategories from './components/sections/event-categories.svelte';
 	import Solutions from './components/sections/benefits.svelte';
-	import PhotoSharing from './components/sections/photo-sharing.svelte';
 	import Pricing from './components/sections/pricing.svelte';
 	import WeddingPlannersCta from './components/sections/wedding-planners-cta.svelte';
 	import LastCta from './components/sections/last-cta.svelte';
@@ -152,7 +151,7 @@
 	/>
 	<meta
 		name="keywords"
-		content="plan de table événement, plan de table mariage, plan de table anniversaire, plan de table baptême, plan de table conférence, plan de table séminaire, placement invités, QR code événement, QR code mariage, gestion invités, plan de table en ligne, organisation événement, liste invités, page invités, album photo collaboratif, collecte photos événement, logiciel plan de table, application plan de table, plan de table personnalisé, placement invités mariage, placement invités anniversaire, plan de table gala"
+		content="plan de table événement, plan de table mariage, plan de table anniversaire, plan de table baptême, plan de table conférence, plan de table séminaire, placement invités, QR code événement, QR code mariage, gestion invités, plan de table en ligne, organisation événement, liste invités, page invités, logiciel plan de table, application plan de table, plan de table personnalisé, placement invités mariage, placement invités anniversaire, plan de table gala"
 	/>
 	<meta
 		property="og:title"
@@ -187,7 +186,6 @@
 	<PainPoints />
 	<EventCategories />
 	<Solutions />
-	<PhotoSharing />
 	<Pricing />
 	<WeddingPlannersCta />
 	<LastCta />

@@ -13,24 +13,17 @@
 		'Mises à jour illimitées jusqu’au jour J',
 	];
 
-	const placementPhotosFeatures = [
-		'Toutes les fonctionnalités du plan Placement',
-		'Collecte de photos via la page invitée et le QR code',
-		'Album collaboratif avec exports groupés',
-	];
 
 	type Event = Database['public']['Tables']['events']['Row'];
 
 	export let data: {
 		event: Event;
 		guestsCount: number;
-		photosCount: number;
 		hasPayment: boolean;
 		stripePrices: {
 			placement: string;
-			placementPhotos: string | null;
 		};
-		activePlan: 'placement' | 'placement_photos' | null;
+		activePlan: 'placement' | null;
 	};
 
 	let qrCodeDataUrl: string | null = null;
@@ -40,8 +33,6 @@
 	let qrCodeMargin = QR_CODE_DEFAULTS.margin; // Margin around QR code
 	let qrCodeSize = QR_CODE_DEFAULTS.width; // QR code size
 	let copied = false; // Copy feedback state
-	let photosLinkCopied = false;
-	let guestPhotosUrl = '';
 
 	// Generate the public search URL
 	$: publicUrl = browser
@@ -50,10 +41,6 @@
 			: `${window.location.origin}/${data.event.id}`
 		: '';
 
-	$: guestPhotosUrl =
-		browser && data.event.slug
-			? `${window.location.origin}/${data.event.slug}/photos`
-			: '';
 
 	// Generate QR code when slug is available
 	$: if (browser && data.event.slug && data.hasPayment) {
@@ -157,19 +144,6 @@
 		}
 	}
 
-	async function copyPhotosUrl() {
-		if (!guestPhotosUrl) return;
-
-		try {
-			await navigator.clipboard.writeText(guestPhotosUrl);
-			photosLinkCopied = true;
-			setTimeout(() => {
-				photosLinkCopied = false;
-			}, 2000);
-		} catch (err) {
-			console.error('Failed to copy photos url:', err);
-		}
-	}
 
 	// Generate checkout URLs (only before any plan is activated)
 	$: canStartPlan = !data.hasPayment;
@@ -177,40 +151,21 @@
 		canStartPlan && data.stripePrices.placement
 			? `/checkout/${data.stripePrices.placement}?eventId=${data.event.id}`
 			: null;
-	$: placementPhotosCheckoutUrl =
-		canStartPlan && data.stripePrices.placementPhotos
-			? `/checkout/${data.stripePrices.placementPhotos}?eventId=${data.event.id}`
-			: null;
 
 	$: isPlacementActive = data.activePlan === 'placement';
-	$: isPlacementPhotosActive = data.activePlan === 'placement_photos';
 	$: placementCardStyle = `border-color: #D4A57433;${
-		isPlacementActive || isPlacementPhotosActive
-			? ' background-color: #FFF9F4;'
-			: ''
+		isPlacementActive ? ' background-color: #FFF9F4;' : ''
 	}`;
-	$: placementPhotosCardStyle = `border-color: #D4A574;${
-		isPlacementPhotosActive ? ' background-color: #FFF9F4;' : ''
-	}`;
-	$: activePlanInfo = isPlacementPhotosActive
+	$: activePlanInfo = isPlacementActive
 		? {
-				name: 'Placement + Photos',
-				price: '99,99€',
+				name: 'Placement',
+				price: '49,99€',
 				description:
-					'Collectez les souvenirs de vos invités depuis la même page que le plan de table.',
-				color: '#D4A574',
-				features: placementPhotosFeatures,
+					'Page invitée élégante avec QR code et lien partageable pour guider vos convives.',
+				color: '#2C3E50',
+				features: placementFeatures,
 			}
-		: isPlacementActive
-			? {
-					name: 'Placement',
-					price: '49,99€',
-					description:
-						'Page invitée élégante avec QR code et lien partageable pour guider vos convives.',
-					color: '#2C3E50',
-					features: placementFeatures,
-				}
-			: null;
+		: null;
 </script>
 
 <svelte:head>
@@ -468,10 +423,9 @@
 	{#if !data.hasPayment || !activePlanInfo}
 		<div id="plans" class="mb-12 scroll-mt-24 space-y-6">
 			<p class="text-center text-base" style="color: #2C3E50; opacity: 0.8;">
-				Choisissez votre formule ou passez au plan supérieur pour débloquer la
-				collecte de photos.
+				Choisissez votre formule pour activer le QR code.
 			</p>
-			<div class="grid gap-6 md:grid-cols-2">
+			<div class="grid gap-6 md:grid-cols-1">
 				<div
 					class="rounded-xl border p-6 text-center shadow-sm"
 					style={placementCardStyle}
@@ -497,34 +451,6 @@
 							style="color: #2C3E50; opacity: 0.7;"
 						>
 							Configuration Stripe manquante.
-						</p>
-					{/if}
-				</div>
-				<div
-					class="rounded-xl border-2 p-6 text-center shadow-lg"
-					style={placementPhotosCardStyle}
-				>
-					<h3 class="text-lg font-semibold" style="color: #2C3E50;">
-						Placement + Photos
-					</h3>
-					<p class="mt-2 text-sm" style="color: #2C3E50; opacity: 0.7;">
-						Ajoutez la collecte de photos invités (QR code + album).
-					</p>
-					<p class="mt-4 text-2xl font-bold" style="color: #2C3E50;">99,99€</p>
-					{#if placementPhotosCheckoutUrl}
-						<a
-							href={placementPhotosCheckoutUrl}
-							class="mt-4 inline-flex w-full justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:scale-[1.03]"
-							style="background-color: #D4A574; border: none;"
-						>
-							Activer le QR + photos
-						</a>
-					{:else}
-						<p
-							class="mt-4 text-sm font-medium"
-							style="color: #2C3E50; opacity: 0.7;"
-						>
-							Configurez l'ID Stripe du plan photos pour proposer cette offre.
 						</p>
 					{/if}
 				</div>
@@ -696,47 +622,6 @@
 							</span>
 						</div>
 					{/if}
-				</div>
-			</div>
-		</div>
-	{/if}
-
-	{#if data.hasPayment && isPlacementPhotosActive}
-		<div class="mb-12">
-			<h2
-				class="mb-4 text-2xl font-medium"
-				style="color: #2C3E50; font-family: 'Playfair Display', serif;"
-			>
-				Collecte de photos
-			</h2>
-			<p class="mb-4 text-sm" style="color: #2C3E50; opacity: 0.75;">
-				Consultez toutes les photos envoyées par vos invités depuis votre espace
-				organisateur.
-			</p>
-			<div
-				class="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between"
-			>
-				<div class="space-y-1">
-					<p class="text-lg font-medium" style="color: #2C3E50;">
-						Album
-						{#if data.photosCount > 0}
-							<span class="ml-2 text-sm font-normal" style="color: #2C3E50; opacity: 0.6;">
-								({data.photosCount} photo{data.photosCount > 1 ? 's' : ''})
-							</span>
-						{/if}
-					</p>
-					<p class="text-xs" style="color: #2C3E50; opacity: 0.65;">
-						L’album invité reste accessible depuis le lien public ci-dessous.
-					</p>
-				</div>
-				<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-					<button
-						on:click={() => goto(`/events/${data.event.id}/albums`)}
-						class="rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md"
-						style="background-color: #D4A574; border: none;"
-					>
-						Ouvrir l’album
-					</button>
 				</div>
 			</div>
 		</div>

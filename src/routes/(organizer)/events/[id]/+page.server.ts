@@ -26,10 +26,9 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
         throw error(404, 'Événement non trouvé');
     }
 
-    // OPTIMIZED: Execute 4 independent queries in parallel
+    // OPTIMIZED: Execute 3 independent queries in parallel
     const [
         { count, error: countError },
-        { count: photosCount, error: photosCountError },
         { data: payment, error: paymentError },
         { data: owner, error: ownerError }
     ] = await Promise.all([
@@ -38,19 +37,14 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
             .from('guests')
             .select('*', { count: 'exact', head: true })
             .eq('event_id', id),
-        // 2. Get photos count (indexed query, very fast)
-        supabase
-            .from('event_photos')
-            .select('*', { count: 'exact', head: true })
-            .eq('event_id', id),
-        // 3. Check if there's a successful payment for this event
+        // 2. Check if there's a successful payment for this event
         supabase
             .from('payments')
             .select('id, status, stripe_price_id')
             .eq('event_id', id)
             .eq('status', 'succeeded')
             .single(),
-        // 4. Check owners flag for free QR generation
+        // 3. Check owners flag for free QR generation
         supabase
             .from('owners')
             .select('can_generate_qr_free')
@@ -60,10 +54,6 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
 
     if (countError) {
         console.error('Error counting guests:', countError);
-    }
-
-    if (photosCountError) {
-        console.error('Error counting photos:', photosCountError);
     }
 
     if (paymentError && paymentError.code !== 'PGRST116') {
@@ -96,23 +86,15 @@ export const load = async ({ params, locals: { supabase, safeGetSession } }: any
     }
 
     const hasPayment = isFree || !!payment;
-    const activePlan = payment?.stripe_price_id === STRIPE_PRICES.EVENT_WITH_PHOTOS
-        ? 'placement_photos'
-        : payment
-            ? 'placement'
-            : isFree
-                ? 'placement_photos'
-                : null;
+    const activePlan = payment || isFree ? 'placement' : null;
 
     return {
         event: event as Event,
         guestsCount: count || 0,
-        photosCount: photosCount || 0,
         hasPayment,
         activePlan,
         stripePrices: {
-            placement: STRIPE_PRICES.EVENT,
-            placementPhotos: STRIPE_PRICES.EVENT_WITH_PHOTOS || null
+            placement: STRIPE_PRICES.EVENT
         }
     };
 };

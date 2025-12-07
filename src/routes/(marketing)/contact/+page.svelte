@@ -1,9 +1,8 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
-	import ContactForm from './contact-form.svelte';
 	import { WebsiteName } from '../../../config';
 
-	export let data;
+	const contactEmail = 'contact@placemoi.com';
 
 	const contactHighlights = [
 		{
@@ -14,7 +13,7 @@
 		{
 			title: 'Comprendre toutes les fonctionnalités',
 			description:
-				'On te montre comment personnaliser la page invitée, partager le QR code et animer l’album photo collaboratif.',
+				'On te montre comment personnaliser la page invitée et partager le QR code.',
 		},
 		{
 			title: 'Questions tarifaires ou administratives',
@@ -112,8 +111,7 @@
 					class="mt-6 text-base leading-[160%] md:text-lg"
 					style="color: #2c3e50; opacity: 0.85;"
 				>
-					Écris-nous pour optimiser ton plan de table, rassurer tes invités ou
-					préparer l’album photo collaboratif. On répond vite, sans jargon, avec
+					Écris-nous pour optimiser ton plan de table ou rassurer tes invités. On répond vite, sans jargon, avec
 					des conseils prêts à être appliqués.
 				</p>
 			</div>
@@ -205,8 +203,22 @@
 						/> On te répond sous 24h ouvrées.</Card.Description
 					>
 				</Card.Header>
-				<Card.Content class="flex flex-col gap-4">
-					<ContactForm data={data.form} />
+				<Card.Content class="flex flex-col items-center gap-6 py-8">
+					<div class="text-center">
+						<p
+							class="text-base leading-relaxed"
+							style="color: #2c3e50; opacity: 0.85;"
+						>
+							Écris-nous directement à :
+						</p>
+						<a
+							href="mailto:{contactEmail}"
+							class="mt-4 inline-block text-2xl font-semibold transition-colors duration-200 hover:opacity-80"
+							style="color: #D4A574;"
+						>
+							{contactEmail}
+						</a>
+					</div>
 				</Card.Content>
 			</Card.Root>
 		</div>
