@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy, onMount } from 'svelte';
 	import GuestFooter from '../components/guest-footer.svelte';
 	import type { Database } from '$lib/database/database.types';
 
@@ -57,6 +58,44 @@
 			? ` background-image: url('${data.customization.background_image_url}'); background-size: cover; background-position: center;`
 			: ''
 	}`;
+
+	// Fond + blocage du scroll sur la page invité (html/body)
+	onMount(() => {
+		const html = document.documentElement;
+		const body = document.body;
+		const bgColor = data.customization.background_color ?? '';
+		html.style.backgroundColor = bgColor;
+		body.style.backgroundColor = bgColor;
+		html.style.overflow = 'hidden';
+		body.style.overflow = 'hidden';
+		html.style.overscrollBehavior = 'none';
+		body.style.overscrollBehavior = 'none';
+		body.style.touchAction = 'none'; // empêche le scroll au doigt sur mobile
+		if (data.customization.background_image_url) {
+			html.style.backgroundImage = `url('${data.customization.background_image_url}')`;
+			body.style.backgroundImage = `url('${data.customization.background_image_url}')`;
+			html.style.backgroundSize = body.style.backgroundSize = 'cover';
+			html.style.backgroundPosition = body.style.backgroundPosition = 'center';
+		}
+	});
+	onDestroy(() => {
+		if (typeof document === 'undefined') return;
+		const html = document.documentElement;
+		const body = document.body;
+		html.style.backgroundColor = '';
+		html.style.backgroundImage = '';
+		html.style.backgroundSize = '';
+		html.style.backgroundPosition = '';
+		html.style.overflow = '';
+		body.style.backgroundColor = '';
+		body.style.backgroundImage = '';
+		body.style.backgroundSize = '';
+		body.style.backgroundPosition = '';
+		body.style.overflow = '';
+		html.style.overscrollBehavior = '';
+		body.style.overscrollBehavior = '';
+		body.style.touchAction = '';
+	});
 
 	// 🚀 OPTIMIZATION: Search adaptatif (mémoire si < 2000, API sinon)
 	async function searchGuest() {
@@ -184,11 +223,11 @@
 </svelte:head>
 
 <div
-	class="flex h-screen flex-col items-center justify-between overflow-hidden"
+	class="flex h-[100dvh] h-screen max-h-[100dvh] flex-col items-center justify-between overflow-hidden"
 	style={backgroundStyle}
 >
 	<div
-		class="flex min-h-0 w-full flex-1 items-center justify-center overflow-y-auto"
+		class="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden"
 	>
 		<div class="container mx-auto max-w-2xl px-4 py-6 sm:py-12">
 			<!-- Logo (if exists) -->
@@ -298,7 +337,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="flex-shrink-0">
+	<div class="w-full flex-shrink-0">
 		<GuestFooter
 			customization={data.customization}
 			fontFallback={getFontFallback}
