@@ -217,7 +217,7 @@
 					{data.customization.welcome_text || 'Bienvenue'}
 				</h1>
 				<p
-					class="text-lg sm:text-xl"
+					class="mt-8 text-lg sm:mt-20 sm:text-xl"
 					style="color: {data.customization
 						.font_color}; opacity: 0.9; font-family: '{data.customization
 						.font_family || 'Playfair Display'}', {getFontFallback(
