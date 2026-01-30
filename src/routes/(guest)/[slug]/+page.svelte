@@ -184,7 +184,7 @@
 </svelte:head>
 
 <div
-	class="flex min-h-screen flex-col items-center overflow-hidden"
+	class="fixed inset-0 flex flex-col items-center overflow-hidden"
 	style={backgroundStyle}
 >
 	<div
