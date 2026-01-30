@@ -44,14 +44,14 @@
 		</div>
 	{/if}
 	<div
-		class="h-px w-full"
+		class="hidden h-px w-full"
 		style="
 			background-color: {customization.font_color};
 			opacity: 0.25;
 		"
 	/>
 	<div
-		class="flex items-center gap-1 text-sm font-medium"
+		class="flex items-center gap-1 text-[10px] font-medium"
 		style="
 			color: {customization.font_color};
 			font-family: '{customization.font_family || 'Playfair Display'}', {fontFallback(
@@ -59,13 +59,9 @@
 		)};
 		"
 	>
-		<span>Fait avec</span>
-		<a
-			href="/"
-			class="group font-semibold text-inherit"
-			style="text-decoration: none;"
-		>
-			<span class="underline-offset-2 group-hover:underline">Placemoi.com</span>
+		<span class="font-normal">Fait avec</span>
+		<a href="/" class="font-semibold text-inherit underline underline-offset-2">
+			Placemoi.com
 		</a>
 	</div>
 </div>
