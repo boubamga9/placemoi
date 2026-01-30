@@ -187,7 +187,9 @@
 	class="flex h-screen flex-col items-center justify-between overflow-hidden"
 	style={backgroundStyle}
 >
-	<div class="flex min-h-0 w-full flex-1 items-center justify-center">
+	<div
+		class="flex min-h-0 w-full flex-1 items-center justify-center overflow-y-auto"
+	>
 		<div class="container mx-auto max-w-2xl px-4 py-6 sm:py-12">
 			<!-- Logo (if exists) -->
 			{#if data.customization.logo_url}
@@ -296,8 +298,10 @@
 			</div>
 		</div>
 	</div>
-	<GuestFooter
-		customization={data.customization}
-		fontFallback={getFontFallback}
-	/>
+	<div class="flex-shrink-0">
+		<GuestFooter
+			customization={data.customization}
+			fontFallback={getFontFallback}
+		/>
+	</div>
 </div>
